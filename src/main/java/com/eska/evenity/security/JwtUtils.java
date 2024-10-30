@@ -56,9 +56,6 @@ public class JwtUtils {
             JWTVerifier verifier = JWT.require(algorithm).build();
             DecodedJWT decodedJWT = verifier.verify(token);
 
-            Map<String, String> userInfo = new HashMap<>();
-            userInfo.put("userId", decodedJWT.getSubject());
-            userInfo.put("role", decodedJWT.getClaim("role").asString());
             return JwtClaim.builder()
                     .userId(decodedJWT.getSubject())
                     .role(decodedJWT.getClaim("role").asString())

@@ -1,5 +1,6 @@
 package com.eska.evenity.entity;
 
+import com.eska.evenity.constant.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -27,6 +28,8 @@ public class UserCredential implements UserDetails {
     @Column(unique = true)
     private String username;
     private String password;
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;

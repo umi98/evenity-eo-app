@@ -9,5 +9,5 @@ import com.eska.evenity.dto.response.RegisterResponse;
 public interface AuthService {
     RegisterResponse customerRegister(CustomerRegisterRequest request);
     RegisterResponse vendorRegister(VendorRegisterRequest request);
-    AuthResponse signIn(AuthRequest request);
+    AuthResponse login(AuthRequest request);
 }

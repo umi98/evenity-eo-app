@@ -1,23 +1,26 @@
 package com.eska.evenity.service.impl;
 
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.constant.VendorStatus;
-import com.eska.evenity.dto.response.CustomerResponse;
+import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.VendorResponse;
-import com.eska.evenity.entity.Customer;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.entity.Vendor;
 import com.eska.evenity.repository.VendorRepository;
 import com.eska.evenity.service.UserService;
 import com.eska.evenity.service.VendorService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class VendorServiceImpl implements VendorService {
     private final VendorRepository vendorRepository;
     private final UserService userService;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Vendor createVendor(Vendor vendor, UserCredential userCredential) {
         Vendor newVendor = Vendor.builder()
@@ -49,6 +53,12 @@ public class VendorServiceImpl implements VendorService {
     }
 
     @Override
+    public List<VendorResponse> getAllActiveVendor() {
+        List<Vendor> result = vendorRepository.getVendorByStatus(UserStatus.ACTIVE);
+        return result.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
     public VendorResponse getVendorById(String id) {
         Vendor result = findByIdOrThrowNotFound(id);
         return mapToResponse(result);
@@ -59,6 +69,52 @@ public class VendorServiceImpl implements VendorService {
         UserCredential user = userService.loadByUserId(id);
         Vendor result = vendorRepository.findVendorByUserCredential(user);
         return mapToResponse(result);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public VendorResponse updateVendor(String id, VendorRequest request) {
+        try {
+            Vendor vendor = findByIdOrThrowNotFound(id);
+            if (vendor.getUserCredential().getStatus() != UserStatus.ACTIVE){
+                throw new RuntimeException("User status is not active");
+            }
+            vendor.setName(request.getName());
+            vendor.setPhoneNumber(request.getPhoneNumber());
+            vendor.setAddress(request.getAddress());
+            vendor.setOwner(request.getOwnerName());
+            vendorRepository.saveAndFlush(vendor);
+            return mapToResponse(vendor);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public VendorResponse approveStatusVendor(String id) {
+        Vendor vendor = findByIdOrThrowNotFound(id);
+        vendor.setStatus(VendorStatus.ACTIVE);
+        vendorRepository.saveAndFlush(vendor);
+        return mapToResponse(vendor);
+    }
+
+    @Override
+    public VendorResponse rejectStatusVendor(String id) {
+        Vendor vendor = findByIdOrThrowNotFound(id);
+        vendor.setStatus(VendorStatus.INACTIVE);
+        vendorRepository.saveAndFlush(vendor);
+        return mapToResponse(vendor);
+    }
+
+    @Override
+    public void softDeleteById(String id) {
+        try {
+            Vendor vendor = findByIdOrThrowNotFound(id);
+            String userCredential = vendor.getUserCredential().getId();
+            userService.softDeleteById(userCredential);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private Vendor findByIdOrThrowNotFound(String id) {

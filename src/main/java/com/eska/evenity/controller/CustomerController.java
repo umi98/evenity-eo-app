@@ -1,16 +1,23 @@
 package com.eska.evenity.controller;
 
+import com.eska.evenity.dto.JwtClaim;
+import com.eska.evenity.dto.request.CustomerRequest;
+import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.CustomerResponse;
+import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.dto.response.WebResponse;
+import com.eska.evenity.security.JwtUtils;
 import com.eska.evenity.service.CustomerService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
+    private final JwtUtils jwtUtils;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -26,7 +34,19 @@ public class CustomerController {
         List<CustomerResponse> customerResponses = customerService.getAllCustomer();
         WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
                 .status(HttpStatus.OK.getReasonPhrase())
-                .status("Successfully retrieve data")
+                .message("Successfully retrieve data")
+                .data(customerResponses)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllActiveCustomer() {
+        List<CustomerResponse> customerResponses = customerService.getAllActiveCustomer();
+        WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
+                .status(HttpStatus.OK.getReasonPhrase())
+                .message("Successfully retrieve data")
                 .data(customerResponses)
                 .build();
         return ResponseEntity.ok(response);
@@ -43,4 +63,36 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> editCustomer(@PathVariable String id, @Valid @RequestBody CustomerRequest request) {
+        CustomerResponse customerResponse = customerService.editCustomer(id, request);
+        WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
+                .status(HttpStatus.OK.getReasonPhrase())
+                .message("Successfully retrieve data")
+                .data(customerResponse)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCustomer(@PathVariable String id) {
+        customerService.deleteCustomer(id);
+        WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
+                .status(HttpStatus.OK.getReasonPhrase())
+                .message("User deleted")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+//    private boolean checkUserId(HttpServletRequest httpRequest, String id) {
+//        String token = httpRequest.getHeader("Authorization");
+//        if (token != null && token.startsWith("Bearer ")) {
+//            token = token.substring(7);
+//        }
+//
+//        String userIdFromToken = jwtUtils.getUserInfoByToken(token).getUserId();
+//        System.out.println(userIdFromToken);
+//        String customerId = customerService.getCustomerByUserId(id).getId();
+//        return userIdFromToken != null && userIdFromToken.equals(customerId);
+//    }
 }

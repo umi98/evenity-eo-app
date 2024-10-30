@@ -1,14 +1,20 @@
 package com.eska.evenity.service;
 
+import java.util.List;
+
+import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.entity.Vendor;
 
-import java.util.List;
-
 public interface VendorService {
     Vendor createVendor(Vendor vendor, UserCredential userCredential);
     List<VendorResponse> getAllVendor();
+    List<VendorResponse> getAllActiveVendor();
     VendorResponse getVendorById(String id);
     VendorResponse getVendorByUserId(String id);
+    VendorResponse updateVendor(String id, VendorRequest request);
+    VendorResponse approveStatusVendor(String id);
+    VendorResponse rejectStatusVendor(String id);
+    void softDeleteById(String id);
 }

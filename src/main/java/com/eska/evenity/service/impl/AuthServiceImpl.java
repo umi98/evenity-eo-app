@@ -1,7 +1,20 @@
 package com.eska.evenity.service.impl;
 
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import com.eska.evenity.constant.UserStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.eska.evenity.constant.ERole;
-import com.eska.evenity.constant.VendorStatus;
 import com.eska.evenity.dto.request.AuthRequest;
 import com.eska.evenity.dto.request.CustomerRegisterRequest;
 import com.eska.evenity.dto.request.VendorRegisterRequest;
@@ -17,20 +30,9 @@ import com.eska.evenity.service.AuthService;
 import com.eska.evenity.service.CustomerService;
 import com.eska.evenity.service.RoleService;
 import com.eska.evenity.service.VendorService;
-import com.eska.evenity.util.ValidationUtil;
-import jakarta.annotation.PostConstruct;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.Optional;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
     private final String usernameAdmin = "admin@gmail.com";
     private final String passwordAdmin = "admin";
 
+    @Transactional(rollbackFor = Exception.class)
     @PostConstruct
     public void initSuperAdmin() {
         Optional<UserCredential> optionalUserCredential = userCredentialRepository.findByUsername(usernameAdmin);
@@ -58,12 +61,14 @@ public class AuthServiceImpl implements AuthService {
                 .username(usernameAdmin)
                 .password(hashPassword)
                 .role(adminRole)
+                .status(UserStatus.ACTIVE)
                 .createdDate(Date.from(Instant.now()))
                 .modifiedDate(Date.from(Instant.now()))
                 .build();
         userCredentialRepository.saveAndFlush(userCredential);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse customerRegister(CustomerRegisterRequest request) {
         try {
@@ -74,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
                             .username(request.getUsername())
                             .password(hashPassword)
                             .role(roleCustomer)
+                            .status(UserStatus.ACTIVE)
                             .createdDate(Date.from(Instant.now()))
                             .modifiedDate(Date.from(Instant.now()))
                             .build()
@@ -94,6 +100,7 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse vendorRegister(VendorRegisterRequest request) {
         try {
@@ -104,6 +111,7 @@ public class AuthServiceImpl implements AuthService {
                             .username(request.getUsername())
                             .password(hashPassword)
                             .role(roleVendor)
+                            .status(UserStatus.ACTIVE)
                             .createdDate(Date.from(Instant.now()))
                             .modifiedDate(Date.from(Instant.now()))
                             .build()
@@ -126,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse signIn(AuthRequest request) {
+    public AuthResponse login(AuthRequest request) {
         try {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     request.getUsername(),
@@ -135,11 +143,19 @@ public class AuthServiceImpl implements AuthService {
             Authentication authenticated = authenticationManager.authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authenticated);
             UserCredential userCredential = (UserCredential) authenticated.getPrincipal();
-            return AuthResponse.builder()
-                    .token(jwtUtils.generateToken(userCredential))
-                    .build();
+            if (userCredential.getStatus() == UserStatus.ACTIVE){
+                return AuthResponse.builder()
+                        .token(jwtUtils.generateToken(userCredential))
+                        .build();
+            } else {
+                return AuthResponse.builder()
+                        .message("Account is not active")
+                        .build();
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            return AuthResponse.builder()
+                    .message("Invalid username and password")
+                    .build();
         }
     }
 }
