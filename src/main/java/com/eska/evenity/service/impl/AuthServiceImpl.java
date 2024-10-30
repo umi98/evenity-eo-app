@@ -17,6 +17,7 @@ import com.eska.evenity.service.AuthService;
 import com.eska.evenity.service.CustomerService;
 import com.eska.evenity.service.RoleService;
 import com.eska.evenity.service.VendorService;
+import com.eska.evenity.util.ValidationUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,62 +61,74 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public RegisterResponse customerRegister(CustomerRegisterRequest request) {
-        Role roleCustomer = roleService.getOrSave(ERole.ROLE_CUSTOMER);
-        String hashPassword = passwordEncoder.encode(request.getPassword());
-        UserCredential userCredential = userCredentialRepository.saveAndFlush(
-                UserCredential.builder()
-                        .username(request.getUsername())
-                        .password(hashPassword)
-                        .role(roleCustomer).build()
-        );
-        Customer customer = customerService.createCustomer(
-                (Customer.builder()
-                    .fullName(request.getFullName())
-                    .address(request.getAddress())
-                    .phoneNumber(request.getPhoneNumber())
-                    .build()
-                ), userCredential);
-        return RegisterResponse.builder()
-                .username(userCredential.getUsername())
-                .name(customer.getFullName())
-                .build();
+        try {
+            Role roleCustomer = roleService.getOrSave(ERole.ROLE_CUSTOMER);
+            String hashPassword = passwordEncoder.encode(request.getPassword());
+            UserCredential userCredential = userCredentialRepository.saveAndFlush(
+                    UserCredential.builder()
+                            .username(request.getUsername())
+                            .password(hashPassword)
+                            .role(roleCustomer).build()
+            );
+            Customer customer = customerService.createCustomer(
+                    (Customer.builder()
+                        .fullName(request.getFullName())
+                        .address(request.getAddress())
+                        .phoneNumber(request.getPhoneNumber())
+                        .build()
+                    ), userCredential);
+            return RegisterResponse.builder()
+                    .username(userCredential.getUsername())
+                    .name(customer.getFullName())
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
     public RegisterResponse vendorRegister(VendorRegisterRequest request) {
-        Role roleVendor = roleService.getOrSave(ERole.ROLE_VENDOR);
-        String hashPassword = passwordEncoder.encode(request.getPassword());
-        UserCredential userCredential = userCredentialRepository.saveAndFlush(
-                UserCredential.builder()
-                        .username(request.getUsername())
-                        .password(hashPassword)
-                        .role(roleVendor).build()
-        );
-        Vendor vendor = vendorService.createVendor(
-                (Vendor.builder()
-                        .name(request.getName())
-                        .address(request.getAddress())
-                        .phoneNumber(request.getPhoneNumber())
-                        .owner(request.getOwnerName())
-                        .build()
-                ), userCredential);
-        return RegisterResponse.builder()
-                .username(userCredential.getUsername())
-                .name(vendor.getName())
-                .build();
+        try {
+            Role roleVendor = roleService.getOrSave(ERole.ROLE_VENDOR);
+            String hashPassword = passwordEncoder.encode(request.getPassword());
+            UserCredential userCredential = userCredentialRepository.saveAndFlush(
+                    UserCredential.builder()
+                            .username(request.getUsername())
+                            .password(hashPassword)
+                            .role(roleVendor).build()
+            );
+            Vendor vendor = vendorService.createVendor(
+                    (Vendor.builder()
+                            .name(request.getName())
+                            .address(request.getAddress())
+                            .phoneNumber(request.getPhoneNumber())
+                            .owner(request.getOwnerName())
+                            .build()
+                    ), userCredential);
+            return RegisterResponse.builder()
+                    .username(userCredential.getUsername())
+                    .name(vendor.getName())
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
     public AuthResponse signIn(AuthRequest request) {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                request.getUsername(),
-                request.getPassword()
-        );
-        Authentication authenticated = authenticationManager.authenticate(authentication);
-        SecurityContextHolder.getContext().setAuthentication(authenticated);
-        UserCredential userCredential = (UserCredential) authenticated.getPrincipal();
-        return AuthResponse.builder()
-                .token(jwtUtils.generateToken(userCredential))
-                .build();
+        try {
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    request.getUsername(),
+                    request.getPassword()
+            );
+            Authentication authenticated = authenticationManager.authenticate(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authenticated);
+            UserCredential userCredential = (UserCredential) authenticated.getPrincipal();
+            return AuthResponse.builder()
+                    .token(jwtUtils.generateToken(userCredential))
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

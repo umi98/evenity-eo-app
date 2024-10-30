@@ -46,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> signIn(@Valid @RequestBody AuthRequest request) {
         AuthResponse token = authService.signIn(request);
         WebResponse<AuthResponse> response = WebResponse.<AuthResponse>builder()
                 .status(HttpStatus.OK.getReasonPhrase())
