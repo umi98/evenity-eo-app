@@ -65,10 +65,9 @@ public class VendorServiceImpl implements VendorService {
     }
 
     @Override
-    public VendorResponse getVendorByUserId(String id) {
+    public Vendor getVendorByUserId(String id) {
         UserCredential user = userService.loadByUserId(id);
-        Vendor result = vendorRepository.findVendorByUserCredential(user);
-        return mapToResponse(result);
+        return vendorRepository.findVendorByUserCredential(user);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -110,6 +109,8 @@ public class VendorServiceImpl implements VendorService {
     public void softDeleteById(String id) {
         try {
             Vendor vendor = findByIdOrThrowNotFound(id);
+            vendor.setStatus(VendorStatus.INACTIVE);
+            vendorRepository.saveAndFlush(vendor);
             String userCredential = vendor.getUserCredential().getId();
             userService.softDeleteById(userCredential);
         } catch (Exception e) {
