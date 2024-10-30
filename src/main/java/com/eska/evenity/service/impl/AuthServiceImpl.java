@@ -19,6 +19,7 @@ import com.eska.evenity.service.RoleService;
 import com.eska.evenity.service.VendorService;
 import com.eska.evenity.util.ValidationUtil;
 import jakarta.annotation.PostConstruct;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -55,6 +58,8 @@ public class AuthServiceImpl implements AuthService {
                 .username(usernameAdmin)
                 .password(hashPassword)
                 .role(adminRole)
+                .createdDate(Date.from(Instant.now()))
+                .modifiedDate(Date.from(Instant.now()))
                 .build();
         userCredentialRepository.saveAndFlush(userCredential);
     }
@@ -68,7 +73,10 @@ public class AuthServiceImpl implements AuthService {
                     UserCredential.builder()
                             .username(request.getUsername())
                             .password(hashPassword)
-                            .role(roleCustomer).build()
+                            .role(roleCustomer)
+                            .createdDate(Date.from(Instant.now()))
+                            .modifiedDate(Date.from(Instant.now()))
+                            .build()
             );
             Customer customer = customerService.createCustomer(
                     (Customer.builder()
@@ -95,7 +103,10 @@ public class AuthServiceImpl implements AuthService {
                     UserCredential.builder()
                             .username(request.getUsername())
                             .password(hashPassword)
-                            .role(roleVendor).build()
+                            .role(roleVendor)
+                            .createdDate(Date.from(Instant.now()))
+                            .modifiedDate(Date.from(Instant.now()))
+                            .build()
             );
             Vendor vendor = vendorService.createVendor(
                     (Vendor.builder()
