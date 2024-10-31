@@ -26,44 +26,48 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register/customer")
-    public ResponseEntity<WebResponse<RegisterResponse>> registerCustomer(@Valid @RequestBody CustomerRegisterRequest request) {
-        RegisterResponse registerResponse = authService.customerRegister(request);
-        WebResponse<RegisterResponse> response = WebResponse.<RegisterResponse>builder()
-                .status(HttpStatus.CREATED.getReasonPhrase())
-                .message("Register success")
-                .data(registerResponse)
-                .build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> registerCustomer(@Valid @RequestBody CustomerRegisterRequest request) {
+        try {
+            RegisterResponse registerResponse = authService.customerRegister(request);
+            WebResponse<RegisterResponse> response = WebResponse.<RegisterResponse>builder()
+                    .status(HttpStatus.CREATED.getReasonPhrase())
+                    .message("Register success")
+                    .data(registerResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PostMapping("/register/vendor")
-    public ResponseEntity<WebResponse<RegisterResponse>> registerVendor(@Valid @RequestBody VendorRegisterRequest request) {
-        RegisterResponse registerResponse = authService.vendorRegister(request);
-        WebResponse<RegisterResponse> response = WebResponse.<RegisterResponse>builder()
-                .status(HttpStatus.CREATED.getReasonPhrase())
-                .message("Register success")
-                .data(registerResponse)
-                .build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> registerVendor(@Valid @RequestBody VendorRegisterRequest request) {
+        try {
+            RegisterResponse registerResponse = authService.vendorRegister(request);
+            WebResponse<RegisterResponse> response = WebResponse.<RegisterResponse>builder()
+                    .status(HttpStatus.CREATED.getReasonPhrase())
+                    .message("Register success")
+                    .data(registerResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
         AuthResponse token = authService.login(request);
         if (token.getToken() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
             WebResponse<AuthResponse> response = WebResponse.<AuthResponse>builder()
-                    .status(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                    .message("Unauthorized")
+                    .status(HttpStatus.OK.name())
+                    .message("Login success")
                     .data(token)
                     .build();
             return ResponseEntity.ok(response);
         }
-        WebResponse<AuthResponse> response = WebResponse.<AuthResponse>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("Login success")
-                .data(token)
-                .build();
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user")
@@ -80,12 +84,16 @@ public class AuthController {
 
     @PutMapping("/user/{id}/password")
     public ResponseEntity<?> changePassword(@PathVariable String id, @Valid @RequestBody AuthRequest request) {
-        UserResponse userResponse = userService.changePassword(id, request);
-        WebResponse<UserResponse> response = WebResponse.<UserResponse>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("Successfully change password")
-                .data(userResponse)
-                .build();
-        return ResponseEntity.ok(response);
+        try {
+            UserResponse userResponse = userService.changePassword(id, request);
+            WebResponse<UserResponse> response = WebResponse.<UserResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully change password")
+                    .data(userResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }

@@ -1,22 +1,14 @@
 package com.eska.evenity.controller;
 
-import com.eska.evenity.dto.JwtClaim;
 import com.eska.evenity.dto.request.CustomerRequest;
-import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.CustomerResponse;
-import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.dto.response.WebResponse;
 import com.eska.evenity.security.JwtUtils;
 import com.eska.evenity.service.CustomerService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,59 +21,79 @@ public class CustomerController {
     private final JwtUtils jwtUtils;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllCustomer() {
-        List<CustomerResponse> customerResponses = customerService.getAllCustomer();
-        WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("Successfully retrieve data")
-                .data(customerResponses)
-                .build();
-        return ResponseEntity.ok(response);
+        try {
+            List<CustomerResponse> customerResponses = customerService.getAllCustomer();
+            WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(customerResponses)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/active")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllActiveCustomer() {
-        List<CustomerResponse> customerResponses = customerService.getAllActiveCustomer();
-        WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("Successfully retrieve data")
-                .data(customerResponses)
-                .build();
-        return ResponseEntity.ok(response);
+        try {
+            List<CustomerResponse> customerResponses = customerService.getAllActiveCustomer();
+            WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(customerResponses)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCustomerById(@PathVariable String id) {
-        CustomerResponse customerResponse = customerService.getCustomerById(id);
-        WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("Successfully retrieve data")
-                .data(customerResponse)
-                .build();
-        return ResponseEntity.ok(response);
+        try {
+            CustomerResponse customerResponse = customerService.getCustomerById(id);
+            WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(customerResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> editCustomer(@PathVariable String id, @Valid @RequestBody CustomerRequest request) {
-        CustomerResponse customerResponse = customerService.editCustomer(id, request);
-        WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("Successfully retrieve data")
-                .data(customerResponse)
-                .build();
-        return ResponseEntity.ok(response);
+        try {
+            CustomerResponse customerResponse = customerService.editCustomer(id, request);
+            WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(customerResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCustomer(@PathVariable String id) {
-        customerService.deleteCustomer(id);
-        WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("User deleted")
-                .build();
-        return ResponseEntity.ok(response);
+        try {
+            customerService.deleteCustomer(id);
+            WebResponse<CustomerResponse> response = WebResponse.<CustomerResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("User deleted")
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
 //    private boolean checkUserId(HttpServletRequest httpRequest, String id) {

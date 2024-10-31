@@ -12,6 +12,7 @@ public interface CustomerService {
     List<CustomerResponse> getAllCustomer();
     List<CustomerResponse> getAllActiveCustomer();
     CustomerResponse getCustomerById(String id);
+    Customer getCustomerByCustomerId(String id);
     CustomerResponse getCustomerByUserId(String id);
     CustomerResponse editCustomer(String id, CustomerRequest request);
     void deleteCustomer(String id);

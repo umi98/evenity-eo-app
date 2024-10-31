@@ -62,6 +62,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Customer getCustomerByCustomerId(String id) {
+        return findByIdOrThrowNotFound(id);
+    }
+
+    @Override
     public CustomerResponse getCustomerByUserId(String id) {
         UserCredential user = userService.loadByUserId(id);
         Customer result = customerRepository.findCustomerByUserCredential(user);
