@@ -23,6 +23,7 @@ public class Vendor {
     private String name;
     @Column(unique = true)
     private String phoneNumber;
+    @Column(columnDefinition = "TEXT")
     private String address;
     private String owner;
     private Integer scoring;

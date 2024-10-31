@@ -28,6 +28,7 @@ public class Event {
     private LocalDate endDate;
     private LocalTime startTime;
     private LocalTime endTime;
+    @Column(columnDefinition = "TEXT")
     private String address;
     private String location;
     private String theme;

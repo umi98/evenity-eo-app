@@ -22,6 +22,7 @@ public class Customer {
     private String fullName;
     @Column(unique = true)
     private String phoneNumber;
+    @Column(columnDefinition = "TEXT")
     private String address;
 
     @OneToOne

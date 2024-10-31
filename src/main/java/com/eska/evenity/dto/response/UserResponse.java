@@ -12,7 +12,7 @@ import java.util.Date;
 @Builder
 public class UserResponse {
     private String id;
-    private String username;
+    private String email;
     private LocalDateTime createdDate;
     private String role;
     private String status;

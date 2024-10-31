@@ -6,7 +6,6 @@ import com.eska.evenity.dto.response.UserResponse;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.repository.UserCredentialRepository;
 import com.eska.evenity.service.UserService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,11 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +67,7 @@ public class UserServiceImpl implements UserService {
     private UserResponse mapToResponse(UserCredential userCredential) {
         return UserResponse.builder()
                 .id(userCredential.getId())
-                .username(userCredential.getUsername())
+                .email(userCredential.getUsername())
                 .createdDate(userCredential.getCreatedDate())
                 .role(userCredential.getRole().getRole().name())
                 .status(userCredential.getStatus().name())

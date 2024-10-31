@@ -1,9 +1,6 @@
 package com.eska.evenity.service.impl;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import com.eska.evenity.constant.UserStatus;
@@ -77,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
             String hashPassword = passwordEncoder.encode(request.getPassword());
             UserCredential userCredential = userCredentialRepository.saveAndFlush(
                     UserCredential.builder()
-                            .username(request.getUsername())
+                            .username(request.getEmail())
                             .password(hashPassword)
                             .role(roleCustomer)
                             .status(UserStatus.ACTIVE)
@@ -93,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
                         .build()
                     ), userCredential);
             return RegisterResponse.builder()
-                    .username(userCredential.getUsername())
+                    .email(userCredential.getUsername())
                     .name(customer.getFullName())
                     .build();
         } catch (Exception e) {
@@ -109,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
             String hashPassword = passwordEncoder.encode(request.getPassword());
             UserCredential userCredential = userCredentialRepository.saveAndFlush(
                     UserCredential.builder()
-                            .username(request.getUsername())
+                            .username(request.getEmail())
                             .password(hashPassword)
                             .role(roleVendor)
                             .status(UserStatus.ACTIVE)
@@ -126,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
                             .build()
                     ), userCredential);
             return RegisterResponse.builder()
-                    .username(userCredential.getUsername())
+                    .email(userCredential.getUsername())
                     .name(vendor.getName())
                     .build();
         } catch (Exception e) {
@@ -138,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(AuthRequest request) {
         try {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    request.getUsername(),
+                    request.getEmail(),
                     request.getPassword()
             );
             Authentication authenticated = authenticationManager.authenticate(authentication);
