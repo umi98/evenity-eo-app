@@ -34,6 +34,9 @@ public class CustomerServiceImpl implements CustomerService {
         Customer newCustomer = Customer.builder()
                 .fullName(customer.getFullName())
                 .phoneNumber(customer.getPhoneNumber())
+                .province(customer.getProvince())
+                .city(customer.getCity())
+                .district(customer.getDistrict())
                 .address(customer.getAddress())
                 .userCredential(userCredential)
                 .createdDate(LocalDateTime.now())
@@ -83,6 +86,9 @@ public class CustomerServiceImpl implements CustomerService {
             }
             customer.setFullName(request.getFullName());
             customer.setPhoneNumber(request.getPhoneNumber());
+            customer.setProvince(request.getProvince());
+            customer.setCity(request.getCity());
+            customer.setDistrict(request.getDistrict());
             customer.setAddress(request.getAddress());
             customer.setModifiedDate(LocalDateTime.now());
             customerRepository.saveAndFlush(customer);
@@ -115,6 +121,9 @@ public class CustomerServiceImpl implements CustomerService {
                 .id(customer.getId())
                 .fullName(customer.getFullName())
                 .phoneNumber(customer.getPhoneNumber())
+                .province(customer.getProvince())
+                .city(customer.getCity())
+                .district(customer.getDistrict())
                 .address(customer.getAddress())
                 .build();
     }

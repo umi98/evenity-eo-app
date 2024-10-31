@@ -39,11 +39,13 @@ public class Event {
     private LocalDate endDate;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String province;
+    private String city;
+    private String district;
     @Column(columnDefinition = "TEXT")
     private String address;
-    private String location;
     private String theme;
-    private Long guestNumber;
+    private Long participant;
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
@@ -53,5 +55,5 @@ public class Event {
     @LastModifiedDate
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;
-    private Boolean deletionStatus = false;
+    private Boolean isDeleted;
 }

@@ -18,10 +18,12 @@ public class EventResponse {
     private LocalDate endDate;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String province;
+    private String city;
+    private String district;
     private String address;
-    private String location;
     private String theme;
-    private Long guestNumber;
+    private Long participant;
     private String customerId;
-    private Boolean deletionStatus;
+    private Boolean isDeleted;
 }

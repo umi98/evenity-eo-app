@@ -24,14 +24,15 @@ public class EventRequest {
     private LocalTime startTime;
     @NotNull(message = "Finish time may not be empty")
     private LocalTime endTime;
+    private String province;
+    private String city;
+    private String district;
     @NotBlank(message = "Address should be filled")
     private String address;
-    @NotBlank(message = "Location should be filled")
-    private String location;
     @NotBlank(message = "Event theme should be filled")
     private String theme;
     @Positive(message = "Guest number should be positive number")
-    private Long guestNumber;
+    private Long participant;
     @NotBlank(message = "Customer id should be filled")
     private String customerId;
 }

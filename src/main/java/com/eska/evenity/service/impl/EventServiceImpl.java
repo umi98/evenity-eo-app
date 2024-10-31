@@ -35,14 +35,16 @@ public class EventServiceImpl implements EventService {
                     .startTime(request.getStartTime())
                     .endDate(request.getEndDate())
                     .endTime(request.getEndTime())
+                    .province(request.getProvince())
+                    .city(request.getCity())
+                    .district(request.getDistrict())
                     .address(request.getAddress())
-                    .location(request.getLocation())
                     .theme(request.getTheme())
-                    .guestNumber(request.getGuestNumber())
+                    .participant(request.getParticipant())
                     .customer(customer)
                     .createdDate(LocalDateTime.now())
                     .modifiedDate(LocalDateTime.now())
-                    .deletionStatus(false)
+                    .isDeleted(false)
                     .build();
             eventRepository.saveAndFlush(newEvent);
             return mapToResponse(newEvent);
@@ -59,13 +61,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventResponse> getAllUndeletedEvents() {
-        List<Event> result = eventRepository.getEventByDeletionStatus(false);
+        List<Event> result = eventRepository.getEventByIsDeleted(false);
         return result.stream().map(this::mapToResponse).toList();
     }
 
     @Override
     public List<EventResponse> getEventByCustomerId(String id) {
-        List<Event> result = eventRepository.getEventByCustomer_IdAndDeletionStatus(id, false);
+        List<Event> result = eventRepository.getEventByCustomer_IdAndIsDeleted(id, false);
         return result.stream().map(this::mapToResponse).toList();
     }
 
@@ -86,10 +88,12 @@ public class EventServiceImpl implements EventService {
             event.setStartTime(request.getStartTime());
             event.setEndDate(request.getEndDate());
             event.setEndTime(request.getEndTime());
+            event.setProvince(request.getProvince());
+            event.setCity(request.getCity());
+            event.setDistrict(request.getDistrict());
             event.setAddress(request.getAddress());
-            event.setLocation(request.getLocation());
             event.setTheme(request.getTheme());
-            event.setGuestNumber(request.getGuestNumber());
+            event.setParticipant(request.getParticipant());
             event.setModifiedDate(LocalDateTime.now());
             eventRepository.saveAndFlush(event);
             return mapToResponse(event);
@@ -103,7 +107,7 @@ public class EventServiceImpl implements EventService {
     public void deleteEvent(String id) {
         try {
             Event result = findByIdOrThrowNotFound(id);
-            result.setDeletionStatus(true);
+            result.setIsDeleted(true);
             result.setModifiedDate(LocalDateTime.now());
             eventRepository.saveAndFlush(result);
         } catch (Exception e) {
@@ -125,12 +129,14 @@ public class EventServiceImpl implements EventService {
                 .startTime(event.getStartTime())
                 .endDate(event.getEndDate())
                 .endTime(event.getEndTime())
+                .province(event.getProvince())
+                .city(event.getCity())
+                .district(event.getDistrict())
                 .address(event.getAddress())
-                .location(event.getLocation())
                 .theme(event.getTheme())
-                .guestNumber(event.getGuestNumber())
+                .participant(event.getParticipant())
                 .customerId(event.getCustomer().getId())
-                .deletionStatus(event.getDeletionStatus())
+                .isDeleted(event.getIsDeleted())
                 .build();
     }
 }

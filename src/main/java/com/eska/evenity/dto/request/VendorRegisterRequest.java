@@ -26,6 +26,9 @@ public class VendorRegisterRequest {
             message = "Invalid phone number format"
     )
     private String phoneNumber;
+    private String province;
+    private String city;
+    private String district;
     @NotBlank(message = "Address should be filled")
     private String address;
     @NotBlank(message = "Owner name should be filled")

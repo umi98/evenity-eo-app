@@ -11,6 +11,9 @@ public class VendorResponse {
     private String id;
     private String name;
     private String phoneNumber;
+    private String province;
+    private String city;
+    private String district;
     private String address;
     private String owner;
     private Integer scoring;

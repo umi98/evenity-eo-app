@@ -37,6 +37,9 @@ public class Vendor {
     private String name;
     @Column(unique = true)
     private String phoneNumber;
+    private String province;
+    private String city;
+    private String district;
     @Column(columnDefinition = "TEXT")
     private String address;
     private String owner;

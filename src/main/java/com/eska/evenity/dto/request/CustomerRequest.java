@@ -23,4 +23,7 @@ public class CustomerRequest {
     private String phoneNumber;
     @NotBlank(message = "Address should be filled")
     private String address;
+    private String province;
+    private String city;
+    private String district;
 }

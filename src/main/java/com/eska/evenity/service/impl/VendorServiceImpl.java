@@ -33,6 +33,9 @@ public class VendorServiceImpl implements VendorService {
         Vendor newVendor = Vendor.builder()
                 .name(vendor.getName())
                 .phoneNumber(vendor.getPhoneNumber())
+                .province(vendor.getProvince())
+                .city(vendor.getCity())
+                .district(vendor.getDistrict())
                 .address(vendor.getAddress())
                 .owner(vendor.getOwner())
                 .scoring(50)
@@ -79,6 +82,9 @@ public class VendorServiceImpl implements VendorService {
             }
             vendor.setName(request.getName());
             vendor.setPhoneNumber(request.getPhoneNumber());
+            vendor.setProvince(request.getProvince());
+            vendor.setCity(request.getCity());
+            vendor.setDistrict(request.getDistrict());
             vendor.setAddress(request.getAddress());
             vendor.setOwner(request.getOwnerName());
             vendor.setModifiedDate(LocalDateTime.now());
@@ -131,6 +137,9 @@ public class VendorServiceImpl implements VendorService {
                 .id(vendor.getId())
                 .name(vendor.getName())
                 .phoneNumber(vendor.getPhoneNumber())
+                .province(vendor.getProvince())
+                .city(vendor.getCity())
+                .district(vendor.getDistrict())
                 .address(vendor.getAddress())
                 .owner(vendor.getOwner())
                 .scoring(vendor.getScoring())

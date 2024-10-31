@@ -9,6 +9,6 @@ import com.eska.evenity.entity.Event;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, String> {
-  List<Event> getEventByCustomer_IdAndDeletionStatus(String id, Boolean status);
-  List<Event> getEventByDeletionStatus(Boolean status);
+  List<Event> getEventByCustomer_IdAndIsDeleted(String id, Boolean status);
+  List<Event> getEventByIsDeleted(Boolean status);
 }

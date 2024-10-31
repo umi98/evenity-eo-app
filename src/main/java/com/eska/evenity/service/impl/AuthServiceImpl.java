@@ -84,10 +84,13 @@ public class AuthServiceImpl implements AuthService {
             );
             Customer customer = customerService.createCustomer(
                     (Customer.builder()
-                        .fullName(request.getFullName())
-                        .address(request.getAddress())
-                        .phoneNumber(request.getPhoneNumber())
-                        .build()
+                            .fullName(request.getFullName())
+                            .province(request.getProvince())
+                            .city(request.getCity())
+                            .district(request.getDistrict())
+                            .address(request.getAddress())
+                            .phoneNumber(request.getPhoneNumber())
+                            .build()
                     ), userCredential);
             return RegisterResponse.builder()
                     .email(userCredential.getUsername())
@@ -117,6 +120,9 @@ public class AuthServiceImpl implements AuthService {
             Vendor vendor = vendorService.createVendor(
                     (Vendor.builder()
                             .name(request.getName())
+                            .province(request.getProvince())
+                            .city(request.getCity())
+                            .district(request.getDistrict())
                             .address(request.getAddress())
                             .phoneNumber(request.getPhoneNumber())
                             .owner(request.getOwnerName())

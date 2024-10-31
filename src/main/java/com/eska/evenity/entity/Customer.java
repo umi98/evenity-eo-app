@@ -33,6 +33,9 @@ public class Customer {
     private String fullName;
     @Column(unique = true)
     private String phoneNumber;
+    private String province;
+    private String city;
+    private String district;
     @Column(columnDefinition = "TEXT")
     private String address;
 
