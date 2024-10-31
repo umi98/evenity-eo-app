@@ -1,6 +1,7 @@
 package com.eska.evenity.service.impl;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -62,8 +63,8 @@ public class AuthServiceImpl implements AuthService {
                 .password(hashPassword)
                 .role(adminRole)
                 .status(UserStatus.ACTIVE)
-                .createdDate(Date.from(Instant.now()))
-                .modifiedDate(Date.from(Instant.now()))
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
                 .build();
         userCredentialRepository.saveAndFlush(userCredential);
     }
@@ -80,8 +81,8 @@ public class AuthServiceImpl implements AuthService {
                             .password(hashPassword)
                             .role(roleCustomer)
                             .status(UserStatus.ACTIVE)
-                            .createdDate(Date.from(Instant.now()))
-                            .modifiedDate(Date.from(Instant.now()))
+                            .createdDate(LocalDateTime.now())
+                            .modifiedDate(LocalDateTime.now())
                             .build()
             );
             Customer customer = customerService.createCustomer(
@@ -112,8 +113,8 @@ public class AuthServiceImpl implements AuthService {
                             .password(hashPassword)
                             .role(roleVendor)
                             .status(UserStatus.ACTIVE)
-                            .createdDate(Date.from(Instant.now()))
-                            .modifiedDate(Date.from(Instant.now()))
+                            .createdDate(LocalDateTime.now())
+                            .modifiedDate(LocalDateTime.now())
                             .build()
             );
             Vendor vendor = vendorService.createVendor(

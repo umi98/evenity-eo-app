@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -36,11 +37,11 @@ public class UserCredential implements UserDetails {
 
     @CreatedDate
     @Column(name = "created_date", updatable = false)
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     @LastModifiedDate
     @Column(name = "modified_date")
-    private Date modifiedDate;
+    private LocalDateTime modifiedDate;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

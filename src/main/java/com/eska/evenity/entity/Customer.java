@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -29,9 +30,9 @@ public class Customer {
 
     @CreatedDate
     @Column(name = "created_date", updatable = false)
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     @LastModifiedDate
     @Column(name = "modified_date")
-    private Date modifiedDate;
+    private LocalDateTime modifiedDate;
 }

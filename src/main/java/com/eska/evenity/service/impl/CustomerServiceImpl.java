@@ -1,6 +1,7 @@
 package com.eska.evenity.service.impl;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -37,8 +38,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .phoneNumber(customer.getPhoneNumber())
                 .address(customer.getAddress())
                 .userCredential(userCredential)
-                .createdDate(Date.from(Instant.now()))
-                .modifiedDate(Date.from(Instant.now()))
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
                 .build();
         customerRepository.saveAndFlush(newCustomer);
         return newCustomer;
@@ -80,7 +81,7 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setFullName(request.getFullName());
             customer.setPhoneNumber(request.getPhoneNumber());
             customer.setAddress(request.getAddress());
-            customer.setModifiedDate(Date.from(Instant.now()));
+            customer.setModifiedDate(LocalDateTime.now());
             customerRepository.saveAndFlush(customer);
             return mapToResponse(customer);
         } catch (Exception e) {
@@ -92,7 +93,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomer(String id) {
         try {
             Customer customer = findByIdOrThrowNotFound(id);
-            customer.setModifiedDate(Date.from(Instant.now()));
+            customer.setModifiedDate(LocalDateTime.now());
             customerRepository.saveAndFlush(customer);
             String userCredential = customer.getUserCredential().getId();
             userService.softDeleteById(userCredential);

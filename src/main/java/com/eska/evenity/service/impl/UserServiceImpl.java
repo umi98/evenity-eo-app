@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse changePassword(String id, AuthRequest request) {
         UserCredential user = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Load by user id failed"));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setModifiedDate(Date.from(Instant.now()));
+        user.setModifiedDate(LocalDateTime.now());
         repository.save(user);
         return mapToResponse(user);
     }
@@ -57,7 +58,7 @@ public class UserServiceImpl implements UserService {
     public void softDeleteById(String id) {
         UserCredential user = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
         user.setStatus(UserStatus.DELETED);
-        user.setModifiedDate(Date.from(Instant.now()));
+        user.setModifiedDate(LocalDateTime.now());
         repository.saveAndFlush(user);
     }
 

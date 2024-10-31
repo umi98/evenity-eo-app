@@ -1,6 +1,7 @@
 package com.eska.evenity.service.impl;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -39,8 +40,8 @@ public class VendorServiceImpl implements VendorService {
                 .scoring(50)
                 .status(VendorStatus.PENDING)
                 .userCredential(userCredential)
-                .createdDate(Date.from(Instant.now()))
-                .modifiedDate(Date.from(Instant.now()))
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
                 .build();
         vendorRepository.saveAndFlush(newVendor);
         return newVendor;
@@ -82,7 +83,7 @@ public class VendorServiceImpl implements VendorService {
             vendor.setPhoneNumber(request.getPhoneNumber());
             vendor.setAddress(request.getAddress());
             vendor.setOwner(request.getOwnerName());
-            vendor.setModifiedDate(Date.from(Instant.now()));
+            vendor.setModifiedDate(LocalDateTime.now());
             vendorRepository.saveAndFlush(vendor);
             return mapToResponse(vendor);
         } catch (Exception e) {
@@ -94,7 +95,7 @@ public class VendorServiceImpl implements VendorService {
     public VendorResponse approveStatusVendor(String id) {
         Vendor vendor = findByIdOrThrowNotFound(id);
         vendor.setStatus(VendorStatus.ACTIVE);
-        vendor.setModifiedDate(Date.from(Instant.now()));
+        vendor.setModifiedDate(LocalDateTime.now());
         vendorRepository.saveAndFlush(vendor);
         return mapToResponse(vendor);
     }
@@ -103,7 +104,7 @@ public class VendorServiceImpl implements VendorService {
     public VendorResponse rejectStatusVendor(String id) {
         Vendor vendor = findByIdOrThrowNotFound(id);
         vendor.setStatus(VendorStatus.INACTIVE);
-        vendor.setModifiedDate(Date.from(Instant.now()));
+        vendor.setModifiedDate(LocalDateTime.now());
         vendorRepository.saveAndFlush(vendor);
         return mapToResponse(vendor);
     }
@@ -113,7 +114,7 @@ public class VendorServiceImpl implements VendorService {
         try {
             Vendor vendor = findByIdOrThrowNotFound(id);
             vendor.setStatus(VendorStatus.INACTIVE);
-            vendor.setModifiedDate(Date.from(Instant.now()));
+            vendor.setModifiedDate(LocalDateTime.now());
             vendorRepository.saveAndFlush(vendor);
             String userCredential = vendor.getUserCredential().getId();
             userService.softDeleteById(userCredential);
