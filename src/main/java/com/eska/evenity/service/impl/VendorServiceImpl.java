@@ -82,6 +82,7 @@ public class VendorServiceImpl implements VendorService {
             vendor.setPhoneNumber(request.getPhoneNumber());
             vendor.setAddress(request.getAddress());
             vendor.setOwner(request.getOwnerName());
+            vendor.setModifiedDate(Date.from(Instant.now()));
             vendorRepository.saveAndFlush(vendor);
             return mapToResponse(vendor);
         } catch (Exception e) {
@@ -93,6 +94,7 @@ public class VendorServiceImpl implements VendorService {
     public VendorResponse approveStatusVendor(String id) {
         Vendor vendor = findByIdOrThrowNotFound(id);
         vendor.setStatus(VendorStatus.ACTIVE);
+        vendor.setModifiedDate(Date.from(Instant.now()));
         vendorRepository.saveAndFlush(vendor);
         return mapToResponse(vendor);
     }
@@ -101,6 +103,7 @@ public class VendorServiceImpl implements VendorService {
     public VendorResponse rejectStatusVendor(String id) {
         Vendor vendor = findByIdOrThrowNotFound(id);
         vendor.setStatus(VendorStatus.INACTIVE);
+        vendor.setModifiedDate(Date.from(Instant.now()));
         vendorRepository.saveAndFlush(vendor);
         return mapToResponse(vendor);
     }
@@ -110,6 +113,7 @@ public class VendorServiceImpl implements VendorService {
         try {
             Vendor vendor = findByIdOrThrowNotFound(id);
             vendor.setStatus(VendorStatus.INACTIVE);
+            vendor.setModifiedDate(Date.from(Instant.now()));
             vendorRepository.saveAndFlush(vendor);
             String userCredential = vendor.getUserCredential().getId();
             userService.softDeleteById(userCredential);

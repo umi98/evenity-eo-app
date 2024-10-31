@@ -80,6 +80,7 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setFullName(request.getFullName());
             customer.setPhoneNumber(request.getPhoneNumber());
             customer.setAddress(request.getAddress());
+            customer.setModifiedDate(Date.from(Instant.now()));
             customerRepository.saveAndFlush(customer);
             return mapToResponse(customer);
         } catch (Exception e) {
@@ -91,6 +92,8 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomer(String id) {
         try {
             Customer customer = findByIdOrThrowNotFound(id);
+            customer.setModifiedDate(Date.from(Instant.now()));
+            customerRepository.saveAndFlush(customer);
             String userCredential = customer.getUserCredential().getId();
             userService.softDeleteById(userCredential);
         } catch (Exception e) {
