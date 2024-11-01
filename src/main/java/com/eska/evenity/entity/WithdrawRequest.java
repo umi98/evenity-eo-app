@@ -2,6 +2,7 @@ package com.eska.evenity.entity;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import com.eska.evenity.constant.ApprovalStatus;
@@ -36,11 +37,12 @@ public class WithdrawRequest {
     private Long amount;
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
-    @Column(updatable = false)
-    private LocalDateTime requestDate;
     @ManyToOne
     @JoinColumn(name = "balance_id", referencedColumnName = "id")
     private Balance balance;
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdDate;
     @LastModifiedDate
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;

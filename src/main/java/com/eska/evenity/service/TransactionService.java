@@ -1,14 +1,11 @@
 package com.eska.evenity.service;
 
+import java.util.List;
+
 import com.eska.evenity.dto.request.MoneyOnlyRequest;
-import com.eska.evenity.dto.request.TransferRequest;
 import com.eska.evenity.dto.response.BalanceResponse;
 import com.eska.evenity.dto.response.TransactionHistoryResponse;
 import com.eska.evenity.dto.response.WithdrawRequestResponse;
-import com.eska.evenity.entity.Balance;
-import com.eska.evenity.entity.TransactionHistory;
-
-import java.util.List;
 
 public interface TransactionService {
     List<BalanceResponse> getAllBalanceAccount();

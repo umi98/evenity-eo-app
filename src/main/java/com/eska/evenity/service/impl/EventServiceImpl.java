@@ -136,7 +136,10 @@ public class EventServiceImpl implements EventService {
                 .theme(event.getTheme())
                 .participant(event.getParticipant())
                 .customerId(event.getCustomer().getId())
+                .customerName(event.getCustomer().getFullName())
                 .isDeleted(event.getIsDeleted())
+                .createdDate(event.getCreatedDate())
+                .modifiedDate(event.getModifiedDate())
                 .build();
     }
 }

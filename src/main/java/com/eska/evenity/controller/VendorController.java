@@ -2,7 +2,9 @@ package com.eska.evenity.controller;
 
 import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.VendorResponse;
+import com.eska.evenity.dto.response.VendorWithProductsResponse;
 import com.eska.evenity.dto.response.WebResponse;
+import com.eska.evenity.service.ProductService;
 import com.eska.evenity.service.VendorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VendorController {
     private final VendorService vendorService;
+    private final ProductService productService;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -59,6 +62,21 @@ public class VendorController {
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
                     .data(vendorResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/products")
+    public ResponseEntity<?> getVendorAndProducts(@PathVariable String id) {
+        try {
+            VendorWithProductsResponse vendorWithProductsResponse = productService.getProductsByVendorId(id);
+            WebResponse<VendorWithProductsResponse> response = WebResponse.<VendorWithProductsResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(vendorWithProductsResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

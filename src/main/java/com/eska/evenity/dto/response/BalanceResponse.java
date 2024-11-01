@@ -13,6 +13,7 @@ public class BalanceResponse {
     private String id;
     private Long amount;
     private String userId;
+    private String userName;
     private LocalDateTime modifiedDate;
     private LocalDateTime createdDate;
 }

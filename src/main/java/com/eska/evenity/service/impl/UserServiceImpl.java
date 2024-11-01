@@ -68,9 +68,10 @@ public class UserServiceImpl implements UserService {
         return UserResponse.builder()
                 .id(userCredential.getId())
                 .email(userCredential.getUsername())
-                .createdDate(userCredential.getCreatedDate())
                 .role(userCredential.getRole().getRole().name())
                 .status(userCredential.getStatus().name())
+                .createdDate(userCredential.getCreatedDate())
+                .modifiedDate(userCredential.getModifiedDate())
                 .build();
     }
 }

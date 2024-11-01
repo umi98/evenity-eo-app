@@ -1,143 +1,157 @@
 package com.eska.evenity.service.impl;
 
+import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.dto.request.ProductRequest;
 import com.eska.evenity.dto.response.ProductResponse;
+import com.eska.evenity.dto.response.VendorWithProductsResponse;
 import com.eska.evenity.entity.Category;
 import com.eska.evenity.entity.Product;
 import com.eska.evenity.entity.Vendor;
-import com.eska.evenity.repository.CategoryRepository;
 import com.eska.evenity.repository.ProductRepository;
-import com.eska.evenity.repository.VendorRepository;
+import com.eska.evenity.service.CategoryService;
 import com.eska.evenity.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.eska.evenity.service.VendorService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final CategoryService categoryService;
+    private final VendorService vendorService;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private VendorRepository vendorRepository;
-
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ProductResponse createProduct(ProductRequest productRequest) {
-        Product product = Product.builder()
-                .productId(UUID.randomUUID().toString())
-                .name(productRequest.getName())
-                .description(productRequest.getDescription())
-                .price(productRequest.getPrice())
-                .qty(productRequest.getQty())
-                .productUnit(productRequest.getProductUnit())
-                .build();
-
-        Category category = categoryRepository.findById(productRequest.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        Vendor vendor = vendorRepository.findById(productRequest.getVendorId())
-                .orElseThrow(() -> new RuntimeException("Vendor not found"));
-
-        product.setCategory(category);
-        product.setVendor(vendor);
-
-        product = productRepository.save(product);
-        return new ProductResponse(product.getProductId(), product.getName(), product.getDescription(),
-                product.getPrice(), product.getQty(), product.getProductUnit(), category.getName(), vendor.getName());
+        try {
+            Category category = categoryService.getCategoryUsingId(productRequest.getCategoryId());
+            Vendor vendor = vendorService.getVendorUsingId(productRequest.getVendorId());
+            Product product = Product.builder()
+                    .name(productRequest.getName())
+                    .description(productRequest.getDescription())
+                    .price(productRequest.getPrice())
+                    .qty(productRequest.getQty())
+                    .productUnit(ProductUnit.valueOf(productRequest.getProductUnit()))
+                    .isDeleted(false)
+                    .category(category)
+                    .vendor(vendor)
+                    .createdDate(LocalDateTime.now())
+                    .modifiedDate(LocalDateTime.now())
+                    .build();
+            productRepository.saveAndFlush(product);
+            return mapToResponse(product);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
-    public Optional<ProductResponse> getProductById(String productId) {
-        return productRepository.findById(productId)
-                .map(product -> new ProductResponse(
-                        product.getProductId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.getQty(),
-                        product.getProductUnit(),
-                        product.getCategory().getName(),
-                        product.getVendor().getName()));
+    public ProductResponse getProductById(String productId) {
+        return mapToResponse(findByIdOrThrowException(productId));
     }
 
     @Override
     public List<ProductResponse> getProductsByCategoryId(String categoryId) {
-        return productRepository.findByCategoryId(categoryId).stream()
-                .map(product -> new ProductResponse(
-                        product.getProductId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.getQty(),
-                        product.getProductUnit(),
-                        product.getCategory().getName(),
-                        product.getVendor().getName()))
-                .collect(Collectors.toList());
+        List<Product> result = productRepository.findByCategoryId(categoryId);
+        return result.stream().map(this::mapToResponse).toList();
     }
 
     @Override
-    public List<ProductResponse> getProductsByVendorId(String vendorId) {
-        return productRepository.findByVendorId(vendorId).stream()
-                .map(product -> new ProductResponse(
-                        product.getProductId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.getQty(),
-                        product.getProductUnit(),
-                        product.getCategory().getName(),
-                        product.getVendor().getName()))
-                .collect(Collectors.toList());
+    public List<ProductResponse> getAllAvailableProducts() {
+        List<Product> result = productRepository.findByIsDeleted(false);
+        return result.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
+    public VendorWithProductsResponse getProductsByVendorId(String vendorId) {
+        Vendor vendor = vendorService.getVendorUsingId(vendorId);
+        List<Product> result = productRepository.findByVendorIdAndIsDeleted(vendorId, false);
+        List<ProductResponse> productResponses = result.stream().map(this::mapToResponse).toList();
+        return VendorWithProductsResponse.builder()
+                .id(vendor.getId())
+                .email(vendor.getUserCredential().getUsername())
+                .name(vendor.getName())
+                .phoneNumber(vendor.getPhoneNumber())
+                .province(vendor.getProvince())
+                .city(vendor.getCity())
+                .district(vendor.getDistrict())
+                .address(vendor.getAddress())
+                .owner(vendor.getOwner())
+                .scoring(vendor.getScoring())
+                .status(vendor.getStatus().name())
+                .createdDate(vendor.getCreatedDate())
+                .modifiedDate(vendor.getModifiedDate())
+                .productList(productResponses)
+                .build();
     }
 
     @Override
     public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(product -> new ProductResponse(
-                        product.getProductId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.getQty(),
-                        product.getProductUnit(),
-                        product.getCategory().getName(),
-                        product.getVendor().getName()))
-                .collect(Collectors.toList());
+        List<Product> result = productRepository.findAll();
+        return result.stream().map(this::mapToResponse).toList();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public Optional<ProductResponse> updateProduct(String productId, ProductRequest productRequest) {
-        return productRepository.findById(productId).map(product -> {
+    public ProductResponse updateProduct(String productId, ProductRequest productRequest) {
+        try {
+            Product product = findByIdOrThrowException(productId);
+            Category category = categoryService.getCategoryUsingId(productRequest.getCategoryId());
             product.setName(productRequest.getName());
             product.setDescription(productRequest.getDescription());
             product.setPrice(productRequest.getPrice());
             product.setQty(productRequest.getQty());
-            product.setProductUnit(productRequest.getProductUnit());
-
-            Category category = categoryRepository.findById(productRequest.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
-            Vendor vendor = vendorRepository.findById(productRequest.getVendorId())
-                    .orElseThrow(() -> new RuntimeException("Vendor not found"));
-
+            product.setProductUnit(ProductUnit.valueOf(productRequest.getProductUnit()));
             product.setCategory(category);
-            product.setVendor(vendor);
-
-            product = productRepository.save(product);
-            return new ProductResponse(product.getProductId(), product.getName(), product.getDescription(),
-                    product.getPrice(), product.getQty(), product.getProductUnit(), category.getName(), vendor.getName());
-        });
+            product.setModifiedDate(LocalDateTime.now());
+            productRepository.saveAndFlush(product);
+            return mapToResponse(product);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteProduct(String productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        productRepository.delete(product);
+        try {
+            Product product = findByIdOrThrowException(productId);
+            product.setIsDeleted(true);
+            product.setModifiedDate(LocalDateTime.now());
+            productRepository.saveAndFlush(product);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private Product findByIdOrThrowException(String id) {
+        Optional<Product> result = productRepository.findById(id);
+        return result.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "product not found"));
+    }
+
+    private ProductResponse mapToResponse(Product product) {
+        return ProductResponse.builder()
+                .id(product.getProductId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .qty(product.getQty())
+                .productUnit(product.getProductUnit().name())
+                .categoryId(product.getCategory().getId())
+                .categoryName(product.getCategory().getName())
+                .vendorId(product.getVendor().getId())
+                .vendorName(product.getVendor().getName())
+                .isDeleted(product.getIsDeleted())
+                .createdDate(product.getCreatedDate())
+                .modifiedDate(product.getModifiedDate())
+                .build();
     }
 }

@@ -13,6 +13,8 @@ public interface VendorService {
     List<VendorResponse> getAllActiveVendor();
     VendorResponse getVendorById(String id);
     Vendor getVendorByUserId(String id);
+    Vendor getVendorUsingId(String id);
+//    VendorWithProductsResponse getVendorWithProducts(String id);
     VendorResponse updateVendor(String id, VendorRequest request);
     VendorResponse approveStatusVendor(String id);
     VendorResponse rejectStatusVendor(String id);

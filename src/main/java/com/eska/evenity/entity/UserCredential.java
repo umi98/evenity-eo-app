@@ -48,11 +48,9 @@ public class UserCredential implements UserDetails {
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
-
     @CreatedDate
     @Column(name = "created_date", updatable = false)
     private LocalDateTime createdDate;
-
     @LastModifiedDate
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;

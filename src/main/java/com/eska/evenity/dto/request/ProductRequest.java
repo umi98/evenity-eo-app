@@ -1,9 +1,16 @@
 package com.eska.evenity.dto.request;
 
+import com.eska.evenity.constant.EnumValue;
 import com.eska.evenity.constant.ProductUnit;
-import lombok.*;
 
-import java.math.BigInteger;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -12,11 +19,18 @@ import java.math.BigInteger;
 @Builder
 @Data
 public class ProductRequest {
+    @NotBlank(message = "Name should be filled")
     private String name;
+    @NotBlank(message = "Description should be filled")
     private String description;
-    private BigInteger price;
+    @Positive(message = "Price should have positive value")
+    private Long price;
+    @Positive(message = "Quantity should have positive value")
     private Long qty;
-    private ProductUnit productUnit;
+    @EnumValue(enumClass = ProductUnit.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
+    private String productUnit;
+    @NotBlank(message = "Category id should be filled")
     private String categoryId;
+    @NotBlank(message = "Vendor id should be filled")
     private String vendorId;
 }

@@ -1,10 +1,17 @@
 package com.eska.evenity.dto.request;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -24,6 +31,7 @@ public class EventRequest {
     private LocalTime startTime;
     @NotNull(message = "Finish time may not be empty")
     private LocalTime endTime;
+    @NotBlank(message = "Province should be filled")
     private String province;
     private String city;
     private String district;

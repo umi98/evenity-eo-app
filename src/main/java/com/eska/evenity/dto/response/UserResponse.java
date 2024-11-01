@@ -1,9 +1,12 @@
 package com.eska.evenity.dto.response;
 
-import lombok.*;
-
 import java.time.LocalDateTime;
-import java.util.Date;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -13,7 +16,8 @@ import java.util.Date;
 public class UserResponse {
     private String id;
     private String email;
-    private LocalDateTime createdDate;
     private String role;
     private String status;
+    private LocalDateTime createdDate;
+    private LocalDateTime modifiedDate;
 }

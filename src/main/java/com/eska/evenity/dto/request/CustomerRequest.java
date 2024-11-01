@@ -1,11 +1,12 @@
 package com.eska.evenity.dto.request;
 
-import com.eska.evenity.constant.EnumValue;
-import com.eska.evenity.constant.VendorStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -23,7 +24,10 @@ public class CustomerRequest {
     private String phoneNumber;
     @NotBlank(message = "Address should be filled")
     private String address;
+    @NotBlank(message = "Province should be filled")
     private String province;
+    @NotBlank(message = "City should be filled")
     private String city;
+    @NotBlank(message = "District should be filled")
     private String district;
 }

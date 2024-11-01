@@ -1,8 +1,5 @@
 package com.eska.evenity.dto.response;
 
-import com.eska.evenity.constant.ApprovalStatus;
-import com.eska.evenity.constant.TransactionType;
-import com.eska.evenity.entity.Balance;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,7 +13,8 @@ public class WithdrawRequestResponse {
     private String id;
     private Long amount;
     private String approvalStatus;
-    private LocalDateTime requestTime;
     private String balanceId;
+    private String userName;
+    private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 }

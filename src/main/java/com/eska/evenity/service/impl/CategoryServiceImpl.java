@@ -1,60 +1,98 @@
 package com.eska.evenity.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.eska.evenity.dto.request.CategoryRequest;
 import com.eska.evenity.dto.response.CategoryResponse;
 import com.eska.evenity.entity.Category;
 import com.eska.evenity.repository.CategoryRepository;
 import com.eska.evenity.service.CategoryService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CategoryServiceImpl implements CategoryService {
-
-    @Autowired
     private final CategoryRepository categoryRepository;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
-        Category category = Category.builder()
-                .name(categoryRequest.getName())
-                .build();
-        category = categoryRepository.save(category);
-        return new CategoryResponse(category.getId(), category.getName());
+        try {
+            Category category = Category.builder()
+                    .name(categoryRequest.getName())
+                    .createdDate(LocalDateTime.now())
+                    .modifiedDate(LocalDateTime.now())
+                    .build();
+            categoryRepository.saveAndFlush(category);
+            return mapToResponse(category);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
-    public Optional<CategoryResponse> getCategoryById(String categoryId) {
-        return categoryRepository.findById(categoryId)
-                .map(category -> new CategoryResponse(category.getId(), category.getName()));
+    public CategoryResponse getCategoryById(String categoryId) {
+        Category result = findByIdOrThrowException(categoryId);
+        return mapToResponse(result);
+    }
+
+    @Override
+    public Category getCategoryUsingId(String id) {
+        return findByIdOrThrowException(id);
     }
 
     @Override
     public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().stream()
-                .map(category -> new CategoryResponse(category.getId(), category.getName()))
-                .collect(Collectors.toList());
+        List<Category> result = categoryRepository.findAll();
+        return result.stream().map(this::mapToResponse).toList();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public Optional<CategoryResponse> updateCategory(String categoryId, CategoryRequest categoryRequest) {
-        return categoryRepository.findById(categoryId).map(category -> {
+    public CategoryResponse updateCategory(String categoryId, CategoryRequest categoryRequest) {
+        try {
+            Category category = findByIdOrThrowException(categoryId);
             category.setName(categoryRequest.getName());
-            category = categoryRepository.save(category);
-            return new CategoryResponse(category.getId(), category.getName());
-        });
+            category.setModifiedDate(LocalDateTime.now());
+            categoryRepository.saveAndFlush(category);
+            return mapToResponse(category);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteCategory(String categoryId) {
-        categoryRepository.deleteById(categoryId);
+        try {
+            findByIdOrThrowException(categoryId);
+            categoryRepository.deleteById(categoryId);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private Category findByIdOrThrowException(String id) {
+        Optional<Category> result = categoryRepository.findById(id);
+        return result.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "category not found"));
+    }
+
+    private CategoryResponse mapToResponse(Category category) {
+        return CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .createdDate(category.getCreatedDate())
+                .modifiedDate(category.getModifiedDate())
+                .build();
     }
 }

@@ -1,5 +1,12 @@
 package com.eska.evenity.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.TransactionType;
 import com.eska.evenity.constant.UserStatus;
@@ -7,19 +14,17 @@ import com.eska.evenity.dto.request.MoneyOnlyRequest;
 import com.eska.evenity.dto.response.BalanceResponse;
 import com.eska.evenity.dto.response.TransactionHistoryResponse;
 import com.eska.evenity.dto.response.WithdrawRequestResponse;
-import com.eska.evenity.entity.*;
+import com.eska.evenity.entity.Balance;
+import com.eska.evenity.entity.TransactionHistory;
+import com.eska.evenity.entity.UserCredential;
+import com.eska.evenity.entity.WithdrawRequest;
 import com.eska.evenity.repository.BalanceRepository;
 import com.eska.evenity.repository.TransactionHistoryRepository;
 import com.eska.evenity.repository.WithdrawRequestRepository;
 import com.eska.evenity.service.TransactionService;
 import com.eska.evenity.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -54,9 +59,9 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionHistory history = TransactionHistory.builder()
                 .amount(0L)
                 .activity(TransactionType.OPEN)
-                .description("User id " + user.getId() + " open balance account.")
-                .transactionDate(LocalDateTime.now())
-                .userCredential(user)
+                .description("User id " + user.getId() + " (" + user.getUsername() + ") open balance account.")
+                .createdDate(LocalDateTime.now())
+                .createdBy(user)
                 .build();
         transactionHistoryRepository.saveAndFlush(history);
         return mapBalanceToResponse(balance);
@@ -94,7 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
         WithdrawRequest withdrawRequest = WithdrawRequest.builder()
                 .amount(request.getAmount())
                 .approvalStatus(ApprovalStatus.PENDING)
-                .requestDate(LocalDateTime.now())
+                .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
                 .balance(balance)
                 .build();
@@ -103,10 +108,11 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionHistory history = TransactionHistory.builder()
                 .amount(0L)
                 .activity(TransactionType.WITHDRAW_REQUEST)
-                .description("User id " + user.getId() + " request for withdrawal: IDR " + request.getAmount() +
+                .description("User id " + user.getId() + " (" + user.getUsername() +
+                        ") request for withdrawal: IDR " + request.getAmount() +
                         " with request code: " + withdrawRequest.getId())
-                .transactionDate(LocalDateTime.now())
-                .userCredential(user)
+                .createdDate(LocalDateTime.now())
+                .createdBy(user)
                 .build();
         transactionHistoryRepository.saveAndFlush(history);
         return mapRequestToResponse(withdrawRequest);
@@ -126,10 +132,11 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionHistory history = TransactionHistory.builder()
                 .amount(request.getAmount())
                 .activity(TransactionType.WITHDRAW)
-                .description("Admin approved User id " + user.getId() + " to withdraw: IDR " +
-                        request.getAmount() + " with request code: " + request.getId())
-                .transactionDate(LocalDateTime.now())
-                .userCredential(user)
+                .description("Admin approved User id " + user.getId() + " (" + user.getUsername() +
+                        ") to withdraw: IDR " + request.getAmount() +
+                        " with request code: " + request.getId())
+                .createdDate(LocalDateTime.now())
+                .createdBy(user)
                 .build();
         transactionHistoryRepository.saveAndFlush(history);
         return mapRequestToResponse(request);
@@ -146,10 +153,11 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionHistory history = TransactionHistory.builder()
                 .amount(0L)
                 .activity(TransactionType.WITHDRAW_REQUEST)
-                .description("Admin rejected User id " + user.getId() + " to withdraw: IDR " +
-                        request.getAmount() + " from request code: " + request.getId())
-                .transactionDate(LocalDateTime.now())
-                .userCredential(user)
+                .description("Admin rejected User id " + user.getId() + " (" + user.getUsername() +
+                        ") to withdraw: IDR " + request.getAmount() +
+                        " from request code: " + request.getId())
+                .createdDate(LocalDateTime.now())
+                .createdBy(user)
                 .build();
         transactionHistoryRepository.saveAndFlush(history);
         return mapRequestToResponse(request);
@@ -163,7 +171,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionHistoryResponse> getAllTransactionHistoryByUserId(String userId) {
-        List<TransactionHistory> result = transactionHistoryRepository.getTransactionHistoryByUserCredential_Id(userId);
+        List<TransactionHistory> result = transactionHistoryRepository.getTransactionHistoryByCreatedBy_Id(userId);
         return result.stream().map(this::mapHistoryToResponse).toList();
     }
 
@@ -190,6 +198,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .id(balance.getId())
                 .amount(balance.getAmount())
                 .userId(balance.getUserCredential().getId())
+                .userName(balance.getUserCredential().getUsername())
                 .modifiedDate(balance.getModifiedDate())
                 .createdDate(balance.getCreatedDate())
                 .build();
@@ -201,8 +210,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .activity(transactionHistory.getActivity().name())
                 .amount(transactionHistory.getAmount())
                 .description(transactionHistory.getDescription())
-                .transactionDate(transactionHistory.getTransactionDate())
-                .userId(transactionHistory.getUserCredential().getId())
+                .createdDate(transactionHistory.getCreatedDate())
+                .createdBy(transactionHistory.getCreatedBy().getId())
+                .createdByName(transactionHistory.getCreatedBy().getUsername())
                 .build();
     }
 
@@ -211,8 +221,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .id(withdrawRequest.getId())
                 .amount(withdrawRequest.getAmount())
                 .approvalStatus(withdrawRequest.getApprovalStatus().name())
-                .requestTime(withdrawRequest.getRequestDate())
                 .balanceId(withdrawRequest.getBalance().getId())
+                .userName(withdrawRequest.getBalance().getUserCredential().getUsername())
+                .createdDate(withdrawRequest.getCreatedDate())
                 .modifiedDate(withdrawRequest.getModifiedDate())
                 .build();
     }

@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 
 @Getter
 @Setter
@@ -36,10 +37,10 @@ public class TransactionHistory {
     private TransactionType activity;
     @Column(columnDefinition = "TEXT")
     private String description;
-    @Column(updatable = false)
-    private LocalDateTime transactionDate;
+    @CreatedDate
+    @Column(name = "created_date", updatable = false)
+    private LocalDateTime createdDate;
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private UserCredential userCredential;
-
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    private UserCredential createdBy;
 }

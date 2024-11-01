@@ -16,6 +16,7 @@ import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.entity.Vendor;
 import com.eska.evenity.repository.VendorRepository;
+import com.eska.evenity.service.TransactionService;
 import com.eska.evenity.service.UserService;
 import com.eska.evenity.service.VendorService;
 
@@ -26,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class VendorServiceImpl implements VendorService {
     private final VendorRepository vendorRepository;
     private final UserService userService;
+//    private final ProductService productService;
+    private final TransactionService transactionService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -72,6 +75,33 @@ public class VendorServiceImpl implements VendorService {
         return vendorRepository.findVendorByUserCredential(user);
     }
 
+    @Override
+    public Vendor getVendorUsingId(String id) {
+        return findByIdOrThrowNotFound(id);
+    }
+
+//    @Override
+//    public VendorWithProductsResponse getVendorWithProducts(String id) {
+//        Vendor vendor = findByIdOrThrowNotFound(id);
+//        List<ProductResponse> productResponses = productService.getProductsByVendorId(id);
+//        return VendorWithProductsResponse.builder()
+//                .id(vendor.getId())
+//                .email(vendor.getUserCredential().getUsername())
+//                .name(vendor.getName())
+//                .phoneNumber(vendor.getPhoneNumber())
+//                .province(vendor.getProvince())
+//                .city(vendor.getCity())
+//                .district(vendor.getDistrict())
+//                .address(vendor.getAddress())
+//                .owner(vendor.getOwner())
+//                .scoring(vendor.getScoring())
+//                .status(vendor.getStatus().name())
+//                .createdDate(vendor.getCreatedDate())
+//                .modifiedDate(vendor.getModifiedDate())
+//                .productList(productResponses)
+//                .build();
+//    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public VendorResponse updateVendor(String id, VendorRequest request) {
@@ -101,6 +131,7 @@ public class VendorServiceImpl implements VendorService {
         vendor.setStatus(VendorStatus.ACTIVE);
         vendor.setModifiedDate(LocalDateTime.now());
         vendorRepository.saveAndFlush(vendor);
+        transactionService.createBalance(vendor.getUserCredential().getId());
         return mapToResponse(vendor);
     }
 
@@ -135,6 +166,7 @@ public class VendorServiceImpl implements VendorService {
     private VendorResponse mapToResponse(Vendor vendor) {
         return VendorResponse.builder()
                 .id(vendor.getId())
+                .email(vendor.getUserCredential().getUsername())
                 .name(vendor.getName())
                 .phoneNumber(vendor.getPhoneNumber())
                 .province(vendor.getProvince())
@@ -144,6 +176,8 @@ public class VendorServiceImpl implements VendorService {
                 .owner(vendor.getOwner())
                 .scoring(vendor.getScoring())
                 .status(vendor.getStatus().name())
+                .createdDate(vendor.getCreatedDate())
+                .modifiedDate(vendor.getModifiedDate())
                 .build();
     }
 }

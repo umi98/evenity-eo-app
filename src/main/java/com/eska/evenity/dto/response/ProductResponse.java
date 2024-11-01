@@ -1,11 +1,13 @@
 package com.eska.evenity.dto.response;
 
-import com.eska.evenity.constant.ProductUnit;
-import lombok.*;
-import org.springframework.http.ResponseEntity;
+import java.time.LocalDateTime;
 
-import java.math.BigInteger;
-import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -14,13 +16,17 @@ import java.util.Optional;
 @Builder
 @Data
 public class ProductResponse {
-    private String productId;
+    private String id;
     private String name;
     private String description;
-    private BigInteger price;
+    private Long price;
     private Long qty;
-    private ProductUnit productUnit;
+    private String productUnit;
+    private String categoryId;
     private String categoryName;
+    private String vendorId;
     private String vendorName;
-
+    private Boolean isDeleted;
+    private LocalDateTime createdDate;
+    private LocalDateTime modifiedDate;
 }

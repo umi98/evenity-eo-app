@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.eska.evenity.constant.UserStatus;
+import com.eska.evenity.entity.*;
+import com.eska.evenity.service.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,16 +20,8 @@ import com.eska.evenity.dto.request.CustomerRegisterRequest;
 import com.eska.evenity.dto.request.VendorRegisterRequest;
 import com.eska.evenity.dto.response.AuthResponse;
 import com.eska.evenity.dto.response.RegisterResponse;
-import com.eska.evenity.entity.Customer;
-import com.eska.evenity.entity.Role;
-import com.eska.evenity.entity.UserCredential;
-import com.eska.evenity.entity.Vendor;
 import com.eska.evenity.repository.UserCredentialRepository;
 import com.eska.evenity.security.JwtUtils;
-import com.eska.evenity.service.AuthService;
-import com.eska.evenity.service.CustomerService;
-import com.eska.evenity.service.RoleService;
-import com.eska.evenity.service.VendorService;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserCredentialRepository userCredentialRepository;
     private final CustomerService customerService;
     private final VendorService vendorService;
+    private final TransactionService transactionService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
@@ -51,19 +46,18 @@ public class AuthServiceImpl implements AuthService {
     public void initSuperAdmin() {
         Optional<UserCredential> optionalUserCredential = userCredentialRepository.findByUsername(usernameAdmin);
         if (optionalUserCredential.isPresent()) return;
-
         Role adminRole = roleService.getOrSave(ERole.ROLE_ADMIN);
-
         String hashPassword = passwordEncoder.encode(passwordAdmin);
         UserCredential userCredential = UserCredential.builder()
                 .username(usernameAdmin)
                 .password(hashPassword)
-                .role(adminRole)
                 .status(UserStatus.ACTIVE)
+                .role(adminRole)
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
                 .build();
         userCredentialRepository.saveAndFlush(userCredential);
+        transactionService.createBalance(userCredential.getId());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -76,8 +70,8 @@ public class AuthServiceImpl implements AuthService {
                     UserCredential.builder()
                             .username(request.getEmail())
                             .password(hashPassword)
-                            .role(roleCustomer)
                             .status(UserStatus.ACTIVE)
+                            .role(roleCustomer)
                             .createdDate(LocalDateTime.now())
                             .modifiedDate(LocalDateTime.now())
                             .build()

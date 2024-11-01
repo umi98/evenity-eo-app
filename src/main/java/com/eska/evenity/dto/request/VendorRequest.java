@@ -21,8 +21,11 @@ public class VendorRequest {
             message = "Invalid phone number format"
     )
     private String phoneNumber;
+    @NotBlank(message = "Province should be filled")
     private String province;
+    @NotBlank(message = "City should be filled")
     private String city;
+    @NotBlank(message = "District should be filled")
     private String district;
     @NotBlank(message = "Address should be filled")
     private String address;

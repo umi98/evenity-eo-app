@@ -119,12 +119,15 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerResponse mapToResponse(Customer customer) {
         return CustomerResponse.builder()
                 .id(customer.getId())
+                .email(customer.getUserCredential().getUsername())
                 .fullName(customer.getFullName())
                 .phoneNumber(customer.getPhoneNumber())
                 .province(customer.getProvince())
                 .city(customer.getCity())
                 .district(customer.getDistrict())
                 .address(customer.getAddress())
+                .createdDate(customer.getCreatedDate())
+                .modifiedDate(customer.getModifiedDate())
                 .build();
     }
 

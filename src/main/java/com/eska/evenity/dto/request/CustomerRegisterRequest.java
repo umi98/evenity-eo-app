@@ -4,7 +4,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -26,8 +30,11 @@ public class CustomerRegisterRequest {
             message = "Invalid phone number format"
     )
     private String phoneNumber;
+    @NotBlank(message = "Province should be filled")
     private String province;
+    @NotBlank(message = "City should be filled")
     private String city;
+    @NotBlank(message = "District should be filled")
     private String district;
     @NotBlank(message = "Address should be filled")
     private String address;
