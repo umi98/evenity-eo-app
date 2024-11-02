@@ -1,25 +1,21 @@
 package com.eska.evenity.dto.request;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EventRequest {
+public class BaseEventRequest {
     @NotBlank(message = "Event name should be filled")
     private String name;
     @NotBlank(message = "Description should be filled")
@@ -44,5 +40,5 @@ public class EventRequest {
     private Long participant;
     @NotBlank(message = "Customer id should be filled")
     private String customerId;
-    private List<EventDetailRequest> evenDetail;
+    private List<GenerateVendorRequest> vendorList;
 }

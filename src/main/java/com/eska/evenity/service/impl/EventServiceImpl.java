@@ -25,9 +25,9 @@ public class EventServiceImpl implements EventService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public EventResponse addNewEvent(String customerId, EventRequest request) {
+    public EventResponse addNewEvent(EventRequest request) {
         try {
-            Customer customer = customerService.getCustomerByCustomerId(customerId);
+            Customer customer = customerService.getCustomerByCustomerId(request.getCustomerId());
             Event newEvent = Event.builder()
                     .name(request.getName())
                     .description(request.getDescription())

@@ -69,6 +69,21 @@ public class VendorController {
         }
     }
 
+    @GetMapping("/approved")
+    public ResponseEntity<?> getApprovedCustomer() {
+        try {
+            List<VendorResponse> vendorResponses = vendorService.getApprovedVendor();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(vendorResponses)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}/products")
     public ResponseEntity<?> getVendorAndProducts(@PathVariable String id) {
         try {

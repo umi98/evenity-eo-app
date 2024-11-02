@@ -76,11 +76,11 @@ public class EventController {
         }
     }
 
-    @PostMapping("/customer/{id}")
+    @PostMapping()
 //    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> addNewEvent(@PathVariable String id, @Valid @RequestBody EventRequest request) {
+    public ResponseEntity<?> addNewEvent(@Valid @RequestBody EventRequest request) {
         try {
-            EventResponse eventResponse = eventService.addNewEvent(id, request);
+            EventResponse eventResponse = eventService.addNewEvent(request);
             WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
                     .status(HttpStatus.CREATED.getReasonPhrase())
                     .message("Successfully create event")

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 public class CategoryResponse {
     private String id;
+    private String mainCategory;
     private String name;
     private LocalDateTime modifiedDate;
     private LocalDateTime createdDate;

@@ -6,7 +6,7 @@ import com.eska.evenity.dto.response.EventResponse;
 import java.util.List;
 
 public interface EventService {
-    EventResponse addNewEvent(String customerId, EventRequest request);
+    EventResponse addNewEvent(EventRequest request);
     List<EventResponse> getAllEvents();
     List<EventResponse> getAllUndeletedEvents();
     List<EventResponse> getEventByCustomerId(String id);

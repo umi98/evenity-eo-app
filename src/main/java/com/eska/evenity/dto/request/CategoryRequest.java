@@ -1,5 +1,8 @@
 package com.eska.evenity.dto.request;
 
+import com.eska.evenity.constant.CategoryType;
+import com.eska.evenity.constant.EnumValue;
+import com.eska.evenity.constant.VendorStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -8,8 +11,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
 public class CategoryRequest {
+    @EnumValue(enumClass = CategoryType.class, message = "Main type not exist")
+    private String mainType;
     @NotBlank(message = "Name should be filled")
     private String name;
 }

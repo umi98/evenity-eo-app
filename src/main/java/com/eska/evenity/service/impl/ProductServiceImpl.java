@@ -1,7 +1,13 @@
 package com.eska.evenity.service.impl;
 
+import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.ProductUnit;
+import com.eska.evenity.constant.VendorStatus;
+import com.eska.evenity.dto.request.EventInfoRequest;
+import com.eska.evenity.dto.request.PriceRangeRequest;
 import com.eska.evenity.dto.request.ProductRequest;
+import com.eska.evenity.dto.response.MinMaxPriceResponse;
+import com.eska.evenity.dto.response.ProductRecommendedResponse;
 import com.eska.evenity.dto.response.ProductResponse;
 import com.eska.evenity.dto.response.VendorWithProductsResponse;
 import com.eska.evenity.entity.Category;
@@ -12,14 +18,15 @@ import com.eska.evenity.service.CategoryService;
 import com.eska.evenity.service.ProductService;
 import com.eska.evenity.service.VendorService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +41,7 @@ public class ProductServiceImpl implements ProductService {
         try {
             Category category = categoryService.getCategoryUsingId(productRequest.getCategoryId());
             Vendor vendor = vendorService.getVendorUsingId(productRequest.getVendorId());
+            if (vendor.getStatus() != VendorStatus.ACTIVE) throw new BadRequestException("Vendor is yet to approved");
             Product product = Product.builder()
                     .name(productRequest.getName())
                     .description(productRequest.getDescription())
@@ -119,6 +127,65 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public MinMaxPriceResponse findMaxMinPrice(PriceRangeRequest request) {
+        Long min = productRepository.findMinPrice(request.getCategoryId(), request.getProvince(), request.getCity());
+        Long max = productRepository.findMaxPrice(request.getCategoryId(), request.getProvince(), request.getCity());
+        CategoryType mainCategory = categoryService.getCategoryUsingId(request.getCategoryId()).getMainCategory();
+        if (mainCategory == CategoryType.CATERING) {
+            min *= request.getParticipant();
+            max *= request.getParticipant();
+        }
+        return MinMaxPriceResponse.builder()
+                .highestPrice(max)
+                .lowestPrice(min)
+                .build();
+    }
+
+    @Override
+    public ProductRecommendedResponse getProductRecommendation(EventInfoRequest request) {
+        try {
+            Long minCost = request.getMinCost();
+            Long maxCost = request.getMaxCost();
+            Category category = categoryService.getCategoryUsingId(request.getCategoryId());
+            if (category.getMainCategory() == CategoryType.CATERING) {
+                minCost = minCost / request.getParticipant();
+                maxCost = maxCost / request.getParticipant();
+            }
+            List<Product> products = productRepository.findRecommendation(
+                    request.getProvince(),
+                    request.getCity(),
+                    request.getCategoryId(),
+                    minCost,
+                    maxCost,
+                    request.getPreviousProduct()
+            );
+            if (products.isEmpty()) {
+                return null;
+            }
+            products.sort(Comparator.comparingInt((Product p) -> p.getVendor().getScoring())
+                    .reversed()
+                    .thenComparingLong(Product::getPrice)
+                    .reversed()
+                    .thenComparing(p -> Math.random()));
+            Product chosenProduct = products.get(0);
+
+            Long cost = chosenProduct.getPrice();
+            if (category.getMainCategory() == CategoryType.CATERING) cost *= request.getParticipant();
+            return ProductRecommendedResponse.builder()
+                    .vendorId(chosenProduct.getVendor().getId())
+                    .vendorName(chosenProduct.getVendor().getName())
+                    .vendorAddress(chosenProduct.getVendor().getAddress())
+                    .productId(chosenProduct.getId())
+                    .productName(chosenProduct.getName())
+                    .productDescription(chosenProduct.getDescription())
+                    .cost(cost)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteProduct(String productId) {
@@ -139,7 +206,7 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductResponse mapToResponse(Product product) {
         return ProductResponse.builder()
-                .id(product.getProductId())
+                .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())

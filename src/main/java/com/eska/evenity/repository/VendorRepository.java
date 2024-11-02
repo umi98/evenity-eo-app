@@ -8,8 +8,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.eska.evenity.constant.UserStatus;
+import com.eska.evenity.constant.VendorStatus;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.entity.Vendor;
+
 
 @Repository
 public interface VendorRepository extends JpaRepository<Vendor, String> {
@@ -18,4 +20,6 @@ public interface VendorRepository extends JpaRepository<Vendor, String> {
 
     @Query("SELECT v FROM Vendor v WHERE v.userCredential.status = :status")
     List<Vendor> getVendorByStatus(@Param("status") UserStatus status);
+
+    List<Vendor> findByStatus(VendorStatus status);
 }

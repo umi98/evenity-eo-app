@@ -64,6 +64,12 @@ public class VendorServiceImpl implements VendorService {
     }
 
     @Override
+    public List<VendorResponse> getApprovedVendor() {
+        List<Vendor> result = vendorRepository.findByStatus(VendorStatus.ACTIVE);
+        return result.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
     public VendorResponse getVendorById(String id) {
         Vendor result = findByIdOrThrowNotFound(id);
         return mapToResponse(result);

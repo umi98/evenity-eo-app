@@ -2,6 +2,11 @@ package com.eska.evenity.controller;
 
 import java.util.List;
 
+import com.eska.evenity.dto.request.BaseEventRequest;
+import com.eska.evenity.dto.request.EventInfoRequest;
+import com.eska.evenity.dto.request.PriceRangeRequest;
+import com.eska.evenity.dto.response.MinMaxPriceResponse;
+import com.eska.evenity.dto.response.ProductRecommendedResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -94,6 +99,39 @@ public class ProductController {
             WebResponse<List<ProductResponse>> response = WebResponse.<List<ProductResponse>>builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieved products by category")
+                    .data(products)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/price/range")
+    public ResponseEntity<?> minMaxPrice(@Valid @RequestBody PriceRangeRequest request) {
+        try {
+            MinMaxPriceResponse products = productService.findMaxMinPrice(request);
+            WebResponse<MinMaxPriceResponse> response = WebResponse.<MinMaxPriceResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieved data")
+                    .data(products)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/event/recommend")
+    public ResponseEntity<?> getSingleRecommendationFromCategory(@Valid @RequestBody EventInfoRequest request) {
+        try {
+            ProductRecommendedResponse products = productService.getProductRecommendation(request);
+            if (products == null) {
+                return ResponseEntity.notFound().build();
+            }
+            WebResponse<ProductRecommendedResponse> response = WebResponse.<ProductRecommendedResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieved data")
                     .data(products)
                     .build();
             return ResponseEntity.ok(response);

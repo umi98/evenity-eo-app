@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.eska.evenity.constant.CategoryType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +28,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
+            System.out.println(categoryRequest);
         try {
             Category category = Category.builder()
+                    .mainCategory(CategoryType.valueOf(categoryRequest.getMainType()))
                     .name(categoryRequest.getName())
                     .createdDate(LocalDateTime.now())
                     .modifiedDate(LocalDateTime.now())
@@ -62,6 +65,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse updateCategory(String categoryId, CategoryRequest categoryRequest) {
         try {
             Category category = findByIdOrThrowException(categoryId);
+            category.setMainCategory(CategoryType.valueOf(categoryRequest.getMainType()));
             category.setName(categoryRequest.getName());
             category.setModifiedDate(LocalDateTime.now());
             categoryRepository.saveAndFlush(category);
@@ -90,6 +94,7 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryResponse mapToResponse(Category category) {
         return CategoryResponse.builder()
                 .id(category.getId())
+                .mainCategory(category.getMainCategory().name())
                 .name(category.getName())
                 .createdDate(category.getCreatedDate())
                 .modifiedDate(category.getModifiedDate())

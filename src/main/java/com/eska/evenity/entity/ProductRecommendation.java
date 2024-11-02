@@ -1,5 +1,6 @@
 package com.eska.evenity.entity;
 
+import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.ProductUnit;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,26 +15,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "product")
-public class Product {
+@Table(name = "product_recommendation")
+public class ProductRecommendation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(nullable = false, length = 100)
-    private String name;
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    private Long price;
-    private Long qty;
     @Enumerated(EnumType.STRING)
-    private ProductUnit productUnit;
-    private Boolean isDeleted;
+    private ApprovalStatus status;
+    private Long quantity;
+    @Enumerated(EnumType.STRING)
+    private ProductUnit unit;
     @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private Category category;
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private Product product;
     @ManyToOne
-    @JoinColumn(name = "vendor_id", referencedColumnName = "id")
-    private Vendor vendor;
+    @JoinColumn(name = "event_id", referencedColumnName = "id")
+    private Event event;
     @CreatedDate
     @Column(name = "created_date", updatable = false)
     private LocalDateTime createdDate;

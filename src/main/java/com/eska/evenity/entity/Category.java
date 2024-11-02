@@ -1,5 +1,6 @@
 package com.eska.evenity.entity;
 
+import com.eska.evenity.constant.CategoryType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,6 +19,8 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Enumerated(EnumType.STRING)
+    private CategoryType mainCategory;
     @Column(nullable = false, unique = true, length = 100)
     private String name;
     @CreatedDate

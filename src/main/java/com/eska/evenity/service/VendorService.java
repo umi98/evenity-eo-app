@@ -11,6 +11,7 @@ public interface VendorService {
     Vendor createVendor(Vendor vendor, UserCredential userCredential);
     List<VendorResponse> getAllVendor();
     List<VendorResponse> getAllActiveVendor();
+    List<VendorResponse> getApprovedVendor();
     VendorResponse getVendorById(String id);
     Vendor getVendorByUserId(String id);
     Vendor getVendorUsingId(String id);

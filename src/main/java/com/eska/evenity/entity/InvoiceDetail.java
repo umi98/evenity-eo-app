@@ -1,6 +1,6 @@
 package com.eska.evenity.entity;
 
-import com.eska.evenity.constant.ProductUnit;
+import com.eska.evenity.constant.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,26 +14,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "product")
-public class Product {
+@Table(name = "invoice_detail")
+public class InvoiceDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(nullable = false, length = 100)
-    private String name;
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    private Long price;
-    private Long qty;
     @Enumerated(EnumType.STRING)
-    private ProductUnit productUnit;
-    private Boolean isDeleted;
+    private PaymentStatus status;
     @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private Category category;
-    @ManyToOne
-    @JoinColumn(name = "vendor_id", referencedColumnName = "id")
-    private Vendor vendor;
+    @JoinColumn(name = "invoice_id", referencedColumnName = "id")
+    private Invoice invoice;
+    @OneToOne
+    @JoinColumn(name = "event_detail_id", referencedColumnName = "id")
+    private EventDetail eventDetail;
     @CreatedDate
     @Column(name = "created_date", updatable = false)
     private LocalDateTime createdDate;
