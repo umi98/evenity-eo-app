@@ -169,10 +169,10 @@ public class TransactionController {
         }
     }
 
-    @PostMapping("/withdraw/balance/{id}")
-    public ResponseEntity<?> withdrawRequest(@PathVariable String id, @Valid @RequestBody MoneyOnlyRequest request) {
+    @PostMapping("/withdraw/{userId}")
+    public ResponseEntity<?> withdrawRequest(@PathVariable String userId, @Valid @RequestBody MoneyOnlyRequest request) {
         try {
-            WithdrawRequestResponse withdrawResponse = transactionService.withDrawRequest(id, request);
+            WithdrawRequestResponse withdrawResponse = transactionService.withDrawRequest(userId, request);
             WebResponse<WithdrawRequestResponse> response = WebResponse.<WithdrawRequestResponse>builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")

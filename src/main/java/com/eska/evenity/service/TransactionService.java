@@ -20,7 +20,7 @@ public interface TransactionService {
     Balance getBalanceUsingUserId(String userId);
     List<WithdrawRequestResponse> getAllWithdrawRequest();
     List<WithdrawRequestResponse> getAllWithdrawRequestByUserId(String id);
-    WithdrawRequestResponse withDrawRequest(String balanceId, MoneyOnlyRequest request);
+    WithdrawRequestResponse withDrawRequest(String userId, MoneyOnlyRequest request);
     WithdrawRequestResponse approveWithdrawRequest(String requestId);
     WithdrawRequestResponse rejectWithdrawRequest(String requestId);
     List<TransactionHistoryResponse> getAllTransactionHistory();

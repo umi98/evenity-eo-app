@@ -3,9 +3,7 @@ package com.eska.evenity.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.eska.evenity.entity.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +15,13 @@ import com.eska.evenity.dto.request.MoneyOnlyRequest;
 import com.eska.evenity.dto.response.BalanceResponse;
 import com.eska.evenity.dto.response.TransactionHistoryResponse;
 import com.eska.evenity.dto.response.WithdrawRequestResponse;
+import com.eska.evenity.entity.Balance;
+import com.eska.evenity.entity.Event;
+import com.eska.evenity.entity.EventDetail;
+import com.eska.evenity.entity.TransactionHistory;
+import com.eska.evenity.entity.UserCredential;
+import com.eska.evenity.entity.Vendor;
+import com.eska.evenity.entity.WithdrawRequest;
 import com.eska.evenity.repository.BalanceRepository;
 import com.eska.evenity.repository.TransactionHistoryRepository;
 import com.eska.evenity.repository.WithdrawRequestRepository;
@@ -103,8 +108,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public WithdrawRequestResponse withDrawRequest(String balanceId, MoneyOnlyRequest request) {
-        Balance balance = findBalanceByIdOrThrowException(balanceId);
+    public WithdrawRequestResponse withDrawRequest(String userId, MoneyOnlyRequest request) {
+        Balance balance = findBalanceByUserIdOrThrowException(userId);
         WithdrawRequest withdrawRequest = WithdrawRequest.builder()
                 .amount(request.getAmount())
                 .approvalStatus(ApprovalStatus.PENDING)
@@ -269,7 +274,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private WithdrawRequestResponse mapRequestToResponse(WithdrawRequest withdrawRequest) {
-        Vendor vendor = withdrawRequestRepository.getVendorByBalance_UserCredential_Id(
+        Vendor vendor = withdrawRequestRepository.findVendorByUserCredentialId(
                 withdrawRequest.getBalance().getUserCredential().getId()
         );
         return WithdrawRequestResponse.builder()
