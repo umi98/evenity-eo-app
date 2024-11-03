@@ -12,24 +12,23 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EventResponse {
-    private String id;
-    private String name;
-    private String description;
+public class InvoiceResponse {
+    private String invoiceId;
     private LocalDate startDate;
-    private LocalDate endDate;
     private LocalTime startTime;
+    private LocalDate endDate;
     private LocalTime endTime;
+    private String eventId;
+    private String eventName;
+    private String customerId;
+    private String customerName;
+    private String theme;
     private String province;
     private String city;
     private String district;
     private String address;
-    private String theme;
     private Long participant;
-    private String customerId;
-    private String customerName;
-    private Boolean isDeleted;
-    private LocalDateTime modifiedDate;
-    private LocalDateTime createdDate;
-    private List<EventDetailResponse> eventDetailResponseList;
+    private String paymentStatus;
+    private LocalDateTime paymentDate;
+    private List<InvoiceDetailResponse> invoiceDetailResponseList;
 }

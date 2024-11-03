@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.eska.evenity.entity.Balance;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -137,8 +138,13 @@ public class VendorServiceImpl implements VendorService {
         vendor.setStatus(VendorStatus.ACTIVE);
         vendor.setModifiedDate(LocalDateTime.now());
         vendorRepository.saveAndFlush(vendor);
-        transactionService.createBalance(vendor.getUserCredential().getId());
-        return mapToResponse(vendor);
+        try {
+            transactionService.getBalanceUsingUserId(vendor.getUserCredential().getId());
+            return mapToResponse(vendor);
+        } catch (Exception e) {
+            transactionService.createBalance(vendor.getUserCredential().getId());
+            return mapToResponse(vendor);
+        }
     }
 
     @Override
@@ -162,6 +168,22 @@ public class VendorServiceImpl implements VendorService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public void upVoteVendor(String id) {
+        Vendor result = findByIdOrThrowNotFound(id);
+        result.setScoring(result.getScoring() + 2);
+        result.setModifiedDate(LocalDateTime.now());
+        vendorRepository.saveAndFlush(result);
+    }
+
+    @Override
+    public void downVoteVendor(String id) {
+        Vendor result = findByIdOrThrowNotFound(id);
+        result.setScoring(result.getScoring() - 2);
+        result.setModifiedDate(LocalDateTime.now());
+        vendorRepository.saveAndFlush(result);
     }
 
     private Vendor findByIdOrThrowNotFound(String id) {

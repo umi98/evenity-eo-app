@@ -20,4 +20,6 @@ public interface VendorService {
     VendorResponse approveStatusVendor(String id);
     VendorResponse rejectStatusVendor(String id);
     void softDeleteById(String id);
+    void upVoteVendor(String id);
+    void downVoteVendor(String id);
 }

@@ -118,7 +118,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerResponse mapToResponse(Customer customer) {
         return CustomerResponse.builder()
-                .id(customer.getId())
+                .customerId(customer.getId())
                 .email(customer.getUserCredential().getUsername())
                 .fullName(customer.getFullName())
                 .phoneNumber(customer.getPhoneNumber())

@@ -1,5 +1,16 @@
 package com.eska.evenity.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.constant.VendorStatus;
@@ -17,16 +28,8 @@ import com.eska.evenity.repository.ProductRepository;
 import com.eska.evenity.service.CategoryService;
 import com.eska.evenity.service.ProductService;
 import com.eska.evenity.service.VendorService;
-import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +67,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse getProductById(String productId) {
         return mapToResponse(findByIdOrThrowException(productId));
+    }
+
+    @Override
+    public Product getProductUsingId(String productId) {
+        return findByIdOrThrowException(productId);
     }
 
     @Override

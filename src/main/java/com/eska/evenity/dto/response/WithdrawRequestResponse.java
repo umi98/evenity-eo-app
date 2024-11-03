@@ -15,6 +15,8 @@ public class WithdrawRequestResponse {
     private String approvalStatus;
     private String balanceId;
     private String userName;
+    private String vendorId;
+    private String vendorName;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 }

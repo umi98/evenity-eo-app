@@ -1,16 +1,21 @@
 package com.eska.evenity.service;
 
-import com.eska.evenity.dto.request.BaseEventRequest;
-import com.eska.evenity.dto.response.MinMaxPriceResponse;
-import com.eska.evenity.entity.EventDetail;
-
 import java.util.List;
 
-public interface EventDetailService {
+import com.eska.evenity.dto.request.EventDetailRequest;
+import com.eska.evenity.dto.response.EventDetailResponse;
+import com.eska.evenity.entity.Event;
+import com.eska.evenity.entity.EventDetail;
 
-    List<EventDetail> addBulk(List<EventDetail> eventDetails);
-    List<EventDetail> editBulk(List<EventDetail> eventDetails);
+public interface EventDetailService {
+    void addBulk(List<EventDetailRequest> eventDetails, Event event);
+    List<EventDetail> editBulk(List<EventDetailRequest> eventDetails);
+    List<EventDetailResponse> getAllEventDetails();
+    List<EventDetailResponse> getEventDetailByVendorId(String vendorId);
+    List<EventDetailResponse> getEventDetailByEventIdAndApproved(String eventId);
+    List<EventDetailResponse> getEventDetailByEventIdAndAllApprovalStatus(String eventId);
+    EventDetailResponse getEvenDetailById(String id);
     void deleteDetail(EventDetail eventDetail);
-    EventDetail approveProductReqOnEventDetail(String detailId);
-    EventDetail rejectProductReqOnEventDetail(String detailId);
+    EventDetailResponse approveProductReqOnEventDetail(String detailId);
+    EventDetailResponse rejectProductReqOnEventDetail(String detailId);
 }

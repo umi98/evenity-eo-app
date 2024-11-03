@@ -7,7 +7,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EventDetailRequest {
+public class EventInfoRegenerateRequest {
+    private String eventId;
     private Long qty;
     private String unit;
     private String notes;

@@ -2,9 +2,13 @@ package com.eska.evenity.dto.request;
 
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.EnumValue;
-import com.eska.evenity.constant.VendorStatus;
+
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

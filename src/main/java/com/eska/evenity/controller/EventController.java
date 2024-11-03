@@ -2,6 +2,8 @@ package com.eska.evenity.controller;
 
 import java.util.List;
 
+import com.eska.evenity.dto.response.EventDetailResponse;
+import com.eska.evenity.service.EventDetailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,12 +29,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;
+    private final EventDetailService eventDetailService;
 
-    @GetMapping
+    @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllEvents() {
         try {
             List<EventResponse> eventResponses = eventService.getAllEvents();
+            WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(eventResponses)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/approved")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllEventsWithApprovedDetails() {
+        try {
+            List<EventResponse> eventResponses = eventService.getAllEventsWithApprovedDetails();
             WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
@@ -60,6 +79,54 @@ public class EventController {
         }
     }
 
+    @GetMapping("/details")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllEventDetail() {
+        try {
+            List<EventDetailResponse> eventDetailResponseList = eventDetailService.getAllEventDetails();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(eventDetailResponseList)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/vendor/{id}")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getEventDetailByVendor(@PathVariable String id) {
+        try {
+            List<EventDetailResponse> eventDetailResponseList = eventDetailService.getEventDetailByVendorId(id);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(eventDetailResponseList)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/detail/{id}")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getEventDetailById(@PathVariable String id) {
+        try {
+            EventDetailResponse eventDetailResponse = eventDetailService.getEvenDetailById(id);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(eventDetailResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/customer/{id}")
 //    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> getAllEventsByCustomerId(@PathVariable String id) {
@@ -76,11 +143,45 @@ public class EventController {
         }
     }
 
+    @GetMapping("/customer/{id}/approved")
+//    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> getAllEventsByCustomerIdAndApprovedDetails(@PathVariable String id) {
+        try {
+            List<EventResponse> eventResponses = eventService.getEventByCustomerIdWithApprovedDetails(id);
+            WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(eventResponses)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PostMapping()
 //    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> addNewEvent(@Valid @RequestBody EventRequest request) {
         try {
             EventResponse eventResponse = eventService.addNewEvent(request);
+            WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
+                    .status(HttpStatus.CREATED.getReasonPhrase())
+                    .message("Successfully create event")
+                    .data(eventResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/regenerate")
+//    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> addOtherProduct(@PathVariable String id, @Valid @RequestBody EventRequest request) {
+        try {
+            EventResponse eventResponse = eventService.submitOtherProductUsingEventId(id, request);
             WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
                     .status(HttpStatus.CREATED.getReasonPhrase())
                     .message("Successfully create event")
@@ -117,6 +218,36 @@ public class EventController {
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully edit data")
                     .data(eventResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/detail/{id}/approve")
+    public ResponseEntity<?> approveProductOnEventDetail(@PathVariable String id) {
+        try {
+            EventDetailResponse eventDetailResponse = eventDetailService.approveProductReqOnEventDetail(id);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully edit data")
+                    .data(eventDetailResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/detail/{id}/reject")
+    public ResponseEntity<?> rejectProductOnEventDetail(@PathVariable String id) {
+        try {
+            EventDetailResponse eventDetailResponse = eventDetailService.rejectProductReqOnEventDetail(id);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully edit data")
+                    .data(eventDetailResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

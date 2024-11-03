@@ -2,11 +2,6 @@ package com.eska.evenity.controller;
 
 import java.util.List;
 
-import com.eska.evenity.dto.request.BaseEventRequest;
-import com.eska.evenity.dto.request.EventInfoRequest;
-import com.eska.evenity.dto.request.PriceRangeRequest;
-import com.eska.evenity.dto.response.MinMaxPriceResponse;
-import com.eska.evenity.dto.response.ProductRecommendedResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eska.evenity.dto.request.EventInfoRequest;
+import com.eska.evenity.dto.request.PriceRangeRequest;
 import com.eska.evenity.dto.request.ProductRequest;
+import com.eska.evenity.dto.response.MinMaxPriceResponse;
+import com.eska.evenity.dto.response.ProductRecommendedResponse;
 import com.eska.evenity.dto.response.ProductResponse;
 import com.eska.evenity.dto.response.WebResponse;
 import com.eska.evenity.service.ProductService;

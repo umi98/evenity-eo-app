@@ -2,6 +2,7 @@ package com.eska.evenity.controller;
 
 import com.eska.evenity.dto.request.MoneyOnlyRequest;
 import com.eska.evenity.dto.response.*;
+import com.eska.evenity.service.EventService;
 import com.eska.evenity.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionController {
     private final TransactionService transactionService;
+    private final EventService eventService;
+
+    @GetMapping("/detail/event/{id}")
+    public ResponseEntity<?> getDetailFromEventId(@PathVariable String id) {
+        try {
+            TransactionDetail detail = eventService.getTransactionByInvoiceId(id);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(detail)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
     @GetMapping("/balance")
     public ResponseEntity<?> getAllBalanceAccout() {
