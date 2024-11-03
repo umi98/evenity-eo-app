@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class InvoiceDetailResponse {
     private String invoiceDetailId;
+    private String forwardPaymentStatus;
     private String productId;
     private String productName;
     private String vendorId;

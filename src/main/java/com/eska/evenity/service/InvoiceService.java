@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface InvoiceService {
     List<InvoiceResponse> getInvoices();
+    InvoiceResponse getInvoiceByIdInResponse(String id);
     Invoice getInvoiceById(String id);
     void createInvoice(Event event);
     String changeStatusWhenPaid(String id);

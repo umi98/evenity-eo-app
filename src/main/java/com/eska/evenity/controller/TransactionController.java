@@ -19,8 +19,8 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final EventService eventService;
 
-    @GetMapping("/detail/event/{id}")
-    public ResponseEntity<?> getDetailFromEventId(@PathVariable String id) {
+    @GetMapping("/detail/invoice/{id}")
+    public ResponseEntity<?> getDetailFromInvoiceId(@PathVariable String id) {
         try {
             TransactionDetail detail = eventService.getTransactionByInvoiceId(id);
             WebResponse<?> response = WebResponse.builder()

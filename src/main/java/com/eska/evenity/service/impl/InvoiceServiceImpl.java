@@ -4,13 +4,9 @@ import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.PaymentStatus;
 import com.eska.evenity.dto.response.InvoiceDetailResponse;
 import com.eska.evenity.dto.response.InvoiceResponse;
-import com.eska.evenity.dto.response.TransactionDetail;
-import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.entity.*;
 import com.eska.evenity.repository.InvoiceDetailRepository;
 import com.eska.evenity.repository.InvoiceRepository;
-import com.eska.evenity.service.CustomerService;
-import com.eska.evenity.service.EventDetailService;
 import com.eska.evenity.service.InvoiceService;
 import com.eska.evenity.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +31,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<InvoiceResponse> getInvoices() {
         List<Invoice> invoices = invoiceRepository.findAll();
         return invoices.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
+    public InvoiceResponse getInvoiceByIdInResponse(String id) {
+        Invoice invoice = invoiceRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "invoice not found"));
+        return mapToResponse(invoice);
     }
 
     @Override
@@ -127,9 +130,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     private InvoiceResponse mapToResponse(Invoice invoice) {
         List<InvoiceDetail> invoiceDetails = invoiceDetailRepository.findByInvoice_IdAndEventDetail_ApprovalStatus(invoice.getId(), ApprovalStatus.APPROVED);
         List<InvoiceDetailResponse> invoiceDetailResponses = new ArrayList<>();
+        Long totalCost = 0L;
         for (InvoiceDetail detail : invoiceDetails) {
             InvoiceDetailResponse detailResponse = InvoiceDetailResponse.builder()
                     .invoiceDetailId(detail.getId())
+                    .forwardPaymentStatus(detail.getStatus().name())
                     .productId(detail.getEventDetail().getProduct().getId())
                     .productName(detail.getEventDetail().getProduct().getName())
                     .vendorId(detail.getEventDetail().getProduct().getVendor().getId())
@@ -139,6 +144,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .cost(detail.getEventDetail().getCost())
                     .build();
             invoiceDetailResponses.add(detailResponse);
+            totalCost += detail.getEventDetail().getCost();
         }
         return InvoiceResponse.builder()
                 .invoiceId(invoice.getId())
@@ -150,6 +156,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .eventName(invoice.getEvent().getName())
                 .customerId(invoice.getEvent().getCustomer().getId())
                 .customerName(invoice.getEvent().getCustomer().getFullName())
+                .customerProvince(invoice.getEvent().getCustomer().getProvince())
+                .customerCity(invoice.getEvent().getCustomer().getCity())
+                .customerDistrict(invoice.getEvent().getCustomer().getDistrict())
+                .customerAddress(invoice.getEvent().getCustomer().getAddress())
                 .theme(invoice.getEvent().getTheme())
                 .province(invoice.getEvent().getProvince())
                 .city(invoice.getEvent().getCity())
@@ -158,6 +168,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .participant(invoice.getEvent().getParticipant())
                 .paymentStatus(invoice.getStatus().name())
                 .paymentDate(invoice.getPaymentDate())
+                .createdDate(invoice.getCreatedDate())
+                .totalCost(totalCost)
                 .invoiceDetailResponseList(invoiceDetailResponses)
                 .build();
     }

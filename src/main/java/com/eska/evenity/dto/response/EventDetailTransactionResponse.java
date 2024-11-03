@@ -6,9 +6,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class TransactionDetail {
-    private EventResponse eventResponse;
-    private CustomerResponse customerResponse;
+//@Builder
+public class EventDetailTransactionResponse extends EventDetailResponse{
     private String paymentStatus;
 }

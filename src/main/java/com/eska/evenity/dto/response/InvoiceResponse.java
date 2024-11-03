@@ -22,6 +22,10 @@ public class InvoiceResponse {
     private String eventName;
     private String customerId;
     private String customerName;
+    private String customerProvince;
+    private String customerCity;
+    private String customerDistrict;
+    private String customerAddress;
     private String theme;
     private String province;
     private String city;
@@ -30,5 +34,7 @@ public class InvoiceResponse {
     private Long participant;
     private String paymentStatus;
     private LocalDateTime paymentDate;
+    private LocalDateTime createdDate;
+    private Long totalCost;
     private List<InvoiceDetailResponse> invoiceDetailResponseList;
 }

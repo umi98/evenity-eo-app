@@ -97,6 +97,7 @@ public class EventServiceImpl implements EventService {
         return TransactionDetail.builder()
                 .eventResponse(eventResponse)
                 .customerResponse(customerResponse)
+                .paymentStatus(invoice.getStatus().name())
                 .build();
     }
 

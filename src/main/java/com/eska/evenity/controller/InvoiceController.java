@@ -34,6 +34,21 @@ public class InvoiceController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getInvoiceById(@PathVariable String id) {
+        try {
+            List<InvoiceResponse> invoiceResponses = invoiceService.getInvoices();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully fetch data")
+                    .data(invoiceResponses)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> userPaidForEvent(@PathVariable String id) {
         try {
