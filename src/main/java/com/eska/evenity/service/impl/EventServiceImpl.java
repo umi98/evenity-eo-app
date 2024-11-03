@@ -1,18 +1,15 @@
 package com.eska.evenity.service.impl;
 
+import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
+import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
+import com.eska.evenity.dto.request.EventInfoMinimalistRequest;
 import com.eska.evenity.dto.request.EventRequest;
-import com.eska.evenity.dto.response.CustomerResponse;
-import com.eska.evenity.dto.response.EventDetailResponse;
-import com.eska.evenity.dto.response.EventResponse;
-import com.eska.evenity.dto.response.TransactionDetail;
+import com.eska.evenity.dto.response.*;
 import com.eska.evenity.entity.Customer;
 import com.eska.evenity.entity.Event;
 import com.eska.evenity.entity.Invoice;
 import com.eska.evenity.repository.EventRepository;
-import com.eska.evenity.service.CustomerService;
-import com.eska.evenity.service.EventDetailService;
-import com.eska.evenity.service.EventService;
-import com.eska.evenity.service.InvoiceService;
+import com.eska.evenity.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +29,7 @@ public class EventServiceImpl implements EventService {
     private final CustomerService customerService;
     private final EventDetailService eventDetailService;
     private final InvoiceService invoiceService;
+    private final ProductService productService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -61,6 +61,65 @@ public class EventServiceImpl implements EventService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request) {
+
+            Customer customer = customerService.getCustomerByCustomerId(request.getCustomerId());
+        System.out.println(request.getPreviousProduct());
+            Event event = Event.builder()
+                    .name(request.getName())
+                    .description(request.getDescription())
+                    .startDate(request.getStartDate())
+                    .startTime(request.getStartTime())
+                    .endDate(request.getEndDate())
+                    .endTime(request.getEndTime())
+                    .province(request.getProvince())
+                    .city(request.getCity())
+                    .district(request.getDistrict())
+                    .address(request.getAddress())
+                    .theme(request.getTheme())
+                    .participant(request.getParticipant())
+                    .customer(customer)
+                    .createdDate(LocalDateTime.now())
+                    .modifiedDate(LocalDateTime.now())
+                    .isDeleted(false)
+                    .build();
+            Long calculatedDate = ChronoUnit.DAYS.between(event.getStartDate(), event.getEndDate()) + 1;
+            List<ProductRecommendedResponse> recommendedList = new ArrayList<>();
+            for (EventInfoMinimalistRequest request1 : request.getCategoryProduct()){
+                EventDetailCustomizedRequest customizedRequest = EventDetailCustomizedRequest.builder()
+                        .categoryId(request1.getCategoryId())
+                        .province(event.getProvince())
+                        .city(event.getCity())
+                        .minCost(request1.getMinCost())
+                        .maxCost(request1.getMaxCost())
+                        .participant(event.getParticipant())
+                        .duration(calculatedDate)
+                        .previousList(request.getPreviousProduct())
+                        .build();
+                ProductRecommendedResponse result = productService.generateRecommendation(customizedRequest);
+                recommendedList.add(result);
+            }
+            return EventRecommendationResponse.builder()
+                    .name(event.getName())
+                    .description(event.getDescription())
+                    .startDate(event.getStartDate())
+                    .startTime(event.getStartTime())
+                    .endDate(event.getEndDate())
+                    .endTime(event.getEndTime())
+                    .province(event.getProvince())
+                    .city(event.getCity())
+                    .district(event.getDistrict())
+                    .address(event.getAddress())
+                    .theme(event.getTheme())
+                    .participant(event.getParticipant())
+                    .customerId(event.getCustomer().getId())
+                    .customerName(event.getCustomer().getFullName())
+                    .recommendedList(recommendedList)
+                    .build();
+
     }
 
     @Override
@@ -205,6 +264,7 @@ public class EventServiceImpl implements EventService {
                 .theme(event.getTheme())
                 .participant(event.getParticipant())
                 .customerId(event.getCustomer().getId())
+                .phoneNumber(event.getCustomer().getPhoneNumber())
                 .customerName(event.getCustomer().getFullName())
                 .eventDetailResponseList(eventDetailResponseList)
                 .isDeleted(event.getIsDeleted())

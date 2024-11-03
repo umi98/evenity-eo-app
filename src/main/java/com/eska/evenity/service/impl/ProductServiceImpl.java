@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.constant.VendorStatus;
+import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
 import com.eska.evenity.dto.request.EventInfoRequest;
 import com.eska.evenity.dto.request.PriceRangeRequest;
 import com.eska.evenity.dto.request.ProductRequest;
@@ -144,6 +145,7 @@ public class ProductServiceImpl implements ProductService {
             min *= request.getParticipant();
             max *= request.getParticipant();
         }
+        System.out.println(request.getCategoryId());
         return MinMaxPriceResponse.builder()
                 .highestPrice(max)
                 .lowestPrice(min)
@@ -168,6 +170,12 @@ public class ProductServiceImpl implements ProductService {
                     maxCost,
                     request.getPreviousProduct()
             );
+            System.out.println(minCost);
+            System.out.println(maxCost);
+            System.out.println(request.getProvince());
+            System.out.println(request.getCity());
+            System.out.println(request.getCategoryId());
+            System.out.println(request.getPreviousProduct());
             if (products.isEmpty()) {
                 return null;
             }
@@ -177,9 +185,65 @@ public class ProductServiceImpl implements ProductService {
                     .reversed()
                     .thenComparing(p -> Math.random()));
             Product chosenProduct = products.get(0);
-
             Long cost = chosenProduct.getPrice();
             if (category.getMainCategory() == CategoryType.CATERING) cost *= request.getParticipant();
+            return ProductRecommendedResponse.builder()
+                    .vendorId(chosenProduct.getVendor().getId())
+                    .vendorName(chosenProduct.getVendor().getName())
+                    .vendorAddress(chosenProduct.getVendor().getAddress())
+                    .productId(chosenProduct.getId())
+                    .productName(chosenProduct.getName())
+                    .productDescription(chosenProduct.getDescription())
+                    .cost(cost)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ProductRecommendedResponse generateRecommendation(
+            EventDetailCustomizedRequest request
+    ) {
+        try {
+            Long minCost = request.getMinCost();
+            Long maxCost = request.getMaxCost();
+            Category category = categoryService.getCategoryUsingId(request.getCategoryId());
+            System.out.println(category.getMainCategory());
+            if (category.getMainCategory() == CategoryType.CATERING) {
+                minCost = minCost / request.getParticipant();
+                maxCost = maxCost / request.getParticipant();
+            } else {
+                minCost = minCost / request.getDuration();
+                maxCost = maxCost / request.getDuration();
+            }
+            System.out.println(minCost);
+            System.out.println(maxCost);
+            System.out.println(request.getProvince());
+            System.out.println(request.getCity());
+            System.out.println(request.getCategoryId());
+            System.out.println(request.getPreviousList());
+            List<Product> products = productRepository.findRecommendation(
+                    request.getProvince(),
+                    request.getCity(),
+                    request.getCategoryId(),
+                    minCost,
+                    maxCost,
+                    request.getPreviousList()
+            );
+            if (products.isEmpty()) {
+                return null;
+            }
+            products.sort(Comparator.comparingInt((Product p) -> p.getVendor().getScoring())
+                    .reversed()
+                    .thenComparingLong(Product::getPrice)
+                    .reversed()
+                    .thenComparing(p -> Math.random()));
+            Product chosenProduct = products.get(0);
+            System.out.println(chosenProduct.getName());
+            Long cost = chosenProduct.getPrice();
+            if (category.getMainCategory() == CategoryType.CATERING) cost *= request.getParticipant();
+            else cost *= request.getDuration();
             return ProductRecommendedResponse.builder()
                     .vendorId(chosenProduct.getVendor().getId())
                     .vendorName(chosenProduct.getVendor().getName())

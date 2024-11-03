@@ -156,6 +156,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .eventName(invoice.getEvent().getName())
                 .customerId(invoice.getEvent().getCustomer().getId())
                 .customerName(invoice.getEvent().getCustomer().getFullName())
+                .phoneNumber(invoice.getEvent().getCustomer().getPhoneNumber())
                 .customerProvince(invoice.getEvent().getCustomer().getProvince())
                 .customerCity(invoice.getEvent().getCustomer().getCity())
                 .customerDistrict(invoice.getEvent().getCustomer().getDistrict())

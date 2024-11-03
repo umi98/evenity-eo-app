@@ -12,8 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EventResponse {
-    private String id;
+public class EventRecommendationResponse {
     private String name;
     private String description;
     private LocalDate startDate;
@@ -28,9 +27,5 @@ public class EventResponse {
     private Long participant;
     private String customerId;
     private String customerName;
-    private String phoneNumber;
-    private Boolean isDeleted;
-    private LocalDateTime modifiedDate;
-    private LocalDateTime createdDate;
-    private List<EventDetailResponse> eventDetailResponseList;
+    private List<ProductRecommendedResponse> recommendedList;
 }

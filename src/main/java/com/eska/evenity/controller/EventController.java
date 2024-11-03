@@ -2,7 +2,9 @@ package com.eska.evenity.controller;
 
 import java.util.List;
 
+import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
 import com.eska.evenity.dto.response.EventDetailResponse;
+import com.eska.evenity.dto.response.EventRecommendationResponse;
 import com.eska.evenity.service.EventDetailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -167,6 +169,42 @@ public class EventController {
             WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
                     .status(HttpStatus.CREATED.getReasonPhrase())
                     .message("Successfully create event")
+                    .data(eventResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
+//    @GetMapping("/generate")
+////    @PreAuthorize("hasRole('CUSTOMER')")
+//    public ResponseEntity<?> GenerateEventWithGeneratedProduct(@Valid @RequestBody EventAndGenerateProductRequest request) {
+//        try {
+//            EventResponse eventResponse = eventService.addNewEvent(request);
+//            WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
+//                    .status(HttpStatus.CREATED.getReasonPhrase())
+//                    .message("Successfully create event")
+//                    .data(eventResponse)
+//                    .build();
+//            return ResponseEntity.ok(response);
+//        } catch (Exception e) {
+//            return ResponseEntity
+//                    .status(HttpStatus.BAD_REQUEST)
+//                    .body(e.getMessage());
+//        }
+//    }
+
+    @GetMapping("/generate")
+//    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> addEventWithGeneratedProduct(@Valid @RequestBody EventAndGenerateProductRequest request) {
+        try {
+            EventRecommendationResponse eventResponse = eventService.eventAndGenerateProduct(request);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
                     .data(eventResponse)
                     .build();
             return ResponseEntity.ok(response);

@@ -26,6 +26,7 @@ public class InvoiceResponse {
     private String customerCity;
     private String customerDistrict;
     private String customerAddress;
+    private String phoneNumber;
     private String theme;
     private String province;
     private String city;

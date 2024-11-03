@@ -1,7 +1,8 @@
 package com.eska.evenity.service;
 
+import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
 import com.eska.evenity.dto.request.EventRequest;
-import com.eska.evenity.dto.response.EventDetailResponse;
+import com.eska.evenity.dto.response.EventRecommendationResponse;
 import com.eska.evenity.dto.response.EventResponse;
 import com.eska.evenity.dto.response.TransactionDetail;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 public interface EventService {
     EventResponse addNewEvent(EventRequest request);
+    EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request);
     EventResponse submitOtherProductUsingEventId(String id, EventRequest request);
     TransactionDetail getTransactionByInvoiceId(String invoiceId);
     List<EventResponse> getAllEvents();
