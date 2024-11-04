@@ -4,8 +4,11 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.eska.evenity.constant.UserStatus;
+import com.eska.evenity.dto.JwtClaim;
+import com.eska.evenity.dto.response.*;
 import com.eska.evenity.entity.*;
 import com.eska.evenity.service.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,13 +21,12 @@ import com.eska.evenity.constant.ERole;
 import com.eska.evenity.dto.request.AuthRequest;
 import com.eska.evenity.dto.request.CustomerRegisterRequest;
 import com.eska.evenity.dto.request.VendorRegisterRequest;
-import com.eska.evenity.dto.response.AuthResponse;
-import com.eska.evenity.dto.response.RegisterResponse;
 import com.eska.evenity.repository.UserCredentialRepository;
 import com.eska.evenity.security.JwtUtils;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -155,5 +157,67 @@ public class AuthServiceImpl implements AuthService {
                     .message("Invalid username and password")
                     .build();
         }
+    }
+
+    @Override
+    public ProfileResponse<?> getUserInfoUsingToken(String token) {
+        JwtClaim claim = jwtUtils.getUserInfoByToken(token);
+        UserCredential user = userCredentialRepository.findById(claim.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+        Customer customer = customerService.getCustomerByUserId(user.getId());
+        Vendor vendor = vendorService.getVendorByUserId(user.getId());
+        if (customer != null) {
+            CustomerResponse customerResponse = CustomerResponse.builder()
+                    .email(user.getUsername())
+                    .customerId(customer.getId())
+                    .fullName(customer.getFullName())
+                    .phoneNumber(customer.getPhoneNumber())
+                    .province(customer.getProvince())
+                    .city(customer.getCity())
+                    .district(customer.getDistrict())
+                    .address(customer.getAddress())
+                    .createdDate(customer.getCreatedDate())
+                    .modifiedDate(customer.getModifiedDate())
+                    .build();
+            return ProfileResponse.builder()
+                    .userId(user.getId())
+                    .email(user.getUsername())
+                    .role(user.getRole().getRole().name())
+                    .createdAt(user.getCreatedDate())
+                    .modifiedAt(user.getModifiedDate())
+                    .data(customerResponse)
+                    .build();
+        } else if (vendor != null){
+            VendorResponse vendorResponse = VendorResponse.builder()
+                    .id(vendor.getId())
+                    .email(user.getUsername())
+                    .name(vendor.getName())
+                    .phoneNumber(vendor.getPhoneNumber())
+                    .province(vendor.getProvince())
+                    .city(vendor.getCity())
+                    .district(vendor.getDistrict())
+                    .address(vendor.getAddress())
+                    .owner(vendor.getOwner())
+                    .scoring(vendor.getScoring())
+                    .status(vendor.getStatus().name())
+                    .createdDate(vendor.getCreatedDate())
+                    .modifiedDate(vendor.getModifiedDate())
+                    .build();
+            return ProfileResponse.builder()
+                    .email(user.getUsername())
+                    .userId(user.getId())
+                    .role(user.getRole().getRole().name())
+                    .createdAt(user.getCreatedDate())
+                    .modifiedAt(user.getModifiedDate())
+                    .data(vendorResponse)
+                    .build();
+        }
+        return ProfileResponse.builder()
+                .userId(user.getId())
+                .email(user.getUsername())
+                .role(user.getRole().getRole().name())
+                .createdAt(user.getCreatedDate())
+                .modifiedAt(user.getModifiedDate())
+                .build();
     }
 }

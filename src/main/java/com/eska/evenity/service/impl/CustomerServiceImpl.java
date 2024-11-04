@@ -70,10 +70,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerResponse getCustomerByUserId(String id) {
+    public Customer getCustomerByUserId(String id) {
         UserCredential user = userService.loadByUserId(id);
-        Customer result = customerRepository.findCustomerByUserCredential(user);
-        return mapToResponse(result);
+        return customerRepository.findCustomerByUserCredential(user);
     }
 
     @Transactional(rollbackFor = Exception.class)

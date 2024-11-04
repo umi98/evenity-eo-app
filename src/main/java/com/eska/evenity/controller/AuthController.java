@@ -1,14 +1,13 @@
 package com.eska.evenity.controller;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.eska.evenity.dto.request.AuthRequest;
 import com.eska.evenity.dto.request.CustomerRegisterRequest;
 import com.eska.evenity.dto.request.VendorRegisterRequest;
-import com.eska.evenity.dto.response.AuthResponse;
-import com.eska.evenity.dto.response.RegisterResponse;
-import com.eska.evenity.dto.response.UserResponse;
-import com.eska.evenity.dto.response.WebResponse;
+import com.eska.evenity.dto.response.*;
 import com.eska.evenity.service.AuthService;
 import com.eska.evenity.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -80,6 +79,22 @@ public class AuthController {
                 .data(userResponses)
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/info")
+    public ResponseEntity<?> checkUserInfoUsingToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer")) {
+            String token = authHeader.substring(7);
+            ProfileResponse<?> profileResponse = authService.getUserInfoUsingToken(token);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(profileResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/user/{id}/password")
