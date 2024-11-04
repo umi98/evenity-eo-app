@@ -1,6 +1,7 @@
 package com.eska.evenity.service.impl;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -142,9 +143,13 @@ public class ProductServiceImpl implements ProductService {
         Long min = productRepository.findMinPrice(request.getCategoryId(), request.getProvince(), request.getCity());
         Long max = productRepository.findMaxPrice(request.getCategoryId(), request.getProvince(), request.getCity());
         CategoryType mainCategory = categoryService.getCategoryUsingId(request.getCategoryId()).getMainCategory();
+        Long calculatedDate = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
         if (mainCategory == CategoryType.CATERING) {
             min *= request.getParticipant();
             max *= request.getParticipant();
+        } else {
+            min *= calculatedDate;
+            max *= calculatedDate;
         }
         System.out.println(request.getCategoryId());
         return MinMaxPriceResponse.builder()

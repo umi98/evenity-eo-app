@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +31,11 @@ public class PaymentServiceImpl {
     private String BASE_SNAP_URL;
 
     public Payment create(String invoiceId, Long amount) {
+        String str = invoiceId + String.valueOf(LocalTime.now());
+        String orderId = str.replace("-","");
         String username = Base64.getEncoder().encodeToString((SECRET_KEY + ":").getBytes());
         PaymentDetailRequest paymentDetailRequest = PaymentDetailRequest.builder()
-                .orderId(invoiceId)
+                .orderId(orderId)
                 .amount(amount)
                 .build();
         PaymentRequest paymentRequest = PaymentRequest.builder()
@@ -39,7 +43,9 @@ public class PaymentServiceImpl {
                 .paymentMethod(List.of(
                         "shopeepay",
                         "gopay",
-                        "indomaret"
+                        "indomaret",
+                        "mandiri",
+                        "bca"
                 ))
                 .build();
         ResponseEntity<Map<String,String>> response = restClient.post()
