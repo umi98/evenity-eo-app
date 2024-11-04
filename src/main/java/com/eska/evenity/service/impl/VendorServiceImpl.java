@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.entity.Balance;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class VendorServiceImpl implements VendorService {
                 .district(vendor.getDistrict())
                 .address(vendor.getAddress())
                 .owner(vendor.getOwner())
+                .mainCategory(vendor.getMainCategory())
                 .scoring(50)
                 .status(VendorStatus.PENDING)
                 .userCredential(userCredential)
@@ -124,6 +126,7 @@ public class VendorServiceImpl implements VendorService {
             vendor.setDistrict(request.getDistrict());
             vendor.setAddress(request.getAddress());
             vendor.setOwner(request.getOwnerName());
+            vendor.setMainCategory(CategoryType.valueOf(request.getMainCategory()));
             vendor.setModifiedDate(LocalDateTime.now());
             vendorRepository.saveAndFlush(vendor);
             return mapToResponse(vendor);
@@ -202,6 +205,7 @@ public class VendorServiceImpl implements VendorService {
                 .district(vendor.getDistrict())
                 .address(vendor.getAddress())
                 .owner(vendor.getOwner())
+                .mainCategory(vendor.getMainCategory().name())
                 .scoring(vendor.getScoring())
                 .status(vendor.getStatus().name())
                 .createdDate(vendor.getCreatedDate())

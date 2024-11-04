@@ -102,6 +102,7 @@ public class ProductServiceImpl implements ProductService {
                 .district(vendor.getDistrict())
                 .address(vendor.getAddress())
                 .owner(vendor.getOwner())
+                .mainCategory(vendor.getMainCategory().name())
                 .scoring(vendor.getScoring())
                 .status(vendor.getStatus().name())
                 .createdDate(vendor.getCreatedDate())

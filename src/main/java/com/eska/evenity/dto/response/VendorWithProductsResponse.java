@@ -22,6 +22,7 @@ public class VendorWithProductsResponse {
     private String owner;
     private Integer scoring;
     private String status;
+    private String mainCategory;
     private LocalDateTime modifiedDate;
     private LocalDateTime createdDate;
     private List<ProductResponse> productList;

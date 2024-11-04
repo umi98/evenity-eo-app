@@ -1,6 +1,7 @@
 package com.eska.evenity.dto.request;
 
 import com.eska.evenity.constant.EnumValue;
+import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.constant.VendorStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -35,4 +36,6 @@ public class VendorRequest {
     private String status;
     @Positive(message = "Score number should be positive number")
     private Integer score;
+    @EnumValue(enumClass = ProductUnit.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
+    private String mainCategory;
 }

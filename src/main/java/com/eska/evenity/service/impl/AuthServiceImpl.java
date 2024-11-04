@@ -3,6 +3,7 @@ package com.eska.evenity.service.impl;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.dto.JwtClaim;
 import com.eska.evenity.dto.response.*;
@@ -122,6 +123,7 @@ public class AuthServiceImpl implements AuthService {
                             .address(request.getAddress())
                             .phoneNumber(request.getPhoneNumber())
                             .owner(request.getOwnerName())
+                            .mainCategory(CategoryType.valueOf(request.getMainCategory()))
                             .build()
                     ), userCredential);
             return RegisterResponse.builder()

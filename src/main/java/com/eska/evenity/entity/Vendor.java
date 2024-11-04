@@ -2,6 +2,7 @@ package com.eska.evenity.entity;
 
 import java.time.LocalDateTime;
 
+import com.eska.evenity.constant.CategoryType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -46,6 +47,8 @@ public class Vendor {
     private Integer scoring;
     @Enumerated(EnumType.STRING)
     private VendorStatus status;
+    @Enumerated(EnumType.STRING)
+    private CategoryType mainCategory;
 
     @OneToOne
     @JoinColumn(name = "user_credential_id", referencedColumnName = "id", unique = true)
