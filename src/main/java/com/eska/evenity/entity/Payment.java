@@ -23,7 +23,7 @@ public class Payment {
     private String redirectUrl;
     @Column(name = "transaction_status")
     private String transactionStatus;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "invoice_id", referencedColumnName = "id")
     private Invoice invoice;
     @CreatedDate

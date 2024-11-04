@@ -25,10 +25,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +41,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Value("${midtrans.snap.url}")
     private String snapUrl;
+
+//    @Override
+//    public Invoice userPaidEvent(String id) {
+//        Midtrans.isProduction = false;
+//        Map<String, String> params = new HashMap<>();
+//
+//        return null;
+//    }
 
     @Override
     public List<InvoiceResponse> getInvoices() {
@@ -86,7 +91,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public String changeStatusWhenPaid(String id) {
 //        try {
-            Midtrans.isProduction = false;
+//            Midtrans.isProduction = false;
             Invoice result = invoiceRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND, "invoice not found"
@@ -97,33 +102,33 @@ public class InvoiceServiceImpl implements InvoiceService {
             List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(id);
             Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
 
-            PaymentDetailRequest paymentDetailRequest = PaymentDetailRequest.builder()
-                    .invoiceId(result.getId())
-                    .amount(totalCost)
-                    .build();
-            PaymentRequest paymentRequest = PaymentRequest.builder()
-                    .paymentDetailRequest(paymentDetailRequest)
-                    .paymentMethod(List.of(
-                            "shoppepay",
-                            "gopay",
-                            "indomaret"
-                    ))
-                    .build();
-            ResponseEntity<Map<String, String>> response = restClient.post()
-                    .uri(snapUrl)
-                    .body(paymentRequest)
-                    .header(HttpHeaders.AUTHORIZATION, "Basic " + serverKey)
-                    .retrieve()
-                    .toEntity(new ParameterizedTypeReference<Map<String, String>>() {});
-            Map<String, String> body = response.getBody();
+//            PaymentDetailRequest paymentDetailRequest = PaymentDetailRequest.builder()
+//                    .invoiceId(result.getId())
+//                    .amount(totalCost)
+//                    .build();
+//            PaymentRequest paymentRequest = PaymentRequest.builder()
+//                    .paymentDetailRequest(paymentDetailRequest)
+//                    .paymentMethod(List.of(
+//                            "shoppepay",
+//                            "gopay",
+//                            "indomaret"
+//                    ))
+//                    .build();
+//            ResponseEntity<Map<String, String>> response = restClient.post()
+//                    .uri(snapUrl)
+//                    .body(paymentRequest)
+//                    .header(HttpHeaders.AUTHORIZATION, "Basic " + serverKey)
+//                    .retrieve()
+//                    .toEntity(new ParameterizedTypeReference<Map<String, String>>() {});
+//            Map<String, String> body = response.getBody();
 
-            Payment payment = Payment.builder()
-                    .token(body.get("token"))
-                    .redirectUrl(body.get("redirect_url"))
-                    .transactionStatus("PAID")
-                    .createdDate(LocalDateTime.now())
-                    .build();
-            paymentRepository.saveAndFlush(payment);
+//            Payment payment = Payment.builder()
+//                    .token(body.get("token"))
+//                    .redirectUrl(body.get("redirect_url"))
+//                    .transactionStatus("PAID")
+//                    .createdDate(LocalDateTime.now())
+//                    .build();
+//            paymentRepository.saveAndFlush(payment);
 
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());

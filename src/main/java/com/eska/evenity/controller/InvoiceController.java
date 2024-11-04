@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.eska.evenity.entity.Invoice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,10 +51,11 @@ public class InvoiceController {
         }
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<?> userPaid(@PathVariable String id) {
-        return null;
-    }
+//    @PostMapping("/{id}")
+//    public ResponseEntity<?> userPaid(@PathVariable String id) {
+//        Invoice invoice = invoiceService.userPaidEvent(id);
+//        return null;
+//    }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> userPaidForEvent(@PathVariable String id) {

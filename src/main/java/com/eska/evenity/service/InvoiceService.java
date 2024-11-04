@@ -10,6 +10,7 @@ import com.eska.evenity.entity.InvoiceDetail;
 import java.util.List;
 
 public interface InvoiceService {
+//    Invoice userPaidEvent(String id);
     List<InvoiceResponse> getInvoices();
     InvoiceResponse getInvoiceByIdInResponse(String id);
     Invoice getInvoiceById(String id);

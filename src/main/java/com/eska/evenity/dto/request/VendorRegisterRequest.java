@@ -1,5 +1,6 @@
 package com.eska.evenity.dto.request;
 
+import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.EnumValue;
 import com.eska.evenity.constant.ProductUnit;
 import jakarta.validation.constraints.Email;
@@ -38,6 +39,6 @@ public class VendorRegisterRequest {
     private String address;
     @NotBlank(message = "Owner name should be filled")
     private String ownerName;
-    @EnumValue(enumClass = ProductUnit.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
+    @EnumValue(enumClass = CategoryType.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
     private String mainCategory;
 }
