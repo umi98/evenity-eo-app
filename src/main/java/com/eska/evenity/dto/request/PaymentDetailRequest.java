@@ -9,8 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class PaymentDetailRequest {
-    @JsonProperty("invoice_id")
-    private String invoiceId;
+    @JsonProperty("order_id")
+    private String orderId;
     @JsonProperty("gross_amount")
     private Long amount;
 }

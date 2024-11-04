@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.eska.evenity.entity.Invoice;
+import com.eska.evenity.entity.Payment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,11 +60,12 @@ public class InvoiceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> userPaidForEvent(@PathVariable String id) {
-//        try {
-            String invoice = invoiceService.changeStatusWhenPaid(id);
-            Pattern pattern = Pattern.compile("paid");
-            Matcher matcher = pattern.matcher(invoice);
-            if (matcher.find()) {
+        try {
+            Payment invoice = invoiceService.changeStatusWhenPaid(id);
+//            Pattern pattern = Pattern.compile("paid");
+//            Matcher matcher = pattern.matcher(invoice);
+//            if (matcher.find()) {
+        if (invoice == null) {
                 return ResponseEntity.badRequest().build();
             }
             WebResponse<?> response = WebResponse.builder()
@@ -72,9 +74,9 @@ public class InvoiceController {
                     .data(invoice)
                     .build();
             return ResponseEntity.ok(response);
-//        } catch (Exception e){
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-//        }
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping("/detail/{detailId}")
