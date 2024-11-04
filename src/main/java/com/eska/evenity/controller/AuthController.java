@@ -83,18 +83,22 @@ public class AuthController {
 
     @GetMapping("/user/info")
     public ResponseEntity<?> checkUserInfoUsingToken(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer")) {
-            String token = authHeader.substring(7);
-            ProfileResponse<?> profileResponse = authService.getUserInfoUsingToken(token);
-            WebResponse<?> response = WebResponse.builder()
-                    .status(HttpStatus.OK.getReasonPhrase())
-                    .message("Successfully retrieve data")
-                    .data(profileResponse)
-                    .build();
-            return ResponseEntity.ok(response);
+        try {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer")) {
+                String token = authHeader.substring(7);
+                ProfileResponse<?> profileResponse = authService.getUserInfoUsingToken(token);
+                WebResponse<?> response = WebResponse.builder()
+                        .status(HttpStatus.OK.getReasonPhrase())
+                        .message("Successfully retrieve data")
+                        .data(profileResponse)
+                        .build();
+                return ResponseEntity.ok(response);
+            }
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/user/{id}/password")
