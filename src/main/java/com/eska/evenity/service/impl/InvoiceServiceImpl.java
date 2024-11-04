@@ -2,30 +2,48 @@ package com.eska.evenity.service.impl;
 
 import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.PaymentStatus;
+import com.eska.evenity.dto.request.PaymentDetailRequest;
+import com.eska.evenity.dto.request.PaymentRequest;
 import com.eska.evenity.dto.response.InvoiceDetailResponse;
 import com.eska.evenity.dto.response.InvoiceResponse;
 import com.eska.evenity.entity.*;
 import com.eska.evenity.repository.InvoiceDetailRepository;
 import com.eska.evenity.repository.InvoiceRepository;
+import com.eska.evenity.repository.PaymentRepository;
 import com.eska.evenity.service.InvoiceService;
 import com.eska.evenity.service.TransactionService;
+import com.midtrans.Midtrans;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class InvoiceServiceImpl implements InvoiceService {
+    private final RestClient restClient;
     private final InvoiceRepository invoiceRepository;
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final TransactionService transactionService;
+    private final PaymentRepository paymentRepository;
+
+    @Value("${midtrans.server.key}")
+    private String serverKey;
+
+    @Value("${midtrans.snap.url}")
+    private String snapUrl;
 
     @Override
     public List<InvoiceResponse> getInvoices() {
@@ -67,29 +85,62 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public String changeStatusWhenPaid(String id) {
-        try {
+//        try {
+            Midtrans.isProduction = false;
             Invoice result = invoiceRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND, "invoice not found"
                     ));
             if (result.getStatus() == PaymentStatus.COMPLETE)
                 return "Invoice has been paid";
+
+            List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(id);
+            Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
+
+            PaymentDetailRequest paymentDetailRequest = PaymentDetailRequest.builder()
+                    .invoiceId(result.getId())
+                    .amount(totalCost)
+                    .build();
+            PaymentRequest paymentRequest = PaymentRequest.builder()
+                    .paymentDetailRequest(paymentDetailRequest)
+                    .paymentMethod(List.of(
+                            "shoppepay",
+                            "gopay",
+                            "indomaret"
+                    ))
+                    .build();
+            ResponseEntity<Map<String, String>> response = restClient.post()
+                    .uri(snapUrl)
+                    .body(paymentRequest)
+                    .header(HttpHeaders.AUTHORIZATION, "Basic " + serverKey)
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<Map<String, String>>() {});
+            Map<String, String> body = response.getBody();
+
+            Payment payment = Payment.builder()
+                    .token(body.get("token"))
+                    .redirectUrl(body.get("redirect_url"))
+                    .transactionStatus("PAID")
+                    .createdDate(LocalDateTime.now())
+                    .build();
+            paymentRepository.saveAndFlush(payment);
+
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());
             result.setModifiedDate(LocalDateTime.now());
-            List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(id);
-            Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
+            invoiceRepository.saveAndFlush(result);
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
             return result.getId();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e.getMessage());
+//        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void createInvoiceDetail(EventDetail eventDetail) {
         try {
+
             Invoice invoice = invoiceRepository.findByEventId(eventDetail.getEvent().getId());
             InvoiceDetail newInvoiceDetail = InvoiceDetail.builder()
                     .invoice(invoice)
