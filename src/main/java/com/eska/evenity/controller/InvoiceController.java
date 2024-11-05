@@ -52,6 +52,21 @@ public class InvoiceController {
         }
     }
 
+    @GetMapping("/customer/{id}")
+    public ResponseEntity<?> getInvoiceByCustomerId(@PathVariable String id) {
+        try {
+            List<InvoiceResponse> invoiceResponses = invoiceService.getInvoicesByCustomerId(id);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully fetch data")
+                    .data(invoiceResponses)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 //    @PostMapping("/{id}")
 //    public ResponseEntity<?> userPaid(@PathVariable String id) {
 //        Invoice invoice = invoiceService.userPaidEvent(id);

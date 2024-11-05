@@ -1,9 +1,6 @@
 package com.eska.evenity.service.impl;
 
-import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
-import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
-import com.eska.evenity.dto.request.EventInfoMinimalistRequest;
-import com.eska.evenity.dto.request.EventRequest;
+import com.eska.evenity.dto.request.*;
 import com.eska.evenity.dto.response.*;
 import com.eska.evenity.entity.Customer;
 import com.eska.evenity.entity.Event;
@@ -65,9 +62,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request) {
-
+        try {
             Customer customer = customerService.getCustomerByCustomerId(request.getCustomerId());
-        System.out.println(request.getPreviousProduct());
+            System.out.println(request.getPreviousProduct());
             Event event = Event.builder()
                     .name(request.getName())
                     .description(request.getDescription())
@@ -88,7 +85,7 @@ public class EventServiceImpl implements EventService {
                     .build();
             Long calculatedDate = ChronoUnit.DAYS.between(event.getStartDate(), event.getEndDate()) + 1;
             List<ProductRecommendedResponse> recommendedList = new ArrayList<>();
-            for (EventInfoMinimalistRequest request1 : request.getCategoryProduct()){
+            for (EventInfoMinimalistRequest request1 : request.getCategoryProduct()) {
                 EventDetailCustomizedRequest customizedRequest = EventDetailCustomizedRequest.builder()
                         .categoryId(request1.getCategoryId())
                         .province(event.getProvince())
@@ -119,17 +116,16 @@ public class EventServiceImpl implements EventService {
                     .customerName(event.getCustomer().getFullName())
                     .recommendedList(recommendedList)
                     .build();
-
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
-    public EventResponse submitOtherProductUsingEventId(String id, EventRequest request) {
+    public EventRecommendationResponse regenerateProductOnSavedEvent(String id, EventAndGenerateProductRequest request) {
         try {
-            Event event = findByIdOrThrowNotFound(id);
-            event.setModifiedDate(LocalDateTime.now());
-            eventRepository.saveAndFlush(event);
-            eventDetailService.addBulk(request.getEventDetail(), event);
-            return mapToResponse(event, "0");
+            findByIdOrThrowNotFound(id);
+            return eventAndGenerateProduct(request);
         } catch (Exception e){
             throw new RuntimeException(e.getMessage());
         }
@@ -165,7 +161,6 @@ public class EventServiceImpl implements EventService {
     public List<EventResponse> getAllEvents() {
         List<Event> result = eventRepository.findAll();
         return result.stream().map(r -> mapToResponse(r, "0")).toList();
-//        return result.stream().map(this::mapToResponse).toList();
     }
 
     @Override
@@ -178,14 +173,12 @@ public class EventServiceImpl implements EventService {
     public List<EventResponse> getAllUndeletedEvents() {
         List<Event> result = eventRepository.getEventByIsDeleted(false);
         return result.stream().map(r -> mapToResponse(r, "0")).toList();
-//        return result.stream().map(this::mapToResponse).toList();
     }
 
     @Override
     public List<EventResponse> getEventByCustomerId(String id) {
         List<Event> result = eventRepository.getEventByCustomer_IdAndIsDeleted(id, false);
         return result.stream().map(r -> mapToResponse(r, "0")).toList();
-//        return result.stream().map(this::mapToResponse).toList();
     }
 
     @Override
@@ -221,6 +214,19 @@ public class EventServiceImpl implements EventService {
             eventRepository.saveAndFlush(event);
             return mapToResponse(event, "0");
         } catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public EventResponse editEventWithRegeneratedProduct(String id, EventRequest request) {
+        try {
+            Event event = findByIdOrThrowNotFound(id);
+            editEvent(id, request);
+            eventDetailService.addBulk(request.getEventDetail(), event);
+            return mapToResponse(event, "0");
+        } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }

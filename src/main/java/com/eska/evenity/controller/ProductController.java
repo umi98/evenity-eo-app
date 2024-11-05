@@ -106,7 +106,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/price/range")
+    @PostMapping("/price/range")
     public ResponseEntity<?> minMaxPrice(@Valid @RequestBody PriceRangeRequest request) {
         try {
             MinMaxPriceResponse products = productService.findMaxMinPrice(request);

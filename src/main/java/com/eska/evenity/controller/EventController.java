@@ -179,24 +179,6 @@ public class EventController {
         }
     }
 
-//    @GetMapping("/generate")
-////    @PreAuthorize("hasRole('CUSTOMER')")
-//    public ResponseEntity<?> GenerateEventWithGeneratedProduct(@Valid @RequestBody EventAndGenerateProductRequest request) {
-//        try {
-//            EventResponse eventResponse = eventService.addNewEvent(request);
-//            WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
-//                    .status(HttpStatus.CREATED.getReasonPhrase())
-//                    .message("Successfully create event")
-//                    .data(eventResponse)
-//                    .build();
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            return ResponseEntity
-//                    .status(HttpStatus.BAD_REQUEST)
-//                    .body(e.getMessage());
-//        }
-//    }
-
     @PostMapping("/generate")
 //    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> addEventWithGeneratedProduct(@Valid @RequestBody EventAndGenerateProductRequest request) {
@@ -215,14 +197,32 @@ public class EventController {
         }
     }
 
-    @PutMapping("/{id}/regenerate")
+    @PostMapping("/{id}/regenerate/recommendation")
 //    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> addOtherProduct(@PathVariable String id, @Valid @RequestBody EventRequest request) {
+    public ResponseEntity<?> addOtherProduct(@PathVariable String id, @Valid @RequestBody EventAndGenerateProductRequest request) {
         try {
-            EventResponse eventResponse = eventService.submitOtherProductUsingEventId(id, request);
-            WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
+            EventRecommendationResponse eventResponse = eventService.regenerateProductOnSavedEvent(id, request);
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.CREATED.getReasonPhrase())
                     .message("Successfully create event")
+                    .data(eventResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/regenerate")
+//    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> editAndRegenerate(@PathVariable String id, @Valid @RequestBody EventRequest request) {
+        try {
+            EventResponse eventResponse = eventService.editEventWithRegeneratedProduct(id, request);
+            WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
+                    .status(HttpStatus.CREATED.getReasonPhrase())
+                    .message("Successfully edit event")
                     .data(eventResponse)
                     .build();
             return ResponseEntity.ok(response);

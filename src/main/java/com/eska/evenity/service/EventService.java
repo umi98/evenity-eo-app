@@ -11,7 +11,7 @@ import java.util.List;
 public interface EventService {
     EventResponse addNewEvent(EventRequest request);
     EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request);
-    EventResponse submitOtherProductUsingEventId(String id, EventRequest request);
+    EventRecommendationResponse regenerateProductOnSavedEvent(String id, EventAndGenerateProductRequest request);
     TransactionDetail getTransactionByInvoiceId(String invoiceId);
     List<EventResponse> getAllEvents();
     List<EventResponse> getAllEventsWithApprovedDetails();
@@ -20,5 +20,6 @@ public interface EventService {
     List<EventResponse> getEventByCustomerIdWithApprovedDetails(String id);
     EventResponse getEventById(String id);
     EventResponse editEvent(String id, EventRequest request);
+    EventResponse editEventWithRegeneratedProduct(String id, EventRequest request);
     void deleteEvent(String id);
 }

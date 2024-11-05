@@ -51,6 +51,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public List<InvoiceResponse> getInvoicesByCustomerId(String id) {
+        List<Invoice> invoice = invoiceRepository.findByEvent_Customer_Id(id);
+        return invoice.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
     public Invoice getInvoiceById(String id) {
         return invoiceRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "invoice not found"
