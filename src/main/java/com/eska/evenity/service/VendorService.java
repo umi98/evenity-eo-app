@@ -1,6 +1,7 @@
 package com.eska.evenity.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.VendorResponse;
@@ -22,4 +23,5 @@ public interface VendorService {
     void softDeleteById(String id);
     void upVoteVendor(String id);
     void downVoteVendor(String id);
+    List<Vendor> searchVendor(String name);
 }

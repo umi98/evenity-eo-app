@@ -15,6 +15,7 @@ import com.eska.evenity.entity.UserCredential;
 public interface CustomerRepository extends JpaRepository<Customer, String> {
     Customer getCustomerByUserCredential_Username(String username);
     Customer findCustomerByUserCredential(UserCredential userCredential);
+    List<Customer> findAllByFullNameLikeIgnoreCase(String fullName);
 
     @Query("SELECT c FROM Customer c WHERE c.userCredential.status = :status")
     List<Customer> getCustomerByStatus(@Param("status") UserStatus status);

@@ -1,6 +1,8 @@
 package com.eska.evenity.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.eska.evenity.constant.CategoryType;
@@ -9,6 +11,7 @@ import com.eska.evenity.dto.JwtClaim;
 import com.eska.evenity.dto.response.*;
 import com.eska.evenity.entity.*;
 import com.eska.evenity.service.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,8 +44,10 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
 
-    private final String usernameAdmin = "admin@gmail.com";
-    private final String passwordAdmin = "admin";
+    @Value("${app.admin.email}")
+    private String usernameAdmin;
+    @Value("${app.admin.password}")
+    private String passwordAdmin;
 
     @Transactional(rollbackFor = Exception.class)
     @PostConstruct
@@ -169,52 +174,9 @@ public class AuthServiceImpl implements AuthService {
         Customer customer = customerService.getCustomerByUserId(user.getId());
         Vendor vendor = vendorService.getVendorByUserId(user.getId());
         if (customer != null) {
-            CustomerResponse customerResponse = CustomerResponse.builder()
-                    .userId(user.getId())
-                    .email(user.getUsername())
-                    .customerId(customer.getId())
-                    .fullName(customer.getFullName())
-                    .phoneNumber(customer.getPhoneNumber())
-                    .province(customer.getProvince())
-                    .city(customer.getCity())
-                    .district(customer.getDistrict())
-                    .address(customer.getAddress())
-                    .createdDate(customer.getCreatedDate())
-                    .modifiedDate(customer.getModifiedDate())
-                    .build();
-            return ProfileResponse.builder()
-                    .userId(user.getId())
-                    .email(user.getUsername())
-                    .role(user.getRole().getRole().name())
-                    .createdAt(user.getCreatedDate())
-                    .modifiedAt(user.getModifiedDate())
-                    .data(customerResponse)
-                    .build();
+            return mapToResponseCustomer(customer, user);
         } else if (vendor != null){
-            VendorResponse vendorResponse = VendorResponse.builder()
-                    .userId(user.getId())
-                    .id(vendor.getId())
-                    .email(user.getUsername())
-                    .name(vendor.getName())
-                    .phoneNumber(vendor.getPhoneNumber())
-                    .province(vendor.getProvince())
-                    .city(vendor.getCity())
-                    .district(vendor.getDistrict())
-                    .address(vendor.getAddress())
-                    .owner(vendor.getOwner())
-                    .scoring(vendor.getScoring())
-                    .status(vendor.getStatus().name())
-                    .createdDate(vendor.getCreatedDate())
-                    .modifiedDate(vendor.getModifiedDate())
-                    .build();
-            return ProfileResponse.builder()
-                    .email(user.getUsername())
-                    .userId(user.getId())
-                    .role(user.getRole().getRole().name())
-                    .createdAt(user.getCreatedDate())
-                    .modifiedAt(user.getModifiedDate())
-                    .data(vendorResponse)
-                    .build();
+            return mapToResponseVendor(vendor, user);
         }
         return ProfileResponse.builder()
                 .userId(user.getId())
@@ -222,6 +184,77 @@ public class AuthServiceImpl implements AuthService {
                 .role(user.getRole().getRole().name())
                 .createdAt(user.getCreatedDate())
                 .modifiedAt(user.getModifiedDate())
+                .build();
+    }
+
+    @Override
+    public List<ProfileResponse<?>> getUserInfoFromSearch(String name) {
+        List<ProfileResponse<?>> responses = new ArrayList<>();
+        List<Customer> customerList = customerService.searchCustomer(name);
+        System.out.println(name);
+        for (Customer customer : customerList) {
+            Optional<UserCredential> user = userCredentialRepository.findById(customer.getUserCredential().getId());
+            ProfileResponse<?> cust = mapToResponseCustomer(customer, user.get());
+            responses.add(cust);
+        }
+
+        List<Vendor> vendorList = vendorService.searchVendor(name);
+        for (Vendor vendor : vendorList) {
+            Optional<UserCredential> user = userCredentialRepository.findById(vendor.getUserCredential().getId());
+            ProfileResponse<?> ven = mapToResponseVendor(vendor, user.get());
+            responses.add(ven);
+        }
+        return responses;
+    }
+
+    private ProfileResponse<?> mapToResponseCustomer(Customer customer, UserCredential user) {
+        CustomerResponse customerResponse = CustomerResponse.builder()
+                .userId(user.getId())
+                .email(user.getUsername())
+                .customerId(customer.getId())
+                .fullName(customer.getFullName())
+                .phoneNumber(customer.getPhoneNumber())
+                .province(customer.getProvince())
+                .city(customer.getCity())
+                .district(customer.getDistrict())
+                .address(customer.getAddress())
+                .createdDate(customer.getCreatedDate())
+                .modifiedDate(customer.getModifiedDate())
+                .build();
+        return ProfileResponse.builder()
+                .userId(user.getId())
+                .email(user.getUsername())
+                .role(user.getRole().getRole().name())
+                .createdAt(user.getCreatedDate())
+                .modifiedAt(user.getModifiedDate())
+                .data(customerResponse)
+                .build();
+    }
+
+    private ProfileResponse<?> mapToResponseVendor(Vendor vendor, UserCredential user) {
+        VendorResponse vendorResponse = VendorResponse.builder()
+                .userId(user.getId())
+                .id(vendor.getId())
+                .email(user.getUsername())
+                .name(vendor.getName())
+                .phoneNumber(vendor.getPhoneNumber())
+                .province(vendor.getProvince())
+                .city(vendor.getCity())
+                .district(vendor.getDistrict())
+                .address(vendor.getAddress())
+                .owner(vendor.getOwner())
+                .scoring(vendor.getScoring())
+                .status(vendor.getStatus().name())
+                .createdDate(vendor.getCreatedDate())
+                .modifiedDate(vendor.getModifiedDate())
+                .build();
+        return ProfileResponse.builder()
+                .email(user.getUsername())
+                .userId(user.getId())
+                .role(user.getRole().getRole().name())
+                .createdAt(user.getCreatedDate())
+                .modifiedAt(user.getModifiedDate())
+                .data(vendorResponse)
                 .build();
     }
 }

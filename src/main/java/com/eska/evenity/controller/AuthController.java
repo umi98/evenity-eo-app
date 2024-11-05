@@ -101,6 +101,21 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUsingNameOrFullName(@RequestParam (required = false) String name) {
+        try {
+            List<ProfileResponse<?>> responseList = authService.getUserInfoFromSearch(name);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve all data")
+                    .data(responseList)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PutMapping("/user/{id}/password")
     public ResponseEntity<?> changePassword(@PathVariable String id, @Valid @RequestBody AuthRequest request) {
         try {

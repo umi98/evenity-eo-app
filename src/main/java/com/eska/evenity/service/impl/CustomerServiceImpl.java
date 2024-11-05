@@ -110,6 +110,11 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    @Override
+    public List<Customer> searchCustomer(String name) {
+        return customerRepository.findAllByFullNameLikeIgnoreCase('%' + name + '%');
+    }
+
     private Customer findByIdOrThrowNotFound(String id) {
         Optional<Customer> customer = customerRepository.findById(id);
         return customer.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "customer not found"));

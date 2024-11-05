@@ -1,6 +1,7 @@
 package com.eska.evenity.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.eska.evenity.dto.request.CustomerRequest;
 import com.eska.evenity.dto.response.CustomerResponse;
@@ -16,4 +17,5 @@ public interface CustomerService {
     Customer getCustomerByUserId(String id);
     CustomerResponse editCustomer(String id, CustomerRequest request);
     void deleteCustomer(String id);
+    List<Customer> searchCustomer(String name);
 }

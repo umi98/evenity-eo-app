@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.eska.evenity.constant.CategoryType;
-import com.eska.evenity.entity.Balance;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -187,6 +186,11 @@ public class VendorServiceImpl implements VendorService {
         result.setScoring(result.getScoring() - 2);
         result.setModifiedDate(LocalDateTime.now());
         vendorRepository.saveAndFlush(result);
+    }
+
+    @Override
+    public List<Vendor> searchVendor(String name) {
+        return vendorRepository.findAllByNameLikeIgnoreCase('%' + name + '%');
     }
 
     private Vendor findByIdOrThrowNotFound(String id) {

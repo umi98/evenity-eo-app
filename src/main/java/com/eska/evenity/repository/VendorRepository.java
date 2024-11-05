@@ -17,6 +17,7 @@ import com.eska.evenity.entity.Vendor;
 public interface VendorRepository extends JpaRepository<Vendor, String> {
     Vendor getVendorByUserCredential_Username(String username);
     Vendor findVendorByUserCredential(UserCredential userCredential);
+    List<Vendor> findAllByNameLikeIgnoreCase(String name);
 
     @Query("SELECT v FROM Vendor v WHERE v.userCredential.status = :status")
     List<Vendor> getVendorByStatus(@Param("status") UserStatus status);
