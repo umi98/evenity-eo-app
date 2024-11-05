@@ -170,6 +170,7 @@ public class AuthServiceImpl implements AuthService {
         Vendor vendor = vendorService.getVendorByUserId(user.getId());
         if (customer != null) {
             CustomerResponse customerResponse = CustomerResponse.builder()
+                    .userId(user.getId())
                     .email(user.getUsername())
                     .customerId(customer.getId())
                     .fullName(customer.getFullName())

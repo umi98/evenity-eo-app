@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class CustomerResponse {
+    private String userId;
     private String email;
     private String customerId;
     private String fullName;

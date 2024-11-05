@@ -140,6 +140,7 @@ public class EventServiceImpl implements EventService {
         Invoice invoice = invoiceService.getInvoiceById(invoiceId);
         Customer customer = customerService.getCustomerByCustomerId(invoice.getEvent().getCustomer().getId());
         CustomerResponse customerResponse = CustomerResponse.builder()
+                .userId(customer.getUserCredential().getId())
                 .customerId(customer.getId())
                 .email(customer.getUserCredential().getUsername())
                 .fullName(customer.getFullName())
