@@ -139,21 +139,6 @@ public class ProductController {
         }
     }
 
-//    @GetMapping("/vendor/{vendorId}")
-//    public ResponseEntity<?> getProductsByVendorId(@PathVariable String vendorId) {
-//        try {
-//            List<ProductResponse> products = productService.getProductsByVendorId(vendorId);
-//            WebResponse<List<ProductResponse>> response = WebResponse.<List<ProductResponse>>builder()
-//                    .status(HttpStatus.OK.getReasonPhrase())
-//                    .message("Successfully retrieved products by vendor")
-//                    .data(products)
-//                    .build();
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-//        }
-//    }
-
     @PutMapping("/{productId}")
     public ResponseEntity<?> updateProduct(
             @PathVariable String productId,

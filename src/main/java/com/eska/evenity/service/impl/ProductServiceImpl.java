@@ -140,22 +140,29 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public MinMaxPriceResponse findMaxMinPrice(PriceRangeRequest request) {
-        Long min = productRepository.findMinPrice(request.getCategoryId(), request.getProvince(), request.getCity());
-        Long max = productRepository.findMaxPrice(request.getCategoryId(), request.getProvince(), request.getCity());
-        CategoryType mainCategory = categoryService.getCategoryUsingId(request.getCategoryId()).getMainCategory();
-        Long calculatedDate = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
-        if (mainCategory == CategoryType.CATERING) {
-            min *= request.getParticipant();
-            max *= request.getParticipant();
-        } else {
-            min *= calculatedDate;
-            max *= calculatedDate;
+        try {
+            Long min = productRepository.findMinPrice(request.getCategoryId(), request.getProvince(), request.getCity());
+            Long max = productRepository.findMaxPrice(request.getCategoryId(), request.getProvince(), request.getCity());
+            CategoryType mainCategory = categoryService.getCategoryUsingId(request.getCategoryId()).getMainCategory();
+            Long calculatedDate = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
+            if (min == null || max == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found");
+            }
+            if (mainCategory == CategoryType.CATERING) {
+                min *= request.getParticipant();
+                max *= request.getParticipant();
+            } else {
+                min *= calculatedDate;
+                max *= calculatedDate;
+            }
+            System.out.println(request.getCategoryId());
+            return MinMaxPriceResponse.builder()
+                    .highestPrice(max)
+                    .lowestPrice(min)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-        System.out.println(request.getCategoryId());
-        return MinMaxPriceResponse.builder()
-                .highestPrice(max)
-                .lowestPrice(min)
-                .build();
     }
 
     @Override
