@@ -64,7 +64,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<?> getAllProducts() {
         try {
-            List<ProductResponse> products = productService.getAllProducts();
+            List<ProductResponse> products = productService.getAllAvailableProducts();
             WebResponse<List<ProductResponse>> response = WebResponse.<List<ProductResponse>>builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieved all products")
@@ -76,10 +76,10 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/available")
+    @GetMapping("/all")
     public ResponseEntity<?> getAvailableProducts() {
         try {
-            List<ProductResponse> products = productService.getAllAvailableProducts();
+            List<ProductResponse> products = productService.getAllProducts();
             WebResponse<List<ProductResponse>> response = WebResponse.<List<ProductResponse>>builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieved all products")
