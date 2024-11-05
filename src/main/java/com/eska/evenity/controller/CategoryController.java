@@ -63,6 +63,21 @@ public class CategoryController {
         }
     }
 
+    @GetMapping("/available")
+    public ResponseEntity<?> getCategoriesWithProduct() {
+        try {
+            List<CategoryResponse> categories = categoryService.nonNullCategory();
+            WebResponse<List<CategoryResponse>> response = WebResponse.<List<CategoryResponse>>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieved all categories")
+                    .data(categories)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{categoryId}")
     public ResponseEntity<?> updateCategory(
             @PathVariable String categoryId,

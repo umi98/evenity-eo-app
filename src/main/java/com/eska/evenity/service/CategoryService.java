@@ -10,6 +10,7 @@ public interface CategoryService {
     CategoryResponse createCategory(CategoryRequest categoryRequest);
     CategoryResponse getCategoryById(String categoryId);
     Category getCategoryUsingId(String id);
+    List<CategoryResponse> nonNullCategory();
     List<CategoryResponse> getAllCategories();
     CategoryResponse updateCategory(String categoryId, CategoryRequest categoryRequest);
     void deleteCategory(String categoryId);

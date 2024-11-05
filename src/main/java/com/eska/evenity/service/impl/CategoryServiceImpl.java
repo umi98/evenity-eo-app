@@ -55,6 +55,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<CategoryResponse> nonNullCategory() {
+        List<Category> result = categoryRepository.findCategoriesWithProducts();
+        return result.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
     public List<CategoryResponse> getAllCategories() {
         List<Category> result = categoryRepository.findAll();
         return result.stream().map(this::mapToResponse).toList();
