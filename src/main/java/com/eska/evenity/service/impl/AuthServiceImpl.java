@@ -227,7 +227,7 @@ public class AuthServiceImpl implements AuthService {
                 .role(user.getRole().getRole().name())
                 .createdAt(user.getCreatedDate())
                 .modifiedAt(user.getModifiedDate())
-                .data(customerResponse)
+                .detail(customerResponse)
                 .build();
     }
 
@@ -254,7 +254,7 @@ public class AuthServiceImpl implements AuthService {
                 .role(user.getRole().getRole().name())
                 .createdAt(user.getCreatedDate())
                 .modifiedAt(user.getModifiedDate())
-                .data(vendorResponse)
+                .detail(vendorResponse)
                 .build();
     }
 }

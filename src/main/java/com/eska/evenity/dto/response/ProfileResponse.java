@@ -15,5 +15,5 @@ public class ProfileResponse<T> {
     private String role;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-    private T data;
+    private T detail;
 }
