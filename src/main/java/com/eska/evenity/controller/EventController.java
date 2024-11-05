@@ -197,7 +197,7 @@ public class EventController {
 //        }
 //    }
 
-    @GetMapping("/generate")
+    @PostMapping("/generate")
 //    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> addEventWithGeneratedProduct(@Valid @RequestBody EventAndGenerateProductRequest request) {
         try {

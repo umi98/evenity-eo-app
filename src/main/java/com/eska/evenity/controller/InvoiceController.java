@@ -40,7 +40,7 @@ public class InvoiceController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getInvoiceById(@PathVariable String id) {
         try {
-            List<InvoiceResponse> invoiceResponses = invoiceService.getInvoices();
+            InvoiceResponse invoiceResponses = invoiceService.getInvoiceByIdInResponse(id);
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully fetch data")
