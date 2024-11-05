@@ -192,6 +192,7 @@ public class AuthServiceImpl implements AuthService {
                     .build();
         } else if (vendor != null){
             VendorResponse vendorResponse = VendorResponse.builder()
+                    .userId(user.getId())
                     .id(vendor.getId())
                     .email(user.getUsername())
                     .name(vendor.getName())

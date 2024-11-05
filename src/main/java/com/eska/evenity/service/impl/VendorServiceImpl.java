@@ -196,6 +196,7 @@ public class VendorServiceImpl implements VendorService {
 
     private VendorResponse mapToResponse(Vendor vendor) {
         return VendorResponse.builder()
+                .userId(vendor.getUserCredential().getId())
                 .id(vendor.getId())
                 .email(vendor.getUserCredential().getUsername())
                 .name(vendor.getName())

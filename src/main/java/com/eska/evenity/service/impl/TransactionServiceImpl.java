@@ -120,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService {
         withdrawRequestRepository.saveAndFlush(withdrawRequest);
         UserCredential user = userService.loadByUserId(balance.getUserCredential().getId());
         TransactionHistory history = TransactionHistory.builder()
-                .amount(0L)
+                .amount(request.getAmount())
                 .activity(TransactionType.WITHDRAW_REQUEST)
                 .description("User id " + user.getId() + " (" + user.getUsername() +
                         ") request for withdrawal: IDR " + request.getAmount() +
