@@ -49,6 +49,7 @@ public class PaymentServiceImpl {
                         "indomaret",
                         "bca_va",
                         "bni_va",
+                        "bri_va",
                         "credit_card",
                         "akulaku"
                 ))
