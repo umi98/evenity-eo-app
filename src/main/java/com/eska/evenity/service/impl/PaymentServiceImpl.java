@@ -2,6 +2,7 @@ package com.eska.evenity.service.impl;
 
 import com.eska.evenity.dto.request.PaymentDetailRequest;
 import com.eska.evenity.dto.request.PaymentRequest;
+import com.eska.evenity.dto.response.PaymentResponse;
 import com.eska.evenity.entity.Invoice;
 import com.eska.evenity.entity.Payment;
 import com.eska.evenity.repository.PaymentRepository;
@@ -33,7 +34,7 @@ public class PaymentServiceImpl {
     @Value("${midtrans.snap.url}")
     private String BASE_SNAP_URL;
 
-    public Payment create(Invoice invoice, Long amount) {
+    public PaymentResponse create(Invoice invoice, Long amount) {
         String orderId = UUID.randomUUID().toString();
         String username = Base64.getEncoder().encodeToString((SECRET_KEY + ":").getBytes());
         PaymentDetailRequest paymentDetailRequest = PaymentDetailRequest.builder()
@@ -46,8 +47,10 @@ public class PaymentServiceImpl {
                         "shopeepay",
                         "gopay",
                         "indomaret",
-                        "mandiri",
-                        "bca"
+                        "bca_va",
+                        "bni_va",
+                        "credit_card",
+                        "akulaku"
                 ))
                 .build();
         ResponseEntity<Map<String,String>> response = restClient.post()
@@ -63,10 +66,14 @@ public class PaymentServiceImpl {
                 .redirectUrl(body.get("redirect_url"))
                 .transactionStatus("ordered")
                 .createdDate(LocalDateTime.now())
-
+                .orderId(orderId)
                 .build();
         paymentRepository.saveAndFlush(payment);
-        return payment;
+        return PaymentResponse.builder()
+                .orderId(orderId)
+                .token(payment.getToken())
+                .url(payment.getRedirectUrl())
+                .build();
     }
 
     public Payment getPaymentByOrderId(String id) {

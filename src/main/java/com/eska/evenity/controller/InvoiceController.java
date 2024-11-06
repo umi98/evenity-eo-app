@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.PagingResponse;
+import com.eska.evenity.dto.response.PaymentResponse;
 import com.eska.evenity.entity.Invoice;
 import com.eska.evenity.entity.Payment;
 import org.springframework.data.domain.Page;
@@ -138,7 +139,7 @@ public class InvoiceController {
     @PutMapping("/{id}")
     public ResponseEntity<?> userPaidForEvent(@PathVariable String id) {
         try {
-            Payment invoice = invoiceService.paidForEvent(id);
+            PaymentResponse invoice = invoiceService.paidForEvent(id);
 //            Pattern pattern = Pattern.compile("paid");
 //            Matcher matcher = pattern.matcher(invoice);
 //            if (matcher.find()) {

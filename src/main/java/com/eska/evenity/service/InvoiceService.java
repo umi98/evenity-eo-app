@@ -4,6 +4,7 @@ import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.InvoiceDetailResponse;
 import com.eska.evenity.dto.response.InvoiceResponse;
 import com.eska.evenity.dto.response.PagingResponse;
+import com.eska.evenity.dto.response.PaymentResponse;
 import com.eska.evenity.entity.*;
 import org.springframework.data.domain.Page;
 
@@ -16,7 +17,7 @@ public interface InvoiceService {
     Page<InvoiceResponse> getInvoicesByCustomerId(String id, PagingRequest pagingRequest);
     Page<InvoiceResponse> getInvoiceDetailByVendorId(String id, PagingRequest pagingRequest);
     Invoice getInvoiceById(String id);
-    Payment paidForEvent(String id);
+    PaymentResponse paidForEvent(String id);
     void createInvoice(Event event);
     void changeStatusWhenPaid(String orderId);
     void createInvoiceDetail(EventDetail eventDetail);

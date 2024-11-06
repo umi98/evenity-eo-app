@@ -5,6 +5,7 @@ import com.eska.evenity.constant.PaymentStatus;
 import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.InvoiceDetailResponse;
 import com.eska.evenity.dto.response.InvoiceResponse;
+import com.eska.evenity.dto.response.PaymentResponse;
 import com.eska.evenity.entity.*;
 import com.eska.evenity.repository.InvoiceDetailRepository;
 import com.eska.evenity.repository.InvoiceRepository;
@@ -113,7 +114,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public Payment paidForEvent(String id) {
+    public PaymentResponse paidForEvent(String id) {
         Invoice result = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "invoice not found"
