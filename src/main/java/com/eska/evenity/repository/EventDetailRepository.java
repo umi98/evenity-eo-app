@@ -1,5 +1,6 @@
 package com.eska.evenity.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -20,4 +21,5 @@ public interface EventDetailRepository extends JpaRepository<EventDetail, String
   List<EventDetail> findByProduct(Product product);
   List<EventDetail> findByEventIdAndProduct(String eventId, Product product);
   Page<EventDetail> findByProduct_Vendor_Id(String id, Pageable pageable);
+  Page<EventDetail> findByApprovalStatusAndCreatedDateBefore(ApprovalStatus approvalStatus, LocalDateTime createdDate, Pageable pageable);
 }

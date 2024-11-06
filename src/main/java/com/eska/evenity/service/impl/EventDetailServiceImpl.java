@@ -20,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +39,34 @@ public class EventDetailServiceImpl implements EventDetailService {
     private final ProductService productService;
     private final InvoiceService invoiceService;
     private final VendorService vendorService;
+
+    @Async
+    public CompletableFuture<Void> runAsyncTask() {
+        try {
+            autoRejectPendingEventDetails();
+        } catch (Exception e) {
+            System.err.println("Error in async task: " + e.getMessage());
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Scheduled(fixedRate = 3600000)
+    public void autoRejectPendingEventDetails() {
+        try {
+            Pageable pageable = PageRequest.of(0, 1000);
+            LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+            Page<EventDetail> pendingEventDetails = repository.findByApprovalStatusAndCreatedDateBefore(
+                    ApprovalStatus.PENDING, twentyFourHoursAgo, pageable
+            );
+            for (EventDetail eventDetail : pendingEventDetails) {
+                eventDetail.setApprovalStatus(ApprovalStatus.REJECTED);
+                eventDetail.setModifiedDate(LocalDateTime.now());
+                repository.saveAndFlush(eventDetail);
+            }
+        } catch (Exception e) {
+            System.err.println("Error in scheduled task: " + e.getMessage());
+        }
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override

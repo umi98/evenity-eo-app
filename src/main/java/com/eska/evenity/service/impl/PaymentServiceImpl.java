@@ -3,6 +3,7 @@ package com.eska.evenity.service.impl;
 import com.eska.evenity.dto.request.PaymentDetailRequest;
 import com.eska.evenity.dto.request.PaymentRequest;
 import com.eska.evenity.dto.response.PaymentResponse;
+import com.eska.evenity.entity.Event;
 import com.eska.evenity.entity.Invoice;
 import com.eska.evenity.entity.Payment;
 import com.eska.evenity.repository.PaymentRepository;
@@ -35,7 +36,7 @@ public class PaymentServiceImpl {
     private String BASE_SNAP_URL;
 
     public PaymentResponse create(Invoice invoice, Long amount) {
-        String orderId = UUID.randomUUID().toString();
+        String orderId = "event-" + UUID.randomUUID().toString();
         String username = Base64.getEncoder().encodeToString((SECRET_KEY + ":").getBytes());
         PaymentDetailRequest paymentDetailRequest = PaymentDetailRequest.builder()
                 .orderId(orderId)
@@ -46,12 +47,19 @@ public class PaymentServiceImpl {
                 .paymentMethod(List.of(
                         "shopeepay",
                         "gopay",
+                        "dana",
+                        "linkaja",
                         "indomaret",
+                        "alfamart",
                         "bca_va",
                         "bni_va",
-                        "bri_va",
+                        "mandiri_va",
+                        "permata_va",
                         "credit_card",
-                        "akulaku"
+                        "akulaku",
+                        "bank_transfer",
+                        "bank_transfer_bca",
+                        "bank_transfer_bni"
                 ))
                 .build();
         ResponseEntity<Map<String,String>> response = restClient.post()
@@ -77,7 +85,15 @@ public class PaymentServiceImpl {
                 .build();
     }
 
+    public PaymentResponse paidPreService(Event event, Long amount) {
+        return null;
+    }
+
     public Payment getPaymentByOrderId(String id) {
         return paymentRepository.findByOrderId(id);
+    }
+
+    private PaymentResponse paymentProceeding() {
+        return null;
     }
 }
