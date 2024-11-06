@@ -25,7 +25,7 @@ public class MidtransNotificationController {
     public ResponseEntity<String> handleNotification(@RequestBody MidtransNotification notification) {
         if ("settlement".equals(notification.getTransaction_status())) {
             try {
-                invoiceService.changeStatusWhenPaid(notification.getOrder_id());
+                invoiceService.changeStatusWhenPaid(notification.getOrder_id(), notification.getGross_amount());
                 return new ResponseEntity<>("Invoice updated successfully", HttpStatus.OK);
             } catch (Exception e) {
                 return new ResponseEntity<>("Invoice not found", HttpStatus.NOT_FOUND);

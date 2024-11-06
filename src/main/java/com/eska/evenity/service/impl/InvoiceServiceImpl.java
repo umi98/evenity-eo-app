@@ -145,18 +145,15 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void changeStatusWhenPaid(String orderId) {
+    public void changeStatusWhenPaid(String orderId, String grossAmount) {
         try {
             Payment payment = paymentService.getPaymentByOrderId(orderId);
-            System.out.println(payment.getInvoice().getId());
             Invoice result = getInvoiceById(payment.getInvoice().getId());
 
             if (result.getStatus() == PaymentStatus.COMPLETE)
                 return;
 
-            List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(orderId);
-            Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
-            System.out.println(totalCost);
+            Long totalCost = Long.valueOf(grossAmount);
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());
             result.setModifiedDate(LocalDateTime.now());

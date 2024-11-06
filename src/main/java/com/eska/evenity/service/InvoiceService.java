@@ -19,7 +19,7 @@ public interface InvoiceService {
     Invoice getInvoiceById(String id);
     PaymentResponse paidForEvent(String id);
     void createInvoice(Event event);
-    void changeStatusWhenPaid(String orderId);
+    void changeStatusWhenPaid(String orderId, String grossAmount);
     void createInvoiceDetail(EventDetail eventDetail);
     String changeStatusWhenVendorWasPaid(String id);
 }
