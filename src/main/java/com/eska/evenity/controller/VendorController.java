@@ -1,6 +1,8 @@
 package com.eska.evenity.controller;
 
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.request.VendorRequest;
+import com.eska.evenity.dto.response.PagingResponse;
 import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.dto.response.VendorWithProductsResponse;
 import com.eska.evenity.dto.response.WebResponse;
@@ -8,6 +10,7 @@ import com.eska.evenity.service.ProductService;
 import com.eska.evenity.service.VendorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,13 +27,27 @@ public class VendorController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllVendor() {
+    public ResponseEntity<?> getAllVendor(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<VendorResponse> vendorResponses = vendorService.getAllVendor();
-            WebResponse<List<VendorResponse>> response = WebResponse.<List<VendorResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<VendorResponse> vendorResponses = vendorService.getAllVendor(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(vendorResponses.getTotalElements())
+                    .totalPage(vendorResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(vendorResponses)
+                    .data(vendorResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -40,13 +57,27 @@ public class VendorController {
 
     @GetMapping("/active")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllActiveVendor() {
+    public ResponseEntity<?> getAllActiveVendor(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<VendorResponse> vendorResponses = vendorService.getAllActiveVendor();
-            WebResponse<List<VendorResponse>> response = WebResponse.<List<VendorResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<VendorResponse> vendorResponses = vendorService.getAllActiveVendor(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(vendorResponses.getTotalElements())
+                    .totalPage(vendorResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(vendorResponses)
+                    .data(vendorResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -70,13 +101,27 @@ public class VendorController {
     }
 
     @GetMapping("/approved")
-    public ResponseEntity<?> getApprovedCustomer() {
+    public ResponseEntity<?> getApprovedCustomer(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<VendorResponse> vendorResponses = vendorService.getApprovedVendor();
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<VendorResponse> vendorResponses = vendorService.getApprovedVendor(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(vendorResponses.getTotalElements())
+                    .totalPage(vendorResponses.getTotalPages())
+                    .build();
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(vendorResponses)
+                    .data(vendorResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

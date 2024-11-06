@@ -8,6 +8,9 @@ import com.eska.evenity.entity.Invoice;
 import com.eska.evenity.repository.EventRepository;
 import com.eska.evenity.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -158,33 +161,38 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventResponse> getAllEvents() {
-        List<Event> result = eventRepository.findAll();
-        return result.stream().map(r -> mapToResponse(r, "0")).toList();
+    public Page<EventResponse> getAllEvents(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Event> result = eventRepository.findAll(pageable);
+        return result.map(r -> mapToResponse(r, "0"));
     }
 
     @Override
-    public List<EventResponse> getAllEventsWithApprovedDetails() {
-        List<Event> result = eventRepository.findAll();
-        return result.stream().map(r -> mapToResponse(r, "1")).toList();
+    public Page<EventResponse> getAllEventsWithApprovedDetails(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Event> result = eventRepository.findAll(pageable);
+        return result.map(r -> mapToResponse(r, "1"));
     }
 
     @Override
-    public List<EventResponse> getAllUndeletedEvents() {
-        List<Event> result = eventRepository.getEventByIsDeleted(false);
-        return result.stream().map(r -> mapToResponse(r, "0")).toList();
+    public Page<EventResponse> getAllUndeletedEvents(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Event> result = eventRepository.getEventByIsDeleted(false, pageable);
+        return result.map(r -> mapToResponse(r, "0"));
     }
 
     @Override
-    public List<EventResponse> getEventByCustomerId(String id) {
-        List<Event> result = eventRepository.getEventByCustomer_IdAndIsDeleted(id, false);
-        return result.stream().map(r -> mapToResponse(r, "0")).toList();
+    public Page<EventResponse> getEventByCustomerId(String id, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Event> result = eventRepository.getEventByCustomer_IdAndIsDeleted(id, false, pageable);
+        return result.map(r -> mapToResponse(r, "0"));
     }
 
     @Override
-    public List<EventResponse> getEventByCustomerIdWithApprovedDetails(String id) {
-        List<Event> result = eventRepository.getEventByCustomer_IdAndIsDeleted(id, false);
-        return result.stream().map(r -> mapToResponse(r, "1")).toList();
+    public Page<EventResponse> getEventByCustomerIdWithApprovedDetails(String id, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Event> result = eventRepository.getEventByCustomer_IdAndIsDeleted(id, false, pageable);
+        return result.map(r -> mapToResponse(r, "1"));
     }
 
     @Override

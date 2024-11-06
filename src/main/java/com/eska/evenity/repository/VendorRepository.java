@@ -2,6 +2,8 @@ package com.eska.evenity.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +22,7 @@ public interface VendorRepository extends JpaRepository<Vendor, String> {
     List<Vendor> findAllByNameLikeIgnoreCase(String name);
 
     @Query("SELECT v FROM Vendor v WHERE v.userCredential.status = :status")
-    List<Vendor> getVendorByStatus(@Param("status") UserStatus status);
+    Page<Vendor> getVendorByStatus(@Param("status") UserStatus status, Pageable pageable);
 
-    List<Vendor> findByStatus(VendorStatus status);
+    Page<Vendor> findByStatus(VendorStatus status, Pageable pageable);
 }

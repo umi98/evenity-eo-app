@@ -1,11 +1,13 @@
 package com.eska.evenity.controller;
 
 import com.eska.evenity.dto.request.MoneyOnlyRequest;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.*;
 import com.eska.evenity.service.EventService;
 import com.eska.evenity.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,13 +37,27 @@ public class TransactionController {
     }
 
     @GetMapping("/balance")
-    public ResponseEntity<?> getAllBalanceAccout() {
+    public ResponseEntity<?> getAllBalanceAccount(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<BalanceResponse> balanceResponses = transactionService.getAllBalanceAccount();
-            WebResponse<List<BalanceResponse>> response = WebResponse.<List<BalanceResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<BalanceResponse> balanceResponses = transactionService.getAllBalanceAccount(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(balanceResponses.getTotalElements())
+                    .totalPage(balanceResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(balanceResponses)
+                    .data(balanceResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -50,13 +66,27 @@ public class TransactionController {
     }
 
     @GetMapping("/balance/active")
-    public ResponseEntity<?> getAllActiveUserBalanceAccount() {
+    public ResponseEntity<?> getAllActiveUserBalanceAccount(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<BalanceResponse> balanceResponses = transactionService.getAllActiveUserBalance();
-            WebResponse<List<BalanceResponse>> response = WebResponse.<List<BalanceResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<BalanceResponse> balanceResponses = transactionService.getAllActiveUserBalance(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(balanceResponses.getTotalElements())
+                    .totalPage(balanceResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(balanceResponses)
+                    .data(balanceResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -65,13 +95,27 @@ public class TransactionController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<?> getAllTransactionHistory() {
+    public ResponseEntity<?> getAllTransactionHistory(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<TransactionHistoryResponse> historyResponses = transactionService.getAllTransactionHistory();
-            WebResponse<List<TransactionHistoryResponse>> response = WebResponse.<List<TransactionHistoryResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<TransactionHistoryResponse> historyResponses = transactionService.getAllTransactionHistory(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(historyResponses.getTotalElements())
+                    .totalPage(historyResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(historyResponses)
+                    .data(historyResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -80,13 +124,28 @@ public class TransactionController {
     }
 
     @GetMapping("/history/{userId}")
-    public ResponseEntity<?> getAllTransactionHistoryByUserId(@PathVariable String userId) {
+    public ResponseEntity<?> getAllTransactionHistoryByUserId(
+            @PathVariable String userId,
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<TransactionHistoryResponse> historyResponses = transactionService.getAllTransactionHistoryByUserId(userId);
-            WebResponse<List<TransactionHistoryResponse>> response = WebResponse.<List<TransactionHistoryResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<TransactionHistoryResponse> historyResponses = transactionService.getAllTransactionHistoryByUserId(userId, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(historyResponses.getTotalElements())
+                    .totalPage(historyResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(historyResponses)
+                    .data(historyResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -140,13 +199,27 @@ public class TransactionController {
     }
 
     @GetMapping("/withdraw/request")
-    public ResponseEntity<?> getAllWithdrawRequest() {
+    public ResponseEntity<?> getAllWithdrawRequest(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<WithdrawRequestResponse> withdrawResponse = transactionService.getAllWithdrawRequest();
-            WebResponse<List<WithdrawRequestResponse>> response = WebResponse.<List<WithdrawRequestResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<WithdrawRequestResponse> withdrawResponse = transactionService.getAllWithdrawRequest(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(withdrawResponse.getTotalElements())
+                    .totalPage(withdrawResponse.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(withdrawResponse)
+                    .data(withdrawResponse.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -155,13 +228,28 @@ public class TransactionController {
     }
 
     @GetMapping("/withdraw/request/user/{id}")
-    public ResponseEntity<?> getAllWithdrawRequestByUserId(@PathVariable String id) {
+    public ResponseEntity<?> getAllWithdrawRequestByUserId(
+            @PathVariable String id,
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<WithdrawRequestResponse> withdrawResponse = transactionService.getAllWithdrawRequestByUserId(id);
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<WithdrawRequestResponse> withdrawResponse = transactionService.getAllWithdrawRequestByUserId(id, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(withdrawResponse.getTotalElements())
+                    .totalPage(withdrawResponse.getTotalPages())
+                    .build();
             WebResponse<List<WithdrawRequestResponse>> response = WebResponse.<List<WithdrawRequestResponse>>builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(withdrawResponse)
+                    .data(withdrawResponse.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

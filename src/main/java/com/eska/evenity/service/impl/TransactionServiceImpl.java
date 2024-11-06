@@ -3,6 +3,10 @@ package com.eska.evenity.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.eska.evenity.dto.request.PagingRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,15 +43,17 @@ public class TransactionServiceImpl implements TransactionService {
     private final UserService userService;
 
     @Override
-    public List<BalanceResponse> getAllBalanceAccount() {
-        List<Balance> result = balanceRepository.findAll();
-        return result.stream().map(this::mapBalanceToResponse).toList();
+    public Page<BalanceResponse> getAllBalanceAccount(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Balance> result = balanceRepository.findAll(pageable);
+        return result.map(this::mapBalanceToResponse);
     }
 
     @Override
-    public List<BalanceResponse> getAllActiveUserBalance() {
-        List<Balance> result = balanceRepository.findBalanceByUserCredential_Status(UserStatus.ACTIVE);
-        return result.stream().map(this::mapBalanceToResponse).toList();
+    public Page<BalanceResponse> getAllActiveUserBalance(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Balance> result = balanceRepository.findBalanceByUserCredential_Status(UserStatus.ACTIVE, pageable);
+        return result.map(this::mapBalanceToResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -96,15 +102,17 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<WithdrawRequestResponse> getAllWithdrawRequest() {
-        List<WithdrawRequest> result = withdrawRequestRepository.findAll();
-        return result.stream().map(this::mapRequestToResponse).toList();
+    public Page<WithdrawRequestResponse> getAllWithdrawRequest(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<WithdrawRequest> result = withdrawRequestRepository.findAll(pageable);
+        return result.map(this::mapRequestToResponse);
     }
 
     @Override
-    public List<WithdrawRequestResponse> getAllWithdrawRequestByUserId(String id) {
-        List<WithdrawRequest> result = withdrawRequestRepository.findAllByBalance_UserCredential_Id(id);
-        return result.stream().map(this::mapRequestToResponse).toList();
+    public Page<WithdrawRequestResponse> getAllWithdrawRequestByUserId(String id, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<WithdrawRequest> result = withdrawRequestRepository.findAllByBalance_UserCredential_Id(id, pageable);
+        return result.map(this::mapRequestToResponse);
     }
 
     @Override
@@ -178,15 +186,17 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionHistoryResponse> getAllTransactionHistory() {
-        List<TransactionHistory> result = transactionHistoryRepository.findAll();
-        return result.stream().map(this::mapHistoryToResponse).toList();
+    public Page<TransactionHistoryResponse> getAllTransactionHistory(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<TransactionHistory> result = transactionHistoryRepository.findAll(pageable);
+        return result.map(this::mapHistoryToResponse);
     }
 
     @Override
-    public List<TransactionHistoryResponse> getAllTransactionHistoryByUserId(String userId) {
-        List<TransactionHistory> result = transactionHistoryRepository.getTransactionHistoryByCreatedBy_Id(userId);
-        return result.stream().map(this::mapHistoryToResponse).toList();
+    public Page<TransactionHistoryResponse> getAllTransactionHistoryByUserId(String userId, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<TransactionHistory> result = transactionHistoryRepository.getTransactionHistoryByCreatedBy_Id(userId, pageable);
+        return result.map(this::mapHistoryToResponse);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.eska.evenity.service.impl;
 
 import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.PaymentStatus;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.request.PaymentDetailRequest;
 import com.eska.evenity.dto.request.PaymentRequest;
 import com.eska.evenity.dto.response.InvoiceDetailResponse;
@@ -17,6 +18,10 @@ import com.midtrans.httpclient.error.MidtransError;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,9 +44,10 @@ public class InvoiceServiceImpl implements InvoiceService {
     private String snapUrl;
 
     @Override
-    public List<InvoiceResponse> getInvoices() {
-        List<Invoice> invoices = invoiceRepository.findAll();
-        return invoices.stream().map(this::mapToResponse).toList();
+    public Page<InvoiceResponse> getInvoices(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Invoice> invoices = invoiceRepository.findAll(pageable);
+        return invoices.map(this::mapToResponse);
     }
 
     @Override
@@ -51,9 +58,57 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceResponse> getInvoicesByCustomerId(String id) {
-        List<Invoice> invoice = invoiceRepository.findByEvent_Customer_Id(id);
-        return invoice.stream().map(this::mapToResponse).toList();
+    public Page<InvoiceResponse> getInvoicesByCustomerId(String id, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Invoice> invoice = invoiceRepository.findByEvent_Customer_Id(id, pageable);
+        return invoice.map(this::mapToResponse);
+    }
+
+    @Override
+    public Page<InvoiceResponse> getInvoiceDetailByVendorId(String id, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<InvoiceDetail> invoiceDetailPage = invoiceDetailRepository.findByEventDetail_Product_Vendor_Id(id, pageable);
+
+        List<InvoiceResponse> invoiceList = invoiceDetailPage.stream().map(invoiceDetail -> {
+            InvoiceDetailResponse invoiceDetailResponse = InvoiceDetailResponse.builder()
+                    .invoiceDetailId(invoiceDetail.getId())
+                    .forwardPaymentStatus(invoiceDetail.getStatus().name())
+                    .productId(invoiceDetail.getEventDetail().getProduct().getId())
+                    .productName(invoiceDetail.getEventDetail().getProduct().getName())
+                    .qty(invoiceDetail.getEventDetail().getQuantity())
+                    .unit(invoiceDetail.getEventDetail().getUnit().name())
+                    .cost(invoiceDetail.getEventDetail().getCost())
+                    .build();
+            Invoice invoice = invoiceRepository.findById(invoiceDetail.getInvoice().getId()).get();
+            return InvoiceResponse.builder()
+                    .invoiceId(invoice.getId())
+                    .startDate(invoice.getEvent().getStartDate())
+                    .startTime(invoice.getEvent().getStartTime())
+                    .endDate(invoice.getEvent().getEndDate())
+                    .endTime(invoice.getEvent().getEndTime())
+                    .eventId(invoice.getEvent().getId())
+                    .eventName(invoice.getEvent().getName())
+                    .theme(invoice.getEvent().getTheme())
+                    .province(invoice.getEvent().getProvince())
+                    .city(invoice.getEvent().getCity())
+                    .district(invoice.getEvent().getDistrict())
+                    .address(invoice.getEvent().getAddress())
+                    .participant(invoice.getEvent().getParticipant())
+                    .customerId(invoice.getEvent().getCustomer().getId())
+                    .customerName(invoice.getEvent().getCustomer().getFullName())
+                    .phoneNumber(invoice.getEvent().getCustomer().getPhoneNumber())
+                    .customerProvince(invoice.getEvent().getCustomer().getProvince())
+                    .customerCity(invoice.getEvent().getCustomer().getCity())
+                    .customerDistrict(invoice.getEvent().getCustomer().getDistrict())
+                    .customerAddress(invoice.getEvent().getCustomer().getAddress())
+                    .paymentStatus(invoice.getStatus().name())
+                    .paymentDate(invoice.getPaymentDate())
+                    .invoiceDetailResponseList(List.of(invoiceDetailResponse))
+                    .build();
+        }).collect(Collectors.toList());
+
+        // Return the list as a Page
+        return new PageImpl<>(invoiceList, pageable, invoiceDetailPage.getTotalElements());
     }
 
     @Override
@@ -99,12 +154,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             result.setModifiedDate(LocalDateTime.now());
             invoiceRepository.saveAndFlush(result);
 
-//            String transactionToken = midTransService.createTransactionToken(result.getId(), totalCost);
             Payment transactionToken = paymentService.create(result.getId(), totalCost);
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
             return transactionToken;
-//        } catch (MidtransError e) {
-//            throw new RuntimeException("Midtrans failed: " + e.getMessage());
 //        } catch (Exception e) {
 //            throw new RuntimeException(e.getMessage());
 //        }

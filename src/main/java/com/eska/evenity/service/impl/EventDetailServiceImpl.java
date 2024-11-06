@@ -4,6 +4,7 @@ import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.EventProgress;
 import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.dto.request.EventDetailRequest;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.EventDetailResponse;
 import com.eska.evenity.entity.Event;
 import com.eska.evenity.entity.EventDetail;
@@ -15,6 +16,9 @@ import com.eska.evenity.service.InvoiceService;
 import com.eska.evenity.service.ProductService;
 import com.eska.evenity.service.VendorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,15 +70,17 @@ public class EventDetailServiceImpl implements EventDetailService {
     }
 
     @Override
-    public List<EventDetailResponse> getAllEventDetails() {
-        List<EventDetail> result = repository.findAll();
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<EventDetailResponse> getAllEventDetails(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<EventDetail> result = repository.findAll(pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override
-    public List<EventDetailResponse> getEventDetailByVendorId(String vendorId) {
-        List<EventDetail> result = repository.findByProduct_Vendor_Id(vendorId);
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<EventDetailResponse> getEventDetailByVendorId(String vendorId, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<EventDetail> result = repository.findByProduct_Vendor_Id(vendorId, pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override

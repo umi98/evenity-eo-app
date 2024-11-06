@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.eska.evenity.constant.UserStatus;
+import com.eska.evenity.dto.request.PagingRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,15 +51,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerResponse> getAllCustomer() {
-        List<Customer> result = customerRepository.findAll();
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<CustomerResponse> getAllCustomer(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Customer> result = customerRepository.findAll(pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override
-    public List<CustomerResponse> getAllActiveCustomer() {
-        List<Customer> result = customerRepository.getCustomerByStatus(UserStatus.ACTIVE);
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<CustomerResponse> getAllActiveCustomer(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Customer> result = customerRepository.getCustomerByStatus(UserStatus.ACTIVE, pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override

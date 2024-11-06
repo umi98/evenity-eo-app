@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.PagingResponse;
 import com.eska.evenity.entity.Invoice;
 import com.eska.evenity.entity.Payment;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +26,27 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
 
     @GetMapping
-    public ResponseEntity<?> getAllInvoices() {
+    public ResponseEntity<?> getAllInvoices(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<InvoiceResponse> invoiceResponses = invoiceService.getInvoices();
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<InvoiceResponse> invoiceResponses = invoiceService.getInvoices(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(invoiceResponses.getTotalElements())
+                    .totalPage(invoiceResponses.getTotalPages())
+                    .build();
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully fetch data")
-                    .data(invoiceResponses)
+                    .data(invoiceResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -53,13 +70,58 @@ public class InvoiceController {
     }
 
     @GetMapping("/customer/{id}")
-    public ResponseEntity<?> getInvoiceByCustomerId(@PathVariable String id) {
+    public ResponseEntity<?> getInvoiceByCustomerId(
+            @PathVariable String id,
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<InvoiceResponse> invoiceResponses = invoiceService.getInvoicesByCustomerId(id);
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<InvoiceResponse> invoiceResponses = invoiceService.getInvoicesByCustomerId(id, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(invoiceResponses.getTotalElements())
+                    .totalPage(invoiceResponses.getTotalPages())
+                    .build();
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully fetch data")
-                    .data(invoiceResponses)
+                    .data(invoiceResponses.getContent())
+                    .pagingResponse(pagingResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/vendor/{id}")
+    public ResponseEntity<?> getInvoiceByVendorId(
+            @PathVariable String id,
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
+        try {
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<InvoiceResponse> invoiceResponses = invoiceService.getInvoiceDetailByVendorId(id, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(invoiceResponses.getTotalElements())
+                    .totalPage(invoiceResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully fetch data")
+                    .data(invoiceResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

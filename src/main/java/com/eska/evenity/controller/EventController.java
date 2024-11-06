@@ -3,24 +3,16 @@ package com.eska.evenity.controller;
 import java.util.List;
 
 import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
-import com.eska.evenity.dto.response.EventDetailResponse;
-import com.eska.evenity.dto.response.EventRecommendationResponse;
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.*;
 import com.eska.evenity.service.EventDetailService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.eska.evenity.dto.request.EventRequest;
-import com.eska.evenity.dto.response.EventResponse;
-import com.eska.evenity.dto.response.WebResponse;
 import com.eska.evenity.service.EventService;
 
 import jakarta.validation.Valid;
@@ -35,13 +27,27 @@ public class EventController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllEvents() {
+    public ResponseEntity<?> getAllEvents(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<EventResponse> eventResponses = eventService.getAllEvents();
-            WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<EventResponse> eventResponses = eventService.getAllEvents(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(eventResponses.getTotalElements())
+                    .totalPage(eventResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(eventResponses)
+                    .data(eventResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -51,13 +57,27 @@ public class EventController {
 
     @GetMapping("/approved")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllEventsWithApprovedDetails() {
+    public ResponseEntity<?> getAllEventsWithApprovedDetails(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<EventResponse> eventResponses = eventService.getAllEventsWithApprovedDetails();
-            WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<EventResponse> eventResponses = eventService.getAllEventsWithApprovedDetails(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(eventResponses.getTotalElements())
+                    .totalPage(eventResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(eventResponses)
+                    .data(eventResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -67,13 +87,27 @@ public class EventController {
 
     @GetMapping("/undeleted")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllUndeletedEvents() {
+    public ResponseEntity<?> getAllUndeletedEvents(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<EventResponse> eventResponses = eventService.getAllUndeletedEvents();
-            WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<EventResponse> eventResponses = eventService.getAllUndeletedEvents(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(eventResponses.getTotalElements())
+                    .totalPage(eventResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(eventResponses)
+                    .data(eventResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -83,13 +117,27 @@ public class EventController {
 
     @GetMapping("/details")
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllEventDetail() {
+    public ResponseEntity<?> getAllEventDetail(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<EventDetailResponse> eventDetailResponseList = eventDetailService.getAllEventDetails();
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<EventDetailResponse> eventDetailResponseList = eventDetailService.getAllEventDetails(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(eventDetailResponseList.getTotalElements())
+                    .totalPage(eventDetailResponseList.getTotalPages())
+                    .build();
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(eventDetailResponseList)
+                    .data(eventDetailResponseList.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -99,13 +147,28 @@ public class EventController {
 
     @GetMapping("/vendor/{id}")
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getEventDetailByVendor(@PathVariable String id) {
+    public ResponseEntity<?> getEventDetailByVendor(
+            @PathVariable String id,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<EventDetailResponse> eventDetailResponseList = eventDetailService.getEventDetailByVendorId(id);
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<EventDetailResponse> eventDetailResponseList = eventDetailService.getEventDetailByVendorId(id, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(eventDetailResponseList.getTotalElements())
+                    .totalPage(eventDetailResponseList.getTotalPages())
+                    .build();
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(eventDetailResponseList)
+                    .data(eventDetailResponseList.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -131,15 +194,30 @@ public class EventController {
 
     @GetMapping("/customer/{id}")
 //    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> getAllEventsByCustomerId(@PathVariable String id) {
+    public ResponseEntity<?> getAllEventsByCustomerId(
+            @PathVariable String id,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-        List<EventResponse> eventResponses = eventService.getEventByCustomerId(id);
-        WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
-                .status(HttpStatus.OK.getReasonPhrase())
-                .message("Successfully retrieve data")
-                .data(eventResponses)
-                .build();
-        return ResponseEntity.ok(response);
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<EventResponse> eventResponses = eventService.getEventByCustomerId(id, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(eventResponses.getTotalElements())
+                    .totalPage(eventResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(eventResponses.getContent())
+                    .pagingResponse(pagingResponse)
+                    .build();
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -147,13 +225,28 @@ public class EventController {
 
     @GetMapping("/customer/{id}/approved")
 //    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<?> getAllEventsByCustomerIdAndApprovedDetails(@PathVariable String id) {
+    public ResponseEntity<?> getAllEventsByCustomerIdAndApprovedDetails(
+            @PathVariable String id,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<EventResponse> eventResponses = eventService.getEventByCustomerIdWithApprovedDetails(id);
-            WebResponse<List<EventResponse>> response = WebResponse.<List<EventResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<EventResponse> eventResponses = eventService.getEventByCustomerIdWithApprovedDetails(id, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(eventResponses.getTotalElements())
+                    .totalPage(eventResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(eventResponses)
+                    .data(eventResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

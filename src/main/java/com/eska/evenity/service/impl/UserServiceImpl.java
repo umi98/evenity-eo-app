@@ -2,11 +2,15 @@ package com.eska.evenity.service.impl;
 
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.dto.request.AuthRequest;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.UserResponse;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.repository.UserCredentialRepository;
 import com.eska.evenity.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -45,9 +49,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllUser() {
-        List<UserCredential> result = repository.findAll();
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<UserResponse> getAllUser(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<UserCredential> result = repository.findAll(pageable);
+//        List<UserCredential> result = repository.findAll();
+        return result.map(this::mapToResponse);
     }
 
     @Override

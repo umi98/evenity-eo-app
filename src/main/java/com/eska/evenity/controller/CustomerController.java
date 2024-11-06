@@ -2,15 +2,12 @@ package com.eska.evenity.controller;
 
 import java.util.List;
 
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.PagingResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.eska.evenity.dto.request.CustomerRequest;
 import com.eska.evenity.dto.response.CustomerResponse;
@@ -28,13 +25,27 @@ public class CustomerController {
 
     @GetMapping
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllCustomer() {
+    public ResponseEntity<?> getAllCustomer(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<CustomerResponse> customerResponses = customerService.getAllCustomer();
-            WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<CustomerResponse> customerResponses = customerService.getAllCustomer(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(customerResponses.getTotalElements())
+                    .totalPage(customerResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(customerResponses)
+                    .data(customerResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -44,13 +55,27 @@ public class CustomerController {
 
     @GetMapping("/active")
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllActiveCustomer() {
+    public ResponseEntity<?> getAllActiveCustomer(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "2") Integer size
+    ) {
         try {
-            List<CustomerResponse> customerResponses = customerService.getAllActiveCustomer();
-            WebResponse<List<CustomerResponse>> response = WebResponse.<List<CustomerResponse>>builder()
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<CustomerResponse> customerResponses = customerService.getAllActiveCustomer(pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(customerResponses.getTotalElements())
+                    .totalPage(customerResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")
-                    .data(customerResponses)
+                    .data(customerResponses.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

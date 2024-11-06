@@ -8,10 +8,15 @@ import java.util.Optional;
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.dto.JwtClaim;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.*;
 import com.eska.evenity.entity.*;
 import com.eska.evenity.service.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -188,10 +193,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public List<ProfileResponse<?>> getUserInfoFromSearch(String name) {
+    public Page<ProfileResponse<?>> getUserInfoFromSearch(String name, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+
         List<ProfileResponse<?>> responses = new ArrayList<>();
         List<Customer> customerList = customerService.searchCustomer(name);
-        System.out.println(name);
         for (Customer customer : customerList) {
             Optional<UserCredential> user = userCredentialRepository.findById(customer.getUserCredential().getId());
             ProfileResponse<?> cust = mapToResponseCustomer(customer, user.get());
@@ -204,7 +210,16 @@ public class AuthServiceImpl implements AuthService {
             ProfileResponse<?> ven = mapToResponseVendor(vendor, user.get());
             responses.add(ven);
         }
-        return responses;
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), responses.size());
+
+        if (start > responses.size()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, responses.size());
+        }
+
+        List<ProfileResponse<?>> paginatedResponse = responses.subList(start, end);
+        return new PageImpl<>(paginatedResponse, pageable, responses.size());
     }
 
     private ProfileResponse<?> mapToResponseCustomer(Customer customer, UserCredential user) {

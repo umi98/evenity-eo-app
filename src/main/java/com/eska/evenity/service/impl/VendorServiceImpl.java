@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.eska.evenity.constant.CategoryType;
+import com.eska.evenity.dto.request.PagingRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,21 +58,24 @@ public class VendorServiceImpl implements VendorService {
     }
 
     @Override
-    public List<VendorResponse> getAllVendor() {
-        List<Vendor> result = vendorRepository.findAll();
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<VendorResponse> getAllVendor(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Vendor> result = vendorRepository.findAll(pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override
-    public List<VendorResponse> getAllActiveVendor() {
-        List<Vendor> result = vendorRepository.getVendorByStatus(UserStatus.ACTIVE);
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<VendorResponse> getAllActiveVendor(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Vendor> result = vendorRepository.getVendorByStatus(UserStatus.ACTIVE, pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override
-    public List<VendorResponse> getApprovedVendor() {
-        List<Vendor> result = vendorRepository.findByStatus(VendorStatus.ACTIVE);
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<VendorResponse> getApprovedVendor(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Vendor> result = vendorRepository.findByStatus(VendorStatus.ACTIVE, pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override

@@ -6,7 +6,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import com.eska.evenity.dto.request.*;
 import org.apache.coyote.BadRequestException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.constant.VendorStatus;
-import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
-import com.eska.evenity.dto.request.EventInfoRequest;
-import com.eska.evenity.dto.request.PriceRangeRequest;
-import com.eska.evenity.dto.request.ProductRequest;
 import com.eska.evenity.dto.response.MinMaxPriceResponse;
 import com.eska.evenity.dto.response.ProductRecommendedResponse;
 import com.eska.evenity.dto.response.ProductResponse;
@@ -77,15 +77,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getProductsByCategoryId(String categoryId) {
-        List<Product> result = productRepository.findByCategoryId(categoryId);
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<ProductResponse> getProductsByCategoryId(String categoryId, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Product> result = productRepository.findByCategoryId(categoryId, pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override
-    public List<ProductResponse> getAllAvailableProducts() {
-        List<Product> result = productRepository.findByIsDeleted(false);
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<ProductResponse> getAllAvailableProducts(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Product> result = productRepository.findByIsDeleted(false, pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Override
@@ -113,9 +115,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getAllProducts() {
-        List<Product> result = productRepository.findAll();
-        return result.stream().map(this::mapToResponse).toList();
+    public Page<ProductResponse> getAllProducts(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Product> result = productRepository.findAll(pageable);
+        return result.map(this::mapToResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)

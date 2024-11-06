@@ -3,6 +3,7 @@ package com.eska.evenity.controller;
 import com.auth0.jwt.interfaces.Claim;
 import com.eska.evenity.dto.request.AuthRequest;
 import com.eska.evenity.dto.request.CustomerRegisterRequest;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.request.VendorRegisterRequest;
 import com.eska.evenity.dto.response.*;
 import com.eska.evenity.service.AuthService;
@@ -10,6 +11,7 @@ import com.eska.evenity.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,12 +73,26 @@ public class AuthController {
 
     @GetMapping("/user")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> userList() {
-        List<UserResponse> userResponses = userService.getAllUser();
-        WebResponse<List<UserResponse>> response = WebResponse.<List<UserResponse>>builder()
+    public ResponseEntity<?> userList(
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
+        PagingRequest pagingRequest = PagingRequest.builder()
+                .page(page)
+                .size(size)
+                .build();
+        Page<UserResponse> userResponsePage = userService.getAllUser(pagingRequest);
+        PagingResponse pagingResponse = PagingResponse.builder()
+                .page(page)
+                .size(size)
+                .count(userResponsePage.getTotalElements())
+                .totalPage(userResponsePage.getTotalPages())
+                .build();
+        WebResponse<?> response = WebResponse.builder()
                 .status(HttpStatus.OK.getReasonPhrase())
                 .message("Successfully retrieve all data")
-                .data(userResponses)
+                .data(userResponsePage.getContent())
+                .pagingResponse(pagingResponse)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -102,13 +118,28 @@ public class AuthController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchUsingNameOrFullName(@RequestParam (required = false) String name) {
+    public ResponseEntity<?> searchUsingNameOrFullName(
+            @RequestParam (required = false) String name,
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
         try {
-            List<ProfileResponse<?>> responseList = authService.getUserInfoFromSearch(name);
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<ProfileResponse<?>> profileResponsePage = authService.getUserInfoFromSearch(name, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(profileResponsePage.getTotalElements())
+                    .totalPage(profileResponsePage.getTotalPages())
+                    .build();
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve all data")
-                    .data(responseList)
+                    .data(profileResponsePage.getContent())
+                    .pagingResponse(pagingResponse)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

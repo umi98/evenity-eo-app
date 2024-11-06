@@ -2,9 +2,13 @@ package com.eska.evenity.service;
 
 import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
 import com.eska.evenity.dto.request.EventRequest;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.EventRecommendationResponse;
 import com.eska.evenity.dto.response.EventResponse;
+import com.eska.evenity.dto.response.PagingResponse;
 import com.eska.evenity.dto.response.TransactionDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -13,11 +17,11 @@ public interface EventService {
     EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request);
     EventRecommendationResponse regenerateProductOnSavedEvent(String id, EventAndGenerateProductRequest request);
     TransactionDetail getTransactionByInvoiceId(String invoiceId);
-    List<EventResponse> getAllEvents();
-    List<EventResponse> getAllEventsWithApprovedDetails();
-    List<EventResponse> getAllUndeletedEvents();
-    List<EventResponse> getEventByCustomerId(String id);
-    List<EventResponse> getEventByCustomerIdWithApprovedDetails(String id);
+    Page<EventResponse> getAllEvents(PagingRequest pagingRequest);
+    Page<EventResponse> getAllEventsWithApprovedDetails(PagingRequest pagingRequest);
+    Page<EventResponse> getAllUndeletedEvents(PagingRequest pagingRequest);
+    Page<EventResponse> getEventByCustomerId(String id, PagingRequest pagingRequest);
+    Page<EventResponse> getEventByCustomerIdWithApprovedDetails(String id, PagingRequest pagingRequest);
     EventResponse getEventById(String id);
     EventResponse editEvent(String id, EventRequest request);
     EventResponse editEventWithRegeneratedProduct(String id, EventRequest request);
