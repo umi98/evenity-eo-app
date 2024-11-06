@@ -148,6 +148,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void changeStatusWhenPaid(String orderId) {
         try {
             Payment payment = paymentService.getPaymentByOrderId(orderId);
+            System.out.println(payment.getInvoice().getId());
             Invoice result = getInvoiceById(payment.getInvoice().getId());
 
             if (result.getStatus() == PaymentStatus.COMPLETE)
@@ -155,6 +156,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
             List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(orderId);
             Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
+            System.out.println(totalCost);
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());
             result.setModifiedDate(LocalDateTime.now());
