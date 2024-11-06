@@ -19,6 +19,7 @@ public class Payment {
     private String id;
     @Column(name = "token")
     private String token;
+    private String orderId;
     @Column(name = "redirect_url")
     private String redirectUrl;
     @Column(name = "transaction_status")

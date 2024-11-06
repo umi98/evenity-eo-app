@@ -3,21 +3,15 @@ package com.eska.evenity.service.impl;
 import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.PaymentStatus;
 import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.dto.request.PaymentDetailRequest;
-import com.eska.evenity.dto.request.PaymentRequest;
 import com.eska.evenity.dto.response.InvoiceDetailResponse;
 import com.eska.evenity.dto.response.InvoiceResponse;
 import com.eska.evenity.entity.*;
 import com.eska.evenity.repository.InvoiceDetailRepository;
 import com.eska.evenity.repository.InvoiceRepository;
-import com.eska.evenity.repository.PaymentRepository;
 import com.eska.evenity.service.InvoiceService;
 import com.eska.evenity.service.TransactionService;
-import com.midtrans.Midtrans;
-import com.midtrans.httpclient.error.MidtransError;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -118,6 +112,19 @@ public class InvoiceServiceImpl implements InvoiceService {
         ));
     }
 
+    @Override
+    public Payment paidForEvent(String id) {
+        Invoice result = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "invoice not found"
+                ));
+        if (result.getStatus() == PaymentStatus.COMPLETE)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This invoice has been paid");
+        List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(id);
+        Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
+        return paymentService.create(result, totalCost);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void createInvoice(Event event) {
@@ -137,29 +144,24 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Payment changeStatusWhenPaid(String id) {
-//        try {
-            Invoice result = invoiceRepository.findById(id)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "invoice not found"
-                    ));
+    public void changeStatusWhenPaid(String orderId) {
+        try {
+            Payment payment = paymentService.getPaymentByOrderId(orderId);
+            Invoice result = getInvoiceById(payment.getInvoice().getId());
 
             if (result.getStatus() == PaymentStatus.COMPLETE)
-                return null;
+                return;
 
-            List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(id);
+            List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(orderId);
             Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());
             result.setModifiedDate(LocalDateTime.now());
             invoiceRepository.saveAndFlush(result);
-
-            Payment transactionToken = paymentService.create(result.getId(), totalCost);
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
-            return transactionToken;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e.getMessage());
-//        }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)

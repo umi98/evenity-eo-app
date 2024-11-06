@@ -138,7 +138,7 @@ public class InvoiceController {
     @PutMapping("/{id}")
     public ResponseEntity<?> userPaidForEvent(@PathVariable String id) {
         try {
-            Payment invoice = invoiceService.changeStatusWhenPaid(id);
+            Payment invoice = invoiceService.paidForEvent(id);
 //            Pattern pattern = Pattern.compile("paid");
 //            Matcher matcher = pattern.matcher(invoice);
 //            if (matcher.find()) {

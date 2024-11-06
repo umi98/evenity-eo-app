@@ -16,8 +16,9 @@ public interface InvoiceService {
     Page<InvoiceResponse> getInvoicesByCustomerId(String id, PagingRequest pagingRequest);
     Page<InvoiceResponse> getInvoiceDetailByVendorId(String id, PagingRequest pagingRequest);
     Invoice getInvoiceById(String id);
+    Payment paidForEvent(String id);
     void createInvoice(Event event);
-    Payment changeStatusWhenPaid(String id);
+    void changeStatusWhenPaid(String orderId);
     void createInvoiceDetail(EventDetail eventDetail);
     String changeStatusWhenVendorWasPaid(String id);
 }
