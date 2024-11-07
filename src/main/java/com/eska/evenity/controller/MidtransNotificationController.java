@@ -22,8 +22,10 @@ public class MidtransNotificationController {
 
     @PostMapping("/api/midtrans/notification")
     public ResponseEntity<String> handleNotification(@RequestBody MidtransNotification notification) {
+        System.out.println(notification.getTransaction_status());
         if (notification.getTransaction_status().equals("settlement")) {
             try {
+                System.out.println(notification.getTransaction_status());
                 invoiceService.changeStatusWhenPaid(notification.getOrder_id(), notification.getGross_amount());
                 return new ResponseEntity<>("Invoice updated successfully", HttpStatus.OK);
             } catch (Exception e) {
