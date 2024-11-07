@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -175,11 +176,22 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public void editAdminFee(Invoice invoice, Long nominal) {
-        AdminFee adminFee = adminFeeRepository.findByInvoice_Id(invoice.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invoice not found"));
-        adminFee.setNominal(nominal);
-        adminFee.setModifiedDate(LocalDateTime.now());
-        adminFeeRepository.saveAndFlush(adminFee);
+        Optional<AdminFee> adminFeeOpt = adminFeeRepository.findByInvoice_Id(invoice.getId());
+        if (adminFeeOpt.isPresent()) {
+            AdminFee adminFee = adminFeeOpt.get();
+            adminFee.setNominal(nominal);
+            adminFee.setModifiedDate(LocalDateTime.now());
+            adminFeeRepository.saveAndFlush(adminFee);
+        } else {
+            AdminFee adminFee = AdminFee.builder()
+                    .invoice(invoice)
+                    .status(PaymentStatus.UNPAID)
+                    .nominal(nominal)
+                    .createdDate(LocalDateTime.now())
+                    .modifiedDate(LocalDateTime.now())
+                    .build();
+            adminFeeRepository.saveAndFlush(adminFee);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
