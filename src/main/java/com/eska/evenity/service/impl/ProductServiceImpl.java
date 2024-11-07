@@ -152,8 +152,8 @@ public class ProductServiceImpl implements ProductService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found");
             }
             if (mainCategory == CategoryType.CATERING) {
-                min *= request.getParticipant();
-                max *= request.getParticipant();
+                min = min * request.getParticipant() * calculatedDate;
+                max = max * request.getParticipant() * calculatedDate;
             } else {
                 min *= calculatedDate;
                 max *= calculatedDate;
@@ -175,8 +175,8 @@ public class ProductServiceImpl implements ProductService {
             Long maxCost = request.getMaxCost();
             Category category = categoryService.getCategoryUsingId(request.getCategoryId());
             if (category.getMainCategory() == CategoryType.CATERING) {
-                minCost = minCost / request.getParticipant();
-                maxCost = maxCost / request.getParticipant();
+                minCost = (minCost / request.getParticipant());
+                maxCost = (maxCost / request.getParticipant());
             }
             List<Product> products = productRepository.findRecommendation(
                     request.getProvince(),
@@ -227,8 +227,8 @@ public class ProductServiceImpl implements ProductService {
             Category category = categoryService.getCategoryUsingId(request.getCategoryId());
             System.out.println(category.getMainCategory());
             if (category.getMainCategory() == CategoryType.CATERING) {
-                minCost = minCost / request.getParticipant();
-                maxCost = maxCost / request.getParticipant();
+                minCost = (minCost / request.getParticipant()) / request.getDuration();
+                maxCost = (maxCost / request.getParticipant()) / request.getDuration();
             } else {
                 minCost = minCost / request.getDuration();
                 maxCost = maxCost / request.getDuration();
@@ -251,14 +251,14 @@ public class ProductServiceImpl implements ProductService {
                 return null;
             }
             products.sort(Comparator.comparingInt((Product p) -> p.getVendor().getScoring())
-                    .reversed()
+//                    .reversed()
                     .thenComparingLong(Product::getPrice)
                     .reversed()
                     .thenComparing(p -> Math.random()));
             Product chosenProduct = products.get(0);
-            System.out.println(chosenProduct.getName());
             Long cost = chosenProduct.getPrice();
-            if (category.getMainCategory() == CategoryType.CATERING) cost *= request.getParticipant();
+            if (category.getMainCategory() == CategoryType.CATERING)
+                cost = cost * request.getParticipant() * request.getDuration();
             else cost *= request.getDuration();
             return ProductRecommendedResponse.builder()
                     .vendorId(chosenProduct.getVendor().getId())

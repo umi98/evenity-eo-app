@@ -44,6 +44,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
             "AND p.id NOT IN :previousProducts " +
             "AND uc.status = 'ACTIVE' " +
             "AND p.isDeleted = false " +
-            "ORDER BY v.scoring DESC")
+            "ORDER BY v.scoring DESC, p.price DESC")
     List<Product> findRecommendation(String province, String city, String categoryId,Long minCost, Long maxCost, List<String> previousProducts);
 }
