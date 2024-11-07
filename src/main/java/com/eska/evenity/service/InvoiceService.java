@@ -11,6 +11,7 @@ import com.eska.evenity.entity.Invoice;
 
 public interface InvoiceService {
 //    Invoice userPaidEvent(String id);
+    void generateAdminFee();
     Page<InvoiceResponse> getInvoices(PagingRequest pagingRequest);
     InvoiceResponse getInvoiceByIdInResponse(String id);
     Page<InvoiceResponse> getInvoicesByCustomerId(String id, PagingRequest pagingRequest);
