@@ -260,6 +260,7 @@ public class AuthServiceImpl implements AuthService {
                 .owner(vendor.getOwner())
                 .scoring(vendor.getScoring())
                 .status(vendor.getStatus().name())
+                .mainCategory(vendor.getMainCategory().name())
                 .createdDate(vendor.getCreatedDate())
                 .modifiedDate(vendor.getModifiedDate())
                 .build();
