@@ -224,8 +224,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             System.out.println("invoice id 5: " + result.getId());
             adminFeeRepository.saveAndFlush(adminFee);
             Long totalCost = Long.valueOf(grossAmount);
+            System.out.println("invoice id 6: " + result.getId() + totalCost + grossAmount);
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
-            System.out.println("invoice id 6: " + result.getId());
+            System.out.println("invoice id 7: " + result.getId());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
