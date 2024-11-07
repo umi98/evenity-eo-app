@@ -214,7 +214,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             System.out.println("invoice id 2: " + result.getId());
             AdminFee adminFee = adminFeeRepository.findByInvoice_Id(result.getId()).get();
             System.out.println("invoice id 3: " + adminFee.getInvoice().getId());
-            Long totalCost = Long.valueOf(grossAmount);
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());
             result.setModifiedDate(LocalDateTime.now());
@@ -224,7 +223,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             adminFee.setModifiedDate(LocalDateTime.now());
             System.out.println("invoice id 5: " + result.getId());
             adminFeeRepository.saveAndFlush(adminFee);
+            Long totalCost = Long.valueOf(grossAmount);
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
+            System.out.println("invoice id 6: " + result.getId());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
