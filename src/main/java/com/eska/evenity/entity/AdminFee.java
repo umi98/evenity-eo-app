@@ -22,7 +22,7 @@ public class AdminFee {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
     @ManyToOne
-    @JoinColumn(name = "invoice_id", referencedColumnName = "id")
+    @JoinColumn(name = "invoice_id", referencedColumnName = "id", nullable = true)
     private Invoice invoice;
     private Long nominal;
     @CreatedDate
