@@ -1,5 +1,6 @@
 package com.eska.evenity.service.impl;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -223,7 +224,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             adminFee.setModifiedDate(LocalDateTime.now());
             System.out.println("invoice id 5: " + result.getId());
             adminFeeRepository.saveAndFlush(adminFee);
-            Long totalCost = Long.valueOf(grossAmount);
+            Long totalCost = new BigInteger(grossAmount).longValueExact();
             System.out.println("invoice id 6: " + result.getId() + totalCost + grossAmount);
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
             System.out.println("invoice id 7: " + result.getId());

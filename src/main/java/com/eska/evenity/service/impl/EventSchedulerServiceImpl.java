@@ -24,6 +24,17 @@ public class EventSchedulerServiceImpl {
     private final EventRepository eventRepository;
     private final EventDetailRepository eventDetailRepository;
 
+    @Async
+    public CompletableFuture<Void> runAsyncTask() {
+        try {
+            autoRejectPendingEventDetails();
+            changeProgressionStatus();
+        } catch (Exception e) {
+            System.err.println("Error in async task: " + e.getMessage());
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+
     @Scheduled(fixedRate = 3600000)
     public void autoRejectPendingEventDetails() {
         try {
