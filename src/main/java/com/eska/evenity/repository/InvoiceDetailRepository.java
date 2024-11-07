@@ -15,13 +15,18 @@ import com.eska.evenity.entity.InvoiceDetail;
 @Repository
 public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail, String> {
   List<InvoiceDetail> findByInvoice_Id(String id);
+
   List<InvoiceDetail> findByInvoice_IdAndEventDetail_ApprovalStatus(String id, ApprovalStatus approval);
+
   InvoiceDetail findByEventDetail_Id(String id);
+
   Page<InvoiceDetail> findByEventDetail_Product_Vendor_Id(String id, Pageable pageable);
+
   @Query("SELECT ed.cost FROM InvoiceDetail id " +
           "JOIN id.eventDetail ed " +
           "WHERE id.invoice.id = :invoiceId")
   List<Long> findAllCostsByInvoiceId(@Param("invoiceId") String invoiceId);
+
   @Query("SELECT eventDetail.cost FROM InvoiceDetail invoiceDetail " +
           "JOIN invoiceDetail.eventDetail eventDetail " +
           "WHERE invoiceDetail.id = :invoiceDetailId")

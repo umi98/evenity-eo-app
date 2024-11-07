@@ -1,9 +1,7 @@
 package com.eska.evenity.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import com.eska.evenity.dto.request.PagingRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +14,7 @@ import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.TransactionType;
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.dto.request.MoneyOnlyRequest;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.BalanceResponse;
 import com.eska.evenity.dto.response.TransactionHistoryResponse;
 import com.eska.evenity.dto.response.WithdrawRequestResponse;

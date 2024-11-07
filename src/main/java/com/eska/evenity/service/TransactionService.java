@@ -1,6 +1,6 @@
 package com.eska.evenity.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.eska.evenity.dto.request.MoneyOnlyRequest;
 import com.eska.evenity.dto.request.PagingRequest;
@@ -10,8 +10,6 @@ import com.eska.evenity.dto.response.WithdrawRequestResponse;
 import com.eska.evenity.entity.Balance;
 import com.eska.evenity.entity.Event;
 import com.eska.evenity.entity.EventDetail;
-import com.eska.evenity.entity.Invoice;
-import org.springframework.data.domain.Page;
 
 public interface TransactionService {
     Page<BalanceResponse> getAllBalanceAccount(PagingRequest pagingRequest);

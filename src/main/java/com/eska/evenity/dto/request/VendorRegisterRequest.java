@@ -2,12 +2,16 @@ package com.eska.evenity.dto.request;
 
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.EnumValue;
-import com.eska.evenity.constant.ProductUnit;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -39,6 +43,8 @@ public class VendorRegisterRequest {
     private String address;
     @NotBlank(message = "Owner name should be filled")
     private String ownerName;
-    @EnumValue(enumClass = CategoryType.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
+    @EnumValue(enumClass = CategoryType.class, message = "Status must be one of: VENUE, PARKING, " +
+            "SECURITY, CATERING, FLOWER_AND_DECORATION, PHOTOGRAPHY_AND_VIDEOGRAPHY, " +
+            "TECHNOLOGY_AND_MULTIMEDIA, ENTERTAINER")
     private String mainCategory;
 }

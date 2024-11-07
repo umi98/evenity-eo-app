@@ -1,30 +1,41 @@
 package com.eska.evenity.service.impl;
 
-import com.eska.evenity.constant.ApprovalStatus;
-import com.eska.evenity.constant.PaymentStatus;
-import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.dto.response.InvoiceDetailResponse;
-import com.eska.evenity.dto.response.InvoiceResponse;
-import com.eska.evenity.dto.response.PaymentResponse;
-import com.eska.evenity.entity.*;
-import com.eska.evenity.repository.InvoiceDetailRepository;
-import com.eska.evenity.repository.InvoiceRepository;
-import com.eska.evenity.service.InvoiceService;
-import com.eska.evenity.service.TransactionService;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.eska.evenity.constant.ApprovalStatus;
+import com.eska.evenity.constant.PaymentStatus;
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.AdminFeeResponse;
+import com.eska.evenity.dto.response.InvoiceDetailResponse;
+import com.eska.evenity.dto.response.InvoiceResponse;
+import com.eska.evenity.dto.response.PaymentResponse;
+import com.eska.evenity.entity.AdminFee;
+import com.eska.evenity.entity.Event;
+import com.eska.evenity.entity.EventDetail;
+import com.eska.evenity.entity.Invoice;
+import com.eska.evenity.entity.InvoiceDetail;
+import com.eska.evenity.entity.Payment;
+import com.eska.evenity.repository.AdminFeeRepository;
+import com.eska.evenity.repository.InvoiceDetailRepository;
+import com.eska.evenity.repository.InvoiceRepository;
+import com.eska.evenity.service.InvoiceService;
+import com.eska.evenity.service.TransactionService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +43,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final TransactionService transactionService;
-    private final MidTransServiceImpl midTransService;
+    private final AdminFeeRepository adminFeeRepository;
     private final PaymentServiceImpl paymentService;
 
     @Value("${midtrans.snap.url}")
@@ -75,6 +86,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .cost(invoiceDetail.getEventDetail().getCost())
                     .build();
             Invoice invoice = invoiceRepository.findById(invoiceDetail.getInvoice().getId()).get();
+            AdminFee adminFee = adminFeeRepository.findByInvoice_Id(invoice.getId()).orElse(null);
             return InvoiceResponse.builder()
                     .invoiceId(invoice.getId())
                     .startDate(invoice.getEvent().getStartDate())
@@ -99,6 +111,14 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .paymentStatus(invoice.getStatus().name())
                     .paymentDate(invoice.getPaymentDate())
                     .invoiceDetailResponseList(List.of(invoiceDetailResponse))
+                    .adminFeeResponse(AdminFeeResponse.builder()
+                            .adminFeeId(adminFee.getId())
+                            .eventId(adminFee.getInvoice().getEvent().getId())
+                            .eventName(adminFee.getInvoice().getEvent().getName())
+                            .customerId(adminFee.getInvoice().getEvent().getCustomer().getId())
+                            .customerId(adminFee.getInvoice().getEvent().getCustomer().getFullName())
+                            .cost(adminFee.getNominal())
+                            .build())
                     .build();
         }).collect(Collectors.toList());
 
@@ -114,6 +134,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public Invoice getInvoiceByEventId(String id) {
+        return invoiceRepository.findByEventId(id);
+    }
+
+    @Override
     public PaymentResponse paidForEvent(String id) {
         Invoice result = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -123,6 +148,10 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This invoice has been paid");
         List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(id);
         Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
+        AdminFee adminFee = adminFeeRepository.findByInvoice_Id(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "admin fee not found"));
+        totalCost += adminFee.getNominal();
         return paymentService.create(result, totalCost);
     }
 
@@ -138,9 +167,19 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .modifiedDate(LocalDateTime.now())
                     .build();
             invoiceRepository.saveAndFlush(newInvoice);
+            createAdminFeeInvoice(newInvoice, 0L);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public void editAdminFee(Invoice invoice, Long nominal) {
+        AdminFee adminFee = adminFeeRepository.findByInvoice_Id(invoice.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invoice not found"));
+        adminFee.setNominal(nominal);
+        adminFee.setModifiedDate(LocalDateTime.now());
+        adminFeeRepository.saveAndFlush(adminFee);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -168,7 +207,6 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public void createInvoiceDetail(EventDetail eventDetail) {
         try {
-
             Invoice invoice = invoiceRepository.findByEventId(eventDetail.getEvent().getId());
             InvoiceDetail newInvoiceDetail = InvoiceDetail.builder()
                     .invoice(invoice)
@@ -206,6 +244,18 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
     }
 
+    @Override
+    public void createAdminFeeInvoice(Invoice invoice, Long nominal) {
+        AdminFee adminFee = AdminFee.builder()
+                .invoice(invoice)
+                .status(PaymentStatus.UNPAID)
+                .nominal(nominal)
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .build();
+        adminFeeRepository.saveAndFlush(adminFee);
+    }
+
     private InvoiceResponse mapToResponse(Invoice invoice) {
         List<InvoiceDetail> invoiceDetails = invoiceDetailRepository.findByInvoice_IdAndEventDetail_ApprovalStatus(invoice.getId(), ApprovalStatus.APPROVED);
         List<InvoiceDetailResponse> invoiceDetailResponses = new ArrayList<>();
@@ -225,6 +275,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoiceDetailResponses.add(detailResponse);
             totalCost += detail.getEventDetail().getCost();
         }
+        AdminFee adminFee = adminFeeRepository.findByInvoice_Id(invoice.getId()).orElse(null);
         return InvoiceResponse.builder()
                 .invoiceId(invoice.getId())
                 .startDate(invoice.getEvent().getStartDate())
@@ -251,6 +302,14 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .createdDate(invoice.getCreatedDate())
                 .totalCost(totalCost)
                 .invoiceDetailResponseList(invoiceDetailResponses)
+                .adminFeeResponse(AdminFeeResponse.builder()
+                        .adminFeeId(adminFee.getId())
+                        .eventId(adminFee.getInvoice().getEvent().getId())
+                        .eventName(adminFee.getInvoice().getEvent().getName())
+                        .customerId(adminFee.getInvoice().getEvent().getCustomer().getId())
+                        .customerId(adminFee.getInvoice().getEvent().getCustomer().getFullName())
+                        .cost(adminFee.getNominal())
+                        .build())
                 .build();
     }
 }

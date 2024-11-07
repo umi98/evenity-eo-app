@@ -2,12 +2,16 @@ package com.eska.evenity.dto.request;
 
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.EnumValue;
-import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.constant.VendorStatus;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -37,6 +41,8 @@ public class VendorRequest {
     private String status;
     @Positive(message = "Score number should be positive number")
     private Integer score;
-    @EnumValue(enumClass = CategoryType.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
+    @EnumValue(enumClass = CategoryType.class, message = "Type must be one of: VENUE, PARKING, " +
+            "SECURITY, CATERING, FLOWER_AND_DECORATION, PHOTOGRAPHY_AND_VIDEOGRAPHY, " +
+            "TECHNOLOGY_AND_MULTIMEDIA, ENTERTAINER")
     private String mainCategory;
 }

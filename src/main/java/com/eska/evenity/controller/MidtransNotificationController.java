@@ -1,10 +1,5 @@
 package com.eska.evenity.controller;
 
-import com.eska.evenity.dto.request.MidtransNotification;
-import com.eska.evenity.service.InvoiceService;
-import com.eska.evenity.service.TransactionService;
-import lombok.RequiredArgsConstructor;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +7,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eska.evenity.dto.request.MidtransNotification;
+import com.eska.evenity.service.InvoiceService;
+
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequiredArgsConstructor
 public class MidtransNotificationController {
-    private final TransactionService transactionService;
     private final InvoiceService invoiceService;
 
     @Value("${midtrans.server.key}")

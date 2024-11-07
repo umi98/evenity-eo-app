@@ -1,13 +1,7 @@
 package com.eska.evenity.service.impl;
 
-import com.eska.evenity.constant.UserStatus;
-import com.eska.evenity.dto.request.AuthRequest;
-import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.dto.response.UserResponse;
-import com.eska.evenity.entity.UserCredential;
-import com.eska.evenity.repository.UserCredentialRepository;
-import com.eska.evenity.service.UserService;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +12,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.eska.evenity.constant.UserStatus;
+import com.eska.evenity.dto.request.AuthRequest;
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.UserResponse;
+import com.eska.evenity.entity.UserCredential;
+import com.eska.evenity.repository.UserCredentialRepository;
+import com.eska.evenity.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

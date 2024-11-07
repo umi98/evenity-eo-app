@@ -1,14 +1,14 @@
 package com.eska.evenity.service;
 
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.data.domain.Page;
 
 import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.entity.Vendor;
-import org.springframework.data.domain.Page;
 
 public interface VendorService {
     Vendor createVendor(Vendor vendor, UserCredential userCredential);

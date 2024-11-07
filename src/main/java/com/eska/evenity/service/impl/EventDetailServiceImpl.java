@@ -3,13 +3,11 @@ package com.eska.evenity.service.impl;
 import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.EventProgress;
 import com.eska.evenity.constant.ProductUnit;
+import com.eska.evenity.constant.RevenueVar;
 import com.eska.evenity.dto.request.EventDetailRequest;
 import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.EventDetailResponse;
-import com.eska.evenity.entity.Event;
-import com.eska.evenity.entity.EventDetail;
-import com.eska.evenity.entity.Product;
-import com.eska.evenity.entity.Vendor;
+import com.eska.evenity.entity.*;
 import com.eska.evenity.repository.EventDetailRepository;
 import com.eska.evenity.service.EventDetailService;
 import com.eska.evenity.service.InvoiceService;
@@ -40,34 +38,6 @@ public class EventDetailServiceImpl implements EventDetailService {
     private final InvoiceService invoiceService;
     private final VendorService vendorService;
 
-    @Async
-    public CompletableFuture<Void> runAsyncTask() {
-        try {
-            autoRejectPendingEventDetails();
-        } catch (Exception e) {
-            System.err.println("Error in async task: " + e.getMessage());
-        }
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Scheduled(fixedRate = 3600000)
-    public void autoRejectPendingEventDetails() {
-        try {
-            Pageable pageable = PageRequest.of(0, 1000);
-            LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
-            Page<EventDetail> pendingEventDetails = repository.findByApprovalStatusAndCreatedDateBefore(
-                    ApprovalStatus.PENDING, twentyFourHoursAgo, pageable
-            );
-            for (EventDetail eventDetail : pendingEventDetails) {
-                eventDetail.setApprovalStatus(ApprovalStatus.REJECTED);
-                eventDetail.setModifiedDate(LocalDateTime.now());
-                repository.saveAndFlush(eventDetail);
-            }
-        } catch (Exception e) {
-            System.err.println("Error in scheduled task: " + e.getMessage());
-        }
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addBulk(List<EventDetailRequest> eventDetails, Event event) {
@@ -96,8 +66,8 @@ public class EventDetailServiceImpl implements EventDetailService {
     }
 
     @Override
-    public List<EventDetail> editBulk(List<EventDetailRequest> eventDetails) {
-        return List.of();
+    public void editBulk(List<EventDetail> eventDetails) {
+        repository.saveAllAndFlush(eventDetails);
     }
 
     @Override
@@ -118,6 +88,11 @@ public class EventDetailServiceImpl implements EventDetailService {
     public List<EventDetailResponse> getEventDetailByEventIdAndApproved(String eventId) {
         List<EventDetail> result = repository.findByEventIdAndApprovalStatus(eventId, ApprovalStatus.APPROVED);
         return result.stream().map(this::mapToResponse).toList();
+    }
+
+    @Override
+    public List<EventDetail> getEventDetailByEventIdAndApprovedRegForm(String eventId) {
+        return repository.findByEventIdAndApprovalStatus(eventId, ApprovalStatus.APPROVED);
     }
 
     @Override
@@ -145,6 +120,10 @@ public class EventDetailServiceImpl implements EventDetailService {
         repository.saveAndFlush(result);
         invoiceService.createInvoiceDetail(result);
         vendorService.upVoteVendor(result.getProduct().getVendor().getId());
+        Invoice invoice = invoiceService.getInvoiceByEventId(result.getEvent().getId());
+        Long totalCost = repository.getTotalApprovedCostByEventId(result.getEvent().getId());
+        Long adminFee = (long) (RevenueVar.ADMIN_COST * totalCost);
+        invoiceService.editAdminFee(invoice, adminFee);
         return mapToResponse(result);
     }
 

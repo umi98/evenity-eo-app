@@ -1,27 +1,26 @@
 package com.eska.evenity.service.impl;
 
-import com.eska.evenity.dto.request.PaymentDetailRequest;
-import com.eska.evenity.dto.request.PaymentRequest;
-import com.eska.evenity.dto.response.PaymentResponse;
-import com.eska.evenity.entity.Event;
-import com.eska.evenity.entity.Invoice;
-import com.eska.evenity.entity.Payment;
-import com.eska.evenity.repository.PaymentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+import com.eska.evenity.dto.request.PaymentDetailRequest;
+import com.eska.evenity.dto.request.PaymentRequest;
+import com.eska.evenity.dto.response.PaymentResponse;
+import com.eska.evenity.entity.Invoice;
+import com.eska.evenity.entity.Payment;
+import com.eska.evenity.repository.PaymentRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,48 @@ public class PaymentServiceImpl {
     private String BASE_SNAP_URL;
 
     public PaymentResponse create(Invoice invoice, Long amount) {
-        String orderId = "event-" + UUID.randomUUID().toString();
+        String orderId = "invoice-" + UUID.randomUUID();
+        Map<String, String> body = paymentProceeding(orderId, amount);
+        Payment payment = Payment.builder()
+                .invoice(invoice)
+                .token(body.get("token"))
+                .redirectUrl(body.get("redirect_url"))
+                .transactionStatus("ordered")
+                .createdDate(LocalDateTime.now())
+                .orderId(orderId)
+                .build();
+        paymentRepository.saveAndFlush(payment);
+        return PaymentResponse.builder()
+                .orderId(orderId)
+                .token(payment.getToken())
+                .url(payment.getRedirectUrl())
+                .build();
+    }
+
+//    public PaymentResponse paidPreService(Event event) {
+//        String orderId = "event-" + UUID.randomUUID();
+//        Map<String, String> body = paymentProceeding(orderId, 10000L);
+//        ProceedingEventFee eventFee = ProceedingEventFee.builder()
+//                .event(event)
+//                .token(body.get("token"))
+//                .redirectUrl(body.get("redirect_url"))
+//                .transactionStatus("ordered")
+//                .createdDate(LocalDateTime.now())
+//                .orderId(orderId)
+//                .build();
+//        proceedingEventFeeRepository.saveAndFlush(eventFee);
+//        return PaymentResponse.builder()
+//                .orderId(orderId)
+//                .token(eventFee.getToken())
+//                .url(eventFee.getRedirectUrl())
+//                .build();
+//    }
+
+    public Payment getPaymentByOrderId(String id) {
+        return paymentRepository.findByOrderId(id);
+    }
+
+    private Map<String, String> paymentProceeding(String orderId, Long amount) {
         String username = Base64.getEncoder().encodeToString((SECRET_KEY + ":").getBytes());
         PaymentDetailRequest paymentDetailRequest = PaymentDetailRequest.builder()
                 .orderId(orderId)
@@ -68,32 +108,6 @@ public class PaymentServiceImpl {
                 .header(HttpHeaders.AUTHORIZATION,"Basic " + username)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<>() {});
-        Map<String,String> body = response.getBody();
-        Payment payment = Payment.builder()
-                .invoice(invoice)
-                .token(body.get("token"))
-                .redirectUrl(body.get("redirect_url"))
-                .transactionStatus("ordered")
-                .createdDate(LocalDateTime.now())
-                .orderId(orderId)
-                .build();
-        paymentRepository.saveAndFlush(payment);
-        return PaymentResponse.builder()
-                .orderId(orderId)
-                .token(payment.getToken())
-                .url(payment.getRedirectUrl())
-                .build();
-    }
-
-    public PaymentResponse paidPreService(Event event, Long amount) {
-        return null;
-    }
-
-    public Payment getPaymentByOrderId(String id) {
-        return paymentRepository.findByOrderId(id);
-    }
-
-    private PaymentResponse paymentProceeding() {
-        return null;
+        return response.getBody();
     }
 }

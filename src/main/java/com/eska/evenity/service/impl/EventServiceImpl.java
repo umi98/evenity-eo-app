@@ -1,13 +1,11 @@
 package com.eska.evenity.service.impl;
 
-import com.eska.evenity.dto.request.*;
-import com.eska.evenity.dto.response.*;
-import com.eska.evenity.entity.Customer;
-import com.eska.evenity.entity.Event;
-import com.eska.evenity.entity.Invoice;
-import com.eska.evenity.repository.EventRepository;
-import com.eska.evenity.service.*;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +14,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.eska.evenity.constant.EventProgress;
+import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
+import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
+import com.eska.evenity.dto.request.EventInfoMinimalistRequest;
+import com.eska.evenity.dto.request.EventRequest;
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.CustomerResponse;
+import com.eska.evenity.dto.response.EventDetailResponse;
+import com.eska.evenity.dto.response.EventRecommendationResponse;
+import com.eska.evenity.dto.response.EventResponse;
+import com.eska.evenity.dto.response.ProductRecommendedResponse;
+import com.eska.evenity.dto.response.TransactionDetail;
+import com.eska.evenity.entity.Customer;
+import com.eska.evenity.entity.Event;
+import com.eska.evenity.entity.EventDetail;
+import com.eska.evenity.entity.Invoice;
+import com.eska.evenity.repository.EventRepository;
+import com.eska.evenity.service.CustomerService;
+import com.eska.evenity.service.EventDetailService;
+import com.eska.evenity.service.EventService;
+import com.eska.evenity.service.InvoiceService;
+import com.eska.evenity.service.ProductService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +47,7 @@ public class EventServiceImpl implements EventService {
     private final EventDetailService eventDetailService;
     private final InvoiceService invoiceService;
     private final ProductService productService;
+//    private final PaymentServiceImpl paymentService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -238,6 +256,28 @@ public class EventServiceImpl implements EventService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
+    @Override
+    public void startEvent(String eventId) {
+        findByIdOrThrowNotFound(eventId);
+        List<EventDetail> eventDetails = eventDetailService.getEventDetailByEventIdAndApprovedRegForm(eventId);
+        List<EventDetail> editBulk = new ArrayList<>();
+        for (EventDetail eventDetail : eventDetails) {
+            eventDetail.setEventProgress(EventProgress.ON_PROGRESS);
+            eventDetail.setModifiedDate(LocalDateTime.now());
+            editBulk.add(eventDetail);
+        }
+        eventDetailService.editBulk(editBulk);
+    }
+//
+//    @Override
+//    public PaymentResponse paidForEventProceeding(String eventId) {
+//        Event event = findByIdOrThrowNotFound(eventId);
+//        if (event.getIsProceeded()) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This event has pre-service paid");
+//        }
+//        return paymentService.paidPreService(event);
+//    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override

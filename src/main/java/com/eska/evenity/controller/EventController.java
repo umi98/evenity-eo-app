@@ -1,18 +1,28 @@
 package com.eska.evenity.controller;
 
-import java.util.List;
-
-import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
-import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.dto.response.*;
-import com.eska.evenity.service.EventDetailService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
 import com.eska.evenity.dto.request.EventRequest;
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.EventDetailResponse;
+import com.eska.evenity.dto.response.EventRecommendationResponse;
+import com.eska.evenity.dto.response.EventResponse;
+import com.eska.evenity.dto.response.PagingResponse;
+import com.eska.evenity.dto.response.WebResponse;
+import com.eska.evenity.service.EventDetailService;
 import com.eska.evenity.service.EventService;
 
 import jakarta.validation.Valid;
@@ -349,6 +359,21 @@ public class EventController {
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully edit data")
                     .data(eventResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/start")
+    public ResponseEntity<?> changeEventToStarted(@PathVariable String id) {
+        try {
+            eventService.startEvent(id);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully edit data")
+                    .data("Event and vendor will start working")
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

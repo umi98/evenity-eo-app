@@ -1,14 +1,17 @@
 package com.eska.evenity.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
-import com.eska.evenity.dto.request.*;
+import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
+import com.eska.evenity.dto.request.EventInfoRequest;
+import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.request.PriceRangeRequest;
+import com.eska.evenity.dto.request.ProductRequest;
 import com.eska.evenity.dto.response.MinMaxPriceResponse;
 import com.eska.evenity.dto.response.ProductRecommendedResponse;
 import com.eska.evenity.dto.response.ProductResponse;
 import com.eska.evenity.dto.response.VendorWithProductsResponse;
 import com.eska.evenity.entity.Product;
-import org.springframework.data.domain.Page;
 
 public interface ProductService {
     ProductResponse createProduct(ProductRequest productRequest);

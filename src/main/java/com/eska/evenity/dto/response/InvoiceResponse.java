@@ -38,4 +38,5 @@ public class InvoiceResponse {
     private LocalDateTime createdDate;
     private Long totalCost;
     private List<InvoiceDetailResponse> invoiceDetailResponseList;
+    private AdminFeeResponse adminFeeResponse;
 }

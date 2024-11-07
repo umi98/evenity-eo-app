@@ -11,10 +11,11 @@ import org.springframework.data.domain.Page;
 
 public interface EventDetailService {
     void addBulk(List<EventDetailRequest> eventDetails, Event event);
-    List<EventDetail> editBulk(List<EventDetailRequest> eventDetails);
+    void editBulk(List<EventDetail> eventDetails);
     Page<EventDetailResponse> getAllEventDetails(PagingRequest pagingRequest);
     Page<EventDetailResponse> getEventDetailByVendorId(String vendorId, PagingRequest pagingRequest);
     List<EventDetailResponse> getEventDetailByEventIdAndApproved(String eventId);
+    List<EventDetail> getEventDetailByEventIdAndApprovedRegForm(String eventId);
     List<EventDetailResponse> getEventDetailByEventIdAndAllApprovalStatus(String eventId);
     EventDetailResponse getEvenDetailById(String id);
     void deleteDetail(EventDetail eventDetail);

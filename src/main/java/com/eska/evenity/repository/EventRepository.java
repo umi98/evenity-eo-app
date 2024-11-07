@@ -13,4 +13,5 @@ import com.eska.evenity.entity.Event;
 public interface EventRepository extends JpaRepository<Event, String> {
   Page<Event> getEventByCustomer_IdAndIsDeleted(String id, Boolean status, Pageable pageable);
   Page<Event> getEventByIsDeleted(Boolean status, Pageable pageable);
+  List<Event> findByIsDeleted(Boolean isDeleted);
 }
