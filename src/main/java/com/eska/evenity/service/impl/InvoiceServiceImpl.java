@@ -222,7 +222,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoiceRepository.saveAndFlush(result);
             adminFee.setStatus(PaymentStatus.COMPLETE);
             adminFee.setModifiedDate(LocalDateTime.now());
-            System.out.println("invoice id 5: " + result.getId());
+            System.out.println("invoice id 5: " + result.getId() + grossAmount);
             adminFeeRepository.saveAndFlush(adminFee);
             Long totalCost = new BigInteger(grossAmount).longValueExact();
             System.out.println("invoice id 6: " + result.getId() + totalCost + grossAmount);
