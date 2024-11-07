@@ -208,26 +208,18 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public void changeStatusWhenPaid(String orderId, String grossAmount) {
         try {
-            System.out.println("orderID: " + orderId);
             Payment payment = paymentService.getPaymentByOrderId(orderId);
-            System.out.println("invoice id 1: " + payment.getInvoice().getId());
             Invoice result = getInvoiceById(payment.getInvoice().getId());
-            System.out.println("invoice id 2: " + result.getId());
             AdminFee adminFee = adminFeeRepository.findByInvoice_Id(result.getId()).get();
-            System.out.println("invoice id 3: " + adminFee.getInvoice().getId());
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());
             result.setModifiedDate(LocalDateTime.now());
-            System.out.println("invoice id 4: " + result.getId());
             invoiceRepository.saveAndFlush(result);
             adminFee.setStatus(PaymentStatus.COMPLETE);
             adminFee.setModifiedDate(LocalDateTime.now());
-            System.out.println("invoice id 5: " + result.getId() + grossAmount);
             adminFeeRepository.saveAndFlush(adminFee);
-            Long totalCost = new BigInteger(grossAmount).longValueExact();
-            System.out.println("invoice id 6: " + result.getId() + totalCost + grossAmount);
+            Long totalCost = (long) Double.parseDouble(grossAmount);
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
-            System.out.println("invoice id 7: " + result.getId());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
