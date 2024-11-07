@@ -13,5 +13,6 @@ public class AdminFeeResponse {
     private String eventName;
     private String customerId;
     private String customerName;
+    private String paymentStatus;
     private Long cost;
 }

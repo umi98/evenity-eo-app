@@ -23,10 +23,10 @@ import lombok.RequiredArgsConstructor;
 public class InvoiceController {
     private final InvoiceService invoiceService;
 
-    @PostMapping("/adminfee")
-    public void generateAdminFee() {
-        invoiceService.generateAdminFee();
-    }
+//    @PostMapping("/adminfee")
+//    public void generateAdminFee() {
+//        invoiceService.generateAdminFee();
+//    }
 
     @GetMapping
     public ResponseEntity<?> getAllInvoices(

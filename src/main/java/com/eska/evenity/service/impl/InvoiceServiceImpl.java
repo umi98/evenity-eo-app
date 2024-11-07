@@ -50,13 +50,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Value("${midtrans.snap.url}")
     private String snapUrl;
 
-    @Override
-    public void generateAdminFee() {
-        List<Invoice> invoices = invoiceRepository.findAll();
-        for (Invoice invoice : invoices) {
-            createAdminFeeInvoice(invoice, 0L);
-        }
-    }
+//    @Override
+//    public void generateAdminFee() {
+//        List<Invoice> invoices = invoiceRepository.findAll();
+//        for (Invoice invoice : invoices) {
+//            createAdminFeeInvoice(invoice, 0L);
+//        }
+//    }
 
     @Override
     public Page<InvoiceResponse> getInvoices(PagingRequest pagingRequest) {
@@ -126,6 +126,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                             .eventName(adminFee.getInvoice().getEvent().getName())
                             .customerId(adminFee.getInvoice().getEvent().getCustomer().getId())
                             .customerId(adminFee.getInvoice().getEvent().getCustomer().getFullName())
+                            .paymentStatus(adminFee.getStatus().name())
                             .cost(adminFee.getNominal())
                             .build())
                     .build();
@@ -331,7 +332,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                         .eventId(adminFee.getInvoice().getEvent().getId())
                         .eventName(adminFee.getInvoice().getEvent().getName())
                         .customerId(adminFee.getInvoice().getEvent().getCustomer().getId())
-                        .customerId(adminFee.getInvoice().getEvent().getCustomer().getFullName())
+                        .customerName(adminFee.getInvoice().getEvent().getCustomer().getFullName())
+                        .paymentStatus(adminFee.getStatus().name())
                         .cost(adminFee.getNominal())
                         .build())
                 .build();
