@@ -226,7 +226,7 @@ public class AuthServiceImpl implements AuthService {
         CustomerResponse customerResponse = CustomerResponse.builder()
                 .userId(user.getId())
                 .email(user.getUsername())
-                .customerId(customer.getId())
+                .id(customer.getId())
                 .fullName(customer.getFullName())
                 .phoneNumber(customer.getPhoneNumber())
                 .province(customer.getProvince())

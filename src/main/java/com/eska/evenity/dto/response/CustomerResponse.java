@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class CustomerResponse {
     private String userId;
     private String email;
-    private String customerId;
+    private String id;
     private String fullName;
     private String phoneNumber;
     private String province;
