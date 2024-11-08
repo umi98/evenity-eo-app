@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.eska.evenity.constant.ApprovalStatus;
-import com.eska.evenity.constant.CategoryType;
-import com.eska.evenity.dto.request.PagingRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.constant.VendorStatus;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.entity.UserCredential;

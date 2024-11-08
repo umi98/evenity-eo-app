@@ -2,6 +2,7 @@ package com.eska.evenity.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -314,15 +315,28 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<DiagramData> getEventCountByMonth() {
         List<Event> events = eventRepository.findByIsDeleted(false);
+
+        LocalDate minDate = events.stream().map(Event::getStartDate).min(LocalDate::compareTo).orElse(LocalDate.now());
+        LocalDate maxDate = events.stream().map(Event::getStartDate).max(LocalDate::compareTo).orElse(LocalDate.now());
+
         Map<String, Long> eventCountByMonth = events.stream()
                 .collect(Collectors.groupingBy(
                         event -> event.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM")),
                         Collectors.counting()
                 ));
 
-        return eventCountByMonth.entrySet().stream()
-                .map(entry -> new DiagramData(entry.getKey(), Math.toIntExact(entry.getValue())))
-                .collect(Collectors.toList());
+        List<DiagramData> result = new ArrayList<>();
+        YearMonth currentMonth = YearMonth.from(minDate);
+        YearMonth endMonth = YearMonth.from(maxDate);
+
+        while (!currentMonth.isAfter(endMonth)) {
+            String monthLabel = currentMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            Long count = eventCountByMonth.getOrDefault(monthLabel, 0L);
+            result.add(new DiagramData(monthLabel, Math.toIntExact(count)));
+            currentMonth = currentMonth.plusMonths(1);
+        }
+
+        return result;
     }
 
     private Event findByIdOrThrowNotFound(String id) {

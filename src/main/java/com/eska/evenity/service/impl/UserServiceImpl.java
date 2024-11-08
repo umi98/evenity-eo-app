@@ -1,12 +1,14 @@
 package com.eska.evenity.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.eska.evenity.dto.response.DiagramData;
 import com.eska.evenity.entity.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.dto.request.AuthRequest;
 import com.eska.evenity.dto.request.PagingRequest;
+import com.eska.evenity.dto.response.DiagramData;
 import com.eska.evenity.dto.response.UserResponse;
 import com.eska.evenity.entity.UserCredential;
 import com.eska.evenity.repository.UserCredentialRepository;
@@ -84,15 +87,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<DiagramData> getEventCountByMonth() {
         List<UserCredential> userCredentials = repository.findByStatus(UserStatus.ACTIVE);
+
+        LocalDateTime minDate = userCredentials.stream().map(UserCredential::getCreatedDate)
+                .min(LocalDateTime::compareTo).orElse(LocalDateTime.now());
+        LocalDateTime maxDate = userCredentials.stream().map(UserCredential::getCreatedDate)
+                .max(LocalDateTime::compareTo).orElse(LocalDateTime.now());
+
         Map<String, Long> userCountByMonth = userCredentials.stream()
                 .collect(Collectors.groupingBy(
                         userCredential -> userCredential.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM")),
                         Collectors.counting()
                 ));
 
-        return userCountByMonth.entrySet().stream()
-                .map(entry -> new DiagramData(entry.getKey(), Math.toIntExact(entry.getValue())))
-                .collect(Collectors.toList());
+        List<DiagramData> result = new ArrayList<>();
+        YearMonth currentMonth = YearMonth.from(minDate);
+        YearMonth endMonth = YearMonth.from(maxDate);
+
+        while (!currentMonth.isAfter(endMonth)) {
+            String monthLabel = currentMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            Long count = userCountByMonth.getOrDefault(monthLabel, 0L);
+            result.add(new DiagramData(monthLabel, Math.toIntExact(count)));
+            currentMonth = currentMonth.plusMonths(1);
+        }
+
+        return result;
     }
 
     @Override
