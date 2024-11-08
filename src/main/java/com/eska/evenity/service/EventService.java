@@ -1,5 +1,6 @@
 package com.eska.evenity.service;
 
+import com.eska.evenity.dto.response.DiagramData;
 import org.springframework.data.domain.Page;
 
 import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
@@ -10,6 +11,7 @@ import com.eska.evenity.dto.response.EventResponse;
 import com.eska.evenity.dto.response.TransactionDetail;
 
 import java.util.HashMap;
+import java.util.List;
 
 public interface EventService {
     EventResponse addNewEvent(EventRequest request);
@@ -29,4 +31,5 @@ public interface EventService {
     void startEvent(String eventId);
 //    PaymentResponse paidForEventProceeding(String eventId);
     void deleteEvent(String id);
+    List<DiagramData> getEventCountByMonth();
 }

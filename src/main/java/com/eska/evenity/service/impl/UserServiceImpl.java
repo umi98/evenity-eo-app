@@ -1,7 +1,13 @@
 package com.eska.evenity.service.impl;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.eska.evenity.dto.response.DiagramData;
+import com.eska.evenity.entity.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -73,6 +79,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public Integer UserRegisterThisMonth() {
         return repository.countUsersRegisteredThisMonth();
+    }
+
+    @Override
+    public List<DiagramData> getEventCountByMonth() {
+        List<UserCredential> userCredentials = repository.findByStatus(UserStatus.ACTIVE);
+        Map<String, Long> userCountByMonth = userCredentials.stream()
+                .collect(Collectors.groupingBy(
+                        userCredential -> userCredential.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                        Collectors.counting()
+                ));
+
+        return userCountByMonth.entrySet().stream()
+                .map(entry -> new DiagramData(entry.getKey(), Math.toIntExact(entry.getValue())))
+                .collect(Collectors.toList());
     }
 
     @Override

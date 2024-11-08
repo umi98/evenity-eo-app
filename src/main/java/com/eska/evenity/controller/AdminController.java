@@ -1,20 +1,14 @@
 package com.eska.evenity.controller;
 
-import com.eska.evenity.dto.request.CustomerRegisterRequest;
-import com.eska.evenity.dto.response.AdminDashboardSummary;
-import com.eska.evenity.dto.response.CustomerResponse;
-import com.eska.evenity.dto.response.RegisterResponse;
-import com.eska.evenity.dto.response.WebResponse;
-import com.eska.evenity.service.AdminDashboardService;
-import com.eska.evenity.service.CustomerService;
-import com.eska.evenity.service.TransactionService;
-import com.eska.evenity.service.VendorService;
-import jakarta.validation.Valid;
+import com.eska.evenity.dto.response.*;
+import com.eska.evenity.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     private final CustomerService customerService;
     private final AdminDashboardService adminDashboardService;
-    private final VendorService vendorService;
-    private final TransactionService transactionService;
+    private final EventService eventService;
+    private final UserService userService;
 
     /*
      * Disable Customer using customer id
@@ -75,6 +69,44 @@ public class AdminController {
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully fetch data")
                     .data(summary)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    /*
+     * Get Data for Diagram : Event
+     */
+    @GetMapping("/admin/diagram/event")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> diagramDataEvent() {
+        try {
+            List<DiagramData> diagramData = eventService.getEventCountByMonth();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully fetch data")
+                    .data(diagramData)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    /*
+     * Get Data for Diagram : User
+     */
+    @GetMapping("/admin/diagram/user")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> diagramDataUser() {
+        try {
+            List<DiagramData> diagramData = userService.getEventCountByMonth();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully fetch data")
+                    .data(diagramData)
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {

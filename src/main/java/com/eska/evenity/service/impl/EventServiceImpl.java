@@ -2,13 +2,13 @@ package com.eska.evenity.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.eska.evenity.constant.CustomerStatus;
+import com.eska.evenity.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,12 +23,6 @@ import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
 import com.eska.evenity.dto.request.EventInfoMinimalistRequest;
 import com.eska.evenity.dto.request.EventRequest;
 import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.dto.response.CustomerResponse;
-import com.eska.evenity.dto.response.EventDetailResponse;
-import com.eska.evenity.dto.response.EventRecommendationResponse;
-import com.eska.evenity.dto.response.EventResponse;
-import com.eska.evenity.dto.response.ProductRecommendedResponse;
-import com.eska.evenity.dto.response.TransactionDetail;
 import com.eska.evenity.entity.Customer;
 import com.eska.evenity.entity.Event;
 import com.eska.evenity.entity.EventDetail;
@@ -315,6 +309,20 @@ public class EventServiceImpl implements EventService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public List<DiagramData> getEventCountByMonth() {
+        List<Event> events = eventRepository.findByIsDeleted(false);
+        Map<String, Long> eventCountByMonth = events.stream()
+                .collect(Collectors.groupingBy(
+                        event -> event.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                        Collectors.counting()
+                ));
+
+        return eventCountByMonth.entrySet().stream()
+                .map(entry -> new DiagramData(entry.getKey(), Math.toIntExact(entry.getValue())))
+                .collect(Collectors.toList());
     }
 
     private Event findByIdOrThrowNotFound(String id) {
