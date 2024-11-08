@@ -66,6 +66,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Integer getTotalUser() {
+        return repository.findAll().size() - 1;
+    }
+
+    @Override
+    public Integer UserRegisterThisMonth() {
+        return repository.countUsersRegisteredThisMonth();
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Load by user's username failed"));

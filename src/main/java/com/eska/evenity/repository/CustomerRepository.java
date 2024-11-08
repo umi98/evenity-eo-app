@@ -2,6 +2,7 @@ package com.eska.evenity.repository;
 
 import java.util.List;
 
+import com.eska.evenity.constant.CustomerStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,14 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     Customer findCustomerByUserCredential(UserCredential userCredential);
     List<Customer> findAllByFullNameLikeIgnoreCase(String fullName);
 
-    @Query("SELECT c FROM Customer c WHERE c.userCredential.status = :status")
-    Page<Customer> getCustomerByStatus(@Param("status") UserStatus status, Pageable pageable);
+    @Query("SELECT c FROM Customer c WHERE c.userCredential.status = :status AND c.status = :customerStatus")
+    Page<Customer> getCustomerByStatus(
+            @Param("status") UserStatus status,
+            @Param("customerStatus") CustomerStatus customerStatus,
+            Pageable pageable
+    );
+
+    @Query("SELECT COUNT(c) FROM Customer c WHERE MONTH(c.createdDate) = MONTH(CURRENT_DATE) " +
+            "AND YEAR(c.createdDate) = YEAR(CURRENT_DATE)")
+    Integer countCustomersRegisteredThisMonth();
 }

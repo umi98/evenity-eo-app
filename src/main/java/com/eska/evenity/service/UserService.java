@@ -14,4 +14,6 @@ public interface UserService extends UserDetailsService {
     UserResponse changePassword(String id, AuthRequest request);
     Page<UserResponse> getAllUser(PagingRequest pagingRequest);
     void softDeleteById(String id);
+    Integer getTotalUser();
+    Integer UserRegisterThisMonth();
 }

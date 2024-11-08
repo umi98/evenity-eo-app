@@ -1,7 +1,10 @@
 package com.eska.evenity.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.eska.evenity.constant.ApprovalStatus;
+import com.eska.evenity.constant.VendorStatus;
 import org.springframework.data.domain.Page;
 
 import com.eska.evenity.dto.request.PagingRequest;
@@ -26,4 +29,7 @@ public interface VendorService {
     void upVoteVendor(String id);
     void downVoteVendor(String id);
     List<Vendor> searchVendor(String name);
+    List<Vendor> getVendors(VendorStatus status);
+    List<Vendor> getAllVendors();
+    Integer countVendorRegisterThisMonth();
 }

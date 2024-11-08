@@ -62,7 +62,7 @@ public class CustomerController {
 //    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllActiveCustomer(
             @RequestParam(required = false, defaultValue = "1") Integer page,
-            @RequestParam (required = false, defaultValue = "2") Integer size
+            @RequestParam (required = false, defaultValue = "100") Integer size
     ) {
         try {
             PagingRequest pagingRequest = PagingRequest.builder()

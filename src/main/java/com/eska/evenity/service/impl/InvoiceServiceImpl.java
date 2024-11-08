@@ -1,7 +1,9 @@
 package com.eska.evenity.service.impl;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -276,6 +278,19 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .modifiedDate(LocalDateTime.now())
                 .build();
         adminFeeRepository.saveAndFlush(adminFee);
+    }
+
+    @Override
+    public Long grossIncomeInMonth() {
+        LocalDateTime startOfMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay();
+        LocalDateTime endOfMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfNextMonth()).atStartOfDay();
+
+        return invoiceRepository.calculateGrossIncomeForMonth(PaymentStatus.COMPLETE, startOfMonth, endOfMonth);
+    }
+
+    @Override
+    public Long grossIncomeAllTime() {
+        return invoiceRepository.calculateAllTimeGrossIncome(PaymentStatus.COMPLETE);
     }
 
     private InvoiceResponse mapToResponse(Invoice invoice) {

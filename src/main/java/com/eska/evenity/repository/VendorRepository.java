@@ -25,4 +25,10 @@ public interface VendorRepository extends JpaRepository<Vendor, String> {
     Page<Vendor> getVendorByStatus(@Param("status") UserStatus status, Pageable pageable);
 
     Page<Vendor> findByStatus(VendorStatus status, Pageable pageable);
+
+    List<Vendor> findByStatus(VendorStatus status);
+
+    @Query("SELECT COUNT(v) FROM Vendor v WHERE MONTH(v.createdDate) = MONTH(CURRENT_DATE) " +
+            "AND YEAR(v.createdDate) = YEAR(CURRENT_DATE)")
+    Integer countVendorsRegisteredThisMonth();
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.eska.evenity.constant.CustomerStatus;
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.dto.request.PagingRequest;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .city(customer.getCity())
                 .district(customer.getDistrict())
                 .address(customer.getAddress())
+                .status(CustomerStatus.ACTIVE)
                 .userCredential(userCredential)
                 .createdDate(LocalDateTime.now())
                 .modifiedDate(LocalDateTime.now())
@@ -60,7 +62,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Page<CustomerResponse> getAllActiveCustomer(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
-        Page<Customer> result = customerRepository.getCustomerByStatus(UserStatus.ACTIVE, pageable);
+        Page<Customer> result = customerRepository.getCustomerByStatus(
+                UserStatus.ACTIVE, CustomerStatus.ACTIVE, pageable
+        );
         return result.map(this::mapToResponse);
     }
 
@@ -86,7 +90,10 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse editCustomer(String id, CustomerRequest request) {
         try {
             Customer customer = findByIdOrThrowNotFound(id);
-            if (customer.getUserCredential().getStatus() != UserStatus.ACTIVE){
+            if (
+                    customer.getUserCredential().getStatus() != UserStatus.ACTIVE ||
+                    customer.getStatus() == CustomerStatus.DISABLED
+            ){
                 throw new RuntimeException("User status is not active");
             }
             customer.setFullName(request.getFullName());
@@ -101,6 +108,24 @@ public class CustomerServiceImpl implements CustomerService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public CustomerResponse disableCustomer(String id) {
+        Customer customer = findByIdOrThrowNotFound(id);
+        customer.setStatus(CustomerStatus.DISABLED);
+        customer.setModifiedDate(LocalDateTime.now());
+        customerRepository.saveAndFlush(customer);
+        return mapToResponse(customer);
+    }
+
+    @Override
+    public CustomerResponse enableCustomer(String id) {
+        Customer customer = findByIdOrThrowNotFound(id);
+        customer.setStatus(CustomerStatus.ACTIVE);
+        customer.setModifiedDate(LocalDateTime.now());
+        customerRepository.saveAndFlush(customer);
+        return mapToResponse(customer);
     }
 
     @Override
@@ -121,6 +146,16 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.findAllByFullNameLikeIgnoreCase('%' + name + '%');
     }
 
+    @Override
+    public List<Customer> getAllCustomers() {
+        return customerRepository.findAll();
+    }
+
+    @Override
+    public Integer countVendorRegisterThisMonth() {
+        return customerRepository.countCustomersRegisteredThisMonth();
+    }
+
     private Customer findByIdOrThrowNotFound(String id) {
         Optional<Customer> customer = customerRepository.findById(id);
         return customer.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "customer not found"));
@@ -137,6 +172,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .city(customer.getCity())
                 .district(customer.getDistrict())
                 .address(customer.getAddress())
+                .status(customer.getStatus().name())
                 .createdDate(customer.getCreatedDate())
                 .modifiedDate(customer.getModifiedDate())
                 .build();

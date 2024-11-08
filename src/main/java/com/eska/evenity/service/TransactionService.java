@@ -27,4 +27,6 @@ public interface TransactionService {
     Page<TransactionHistoryResponse> getAllTransactionHistoryByUserId(String userId, PagingRequest pagingRequest);
     void changeBalanceWhenCustomerPay(Long amount, Event event);
     void changeBalanceWhenTransfer(Long amount, EventDetail eventDetail);
+    Long getTotalOfApprovedWithdrawalAllTime();
+    Long getTotalOfApprovedWithdrawalThisMonth();
 }

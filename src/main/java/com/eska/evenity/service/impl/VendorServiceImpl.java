@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.dto.request.PagingRequest;
 import org.springframework.data.domain.Page;
@@ -95,28 +96,6 @@ public class VendorServiceImpl implements VendorService {
         return findByIdOrThrowNotFound(id);
     }
 
-//    @Override
-//    public VendorWithProductsResponse getVendorWithProducts(String id) {
-//        Vendor vendor = findByIdOrThrowNotFound(id);
-//        List<ProductResponse> productResponses = productService.getProductsByVendorId(id);
-//        return VendorWithProductsResponse.builder()
-//                .id(vendor.getId())
-//                .email(vendor.getUserCredential().getUsername())
-//                .name(vendor.getName())
-//                .phoneNumber(vendor.getPhoneNumber())
-//                .province(vendor.getProvince())
-//                .city(vendor.getCity())
-//                .district(vendor.getDistrict())
-//                .address(vendor.getAddress())
-//                .owner(vendor.getOwner())
-//                .scoring(vendor.getScoring())
-//                .status(vendor.getStatus().name())
-//                .createdDate(vendor.getCreatedDate())
-//                .modifiedDate(vendor.getModifiedDate())
-//                .productList(productResponses)
-//                .build();
-//    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public VendorResponse updateVendor(String id, VendorRequest request) {
@@ -198,6 +177,28 @@ public class VendorServiceImpl implements VendorService {
     @Override
     public List<Vendor> searchVendor(String name) {
         return vendorRepository.findAllByNameLikeIgnoreCase('%' + name + '%');
+    }
+
+    @Override
+    public List<Vendor> getVendors(VendorStatus status) {
+        if (status == VendorStatus.ACTIVE) {
+            return vendorRepository.findByStatus(VendorStatus.ACTIVE);
+        } else if (status == VendorStatus.PENDING) {
+            return vendorRepository.findByStatus(VendorStatus.PENDING);
+        } else if (status == VendorStatus.INACTIVE) {
+            return vendorRepository.findByStatus(VendorStatus.INACTIVE);
+        }
+        return vendorRepository.findByStatus(VendorStatus.DISABLED);
+    }
+
+    @Override
+    public List<Vendor> getAllVendors() {
+        return vendorRepository.findAll();
+    }
+
+    @Override
+    public Integer countVendorRegisterThisMonth() {
+        return vendorRepository.countVendorsRegisteredThisMonth();
     }
 
     private Vendor findByIdOrThrowNotFound(String id) {

@@ -1,5 +1,6 @@
 package com.eska.evenity.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
@@ -239,6 +240,21 @@ public class TransactionServiceImpl implements TransactionService {
                 .createdBy(userCredential)
                 .build();
         transactionHistoryRepository.saveAndFlush(history);
+    }
+
+    @Override
+    public Long getTotalOfApprovedWithdrawalAllTime() {
+        return withdrawRequestRepository.getTotalApprovedWithdrawalAmount(ApprovalStatus.APPROVED);
+    }
+
+    @Override
+    public Long getTotalOfApprovedWithdrawalThisMonth() {
+        LocalDate current = LocalDate.now();
+        return withdrawRequestRepository.getTotalApprovedWithdrawalAmountForCurrentMonth(
+                ApprovalStatus.APPROVED,
+                current.getYear(),
+                current.getMonthValue()
+        );
     }
 
     private Balance findBalanceByUserIdOrThrowException(String id) {

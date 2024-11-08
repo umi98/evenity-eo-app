@@ -1,11 +1,14 @@
 package com.eska.evenity.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import com.eska.evenity.constant.CustomerStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +57,9 @@ public class EventServiceImpl implements EventService {
     public EventResponse addNewEvent(EventRequest request) {
         try {
             Customer customer = customerService.getCustomerByCustomerId(request.getCustomerId());
+            if (customer.getStatus() == CustomerStatus.DISABLED) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer is disabled");
+            }
             Event newEvent = Event.builder()
                     .name(request.getName())
                     .description(request.getDescription())
@@ -85,7 +91,9 @@ public class EventServiceImpl implements EventService {
     public EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request) {
         try {
             Customer customer = customerService.getCustomerByCustomerId(request.getCustomerId());
-            System.out.println(request.getPreviousProduct());
+            if (customer.getStatus() == CustomerStatus.DISABLED) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer is disabled");
+            }
             Event event = Event.builder()
                     .name(request.getName())
                     .description(request.getDescription())
@@ -166,6 +174,7 @@ public class EventServiceImpl implements EventService {
                 .city(customer.getCity())
                 .district(customer.getDistrict())
                 .address(customer.getAddress())
+                .status(customer.getStatus().name())
                 .createdDate(customer.getCreatedDate())
                 .modifiedDate(customer.getModifiedDate())
                 .build();
@@ -255,6 +264,22 @@ public class EventServiceImpl implements EventService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public Long numOfEventHeldThisMonth() {
+        return eventRepository.countEventsThisMonth();
+    }
+
+    @Override
+    public HashMap<String, Long> numOfFuturePastEvents() {
+        HashMap<String, Long> result = new HashMap<>();
+        LocalDate current = LocalDate.now();
+        Long pastEventsCount = eventRepository.countPastEvents(current);
+        Long futureEventsCount = eventRepository.countFutureEvents(current);
+        result.put("pastEvents", pastEventsCount);
+        result.put("futureEvents", futureEventsCount);
+        return result;
     }
 
     @Override

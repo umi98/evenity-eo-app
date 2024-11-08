@@ -1,5 +1,6 @@
 package com.eska.evenity.repository;
 
+import com.eska.evenity.constant.ApprovalStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +17,21 @@ public interface WithdrawRequestRepository extends JpaRepository<WithdrawRequest
 
   @Query("SELECT v FROM Vendor v JOIN v.userCredential uc WHERE uc.id = :userId")
   Vendor findVendorByUserCredentialId(@Param("userId") String userId);
+
+  @Query("SELECT COALESCE(SUM(w.amount), 0) " +
+          "FROM WithdrawRequest w " +
+          "WHERE w.approvalStatus = :status")
+  Long getTotalApprovedWithdrawalAmount(@Param("status") ApprovalStatus status);
+
+  @Query("SELECT COALESCE(SUM(w.amount), 0) " +
+          "FROM WithdrawRequest w " +
+          "WHERE w.approvalStatus = :status " +
+          "AND YEAR(w.createdDate) = :year " +
+          "AND MONTH(w.createdDate) = :month")
+  Long getTotalApprovedWithdrawalAmountForCurrentMonth(
+          @Param("status") ApprovalStatus status,
+          @Param("year") int year,
+          @Param("month") int month);
 
   // Vendor getVendorByBalance_UserCredential_Id(String id);
 }

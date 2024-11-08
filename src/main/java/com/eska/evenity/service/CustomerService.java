@@ -18,6 +18,10 @@ public interface CustomerService {
     Customer getCustomerByCustomerId(String id);
     Customer getCustomerByUserId(String id);
     CustomerResponse editCustomer(String id, CustomerRequest request);
+    CustomerResponse disableCustomer(String id);
+    CustomerResponse enableCustomer(String id);
     void deleteCustomer(String id);
     List<Customer> searchCustomer(String name);
+    List<Customer> getAllCustomers();
+    Integer countVendorRegisterThisMonth();
 }

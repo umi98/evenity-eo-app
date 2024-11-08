@@ -11,7 +11,9 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository <Category, String> {
     Optional<Category> findByName(String name);
+
     @Query("SELECT c FROM Category c WHERE EXISTS (" +
-            "SELECT p FROM Product p WHERE p.category = c AND p.isDeleted = false)")
+            "SELECT p FROM Product p WHERE p.category = c AND p.isDeleted = false" +
+            " AND p.vendor.status = 'ACTIVE')")
     List<Category> findCategoriesWithProducts();
 }

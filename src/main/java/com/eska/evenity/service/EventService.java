@@ -9,6 +9,8 @@ import com.eska.evenity.dto.response.EventRecommendationResponse;
 import com.eska.evenity.dto.response.EventResponse;
 import com.eska.evenity.dto.response.TransactionDetail;
 
+import java.util.HashMap;
+
 public interface EventService {
     EventResponse addNewEvent(EventRequest request);
     EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request);
@@ -22,6 +24,8 @@ public interface EventService {
     EventResponse getEventById(String id);
     EventResponse editEvent(String id, EventRequest request);
     EventResponse editEventWithRegeneratedProduct(String id, EventRequest request);
+    Long numOfEventHeldThisMonth();
+    HashMap<String, Long> numOfFuturePastEvents();
     void startEvent(String eventId);
 //    PaymentResponse paidForEventProceeding(String eventId);
     void deleteEvent(String id);

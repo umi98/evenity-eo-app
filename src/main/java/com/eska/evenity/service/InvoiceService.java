@@ -25,4 +25,6 @@ public interface InvoiceService {
     void createInvoiceDetail(EventDetail eventDetail);
     String changeStatusWhenVendorWasPaid(String id);
     void createAdminFeeInvoice(Invoice invoice, Long nominal);
+    Long grossIncomeInMonth();
+    Long grossIncomeAllTime();
 }

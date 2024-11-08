@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.eska.evenity.constant.CategoryType;
-import com.eska.evenity.constant.UserStatus;
+import com.eska.evenity.constant.*;
 import com.eska.evenity.dto.JwtClaim;
 import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.*;
@@ -26,7 +25,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eska.evenity.constant.ERole;
 import com.eska.evenity.dto.request.AuthRequest;
 import com.eska.evenity.dto.request.CustomerRegisterRequest;
 import com.eska.evenity.dto.request.VendorRegisterRequest;
@@ -155,15 +153,19 @@ public class AuthServiceImpl implements AuthService {
             Authentication authenticated = authenticationManager.authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authenticated);
             UserCredential userCredential = (UserCredential) authenticated.getPrincipal();
-            if (userCredential.getStatus() == UserStatus.ACTIVE){
-                return AuthResponse.builder()
-                        .token(jwtUtils.generateToken(userCredential))
-                        .build();
-            } else {
-                return AuthResponse.builder()
-                        .message("Account is not active")
-                        .build();
+
+            if (userCredential.getStatus() != UserStatus.ACTIVE) {
+                return AuthResponse.builder().message("Account is not active").build();
             }
+
+            String role = userCredential.getRole().getRole().name();
+            if (role.equals(ERole.ROLE_VENDOR.name())) {
+                return handleVendorLogin(userCredential);
+            } else if (role.equals(ERole.ROLE_CUSTOMER.name())) {
+                return handleCustomerLogin(userCredential);
+            }
+
+            return generateSuccessResponse(userCredential);
         } catch (Exception e) {
             return AuthResponse.builder()
                     .message("Invalid username and password")
@@ -222,6 +224,27 @@ public class AuthServiceImpl implements AuthService {
         return new PageImpl<>(paginatedResponse, pageable, responses.size());
     }
 
+    private AuthResponse handleVendorLogin(UserCredential userCredential) {
+        Vendor vendor = vendorService.getVendorByUserId(userCredential.getId());
+        if (vendor.getStatus() == VendorStatus.DISABLED) {
+            return AuthResponse.builder().message("Login failed because user is disabled").build();
+        }
+        return generateSuccessResponse(userCredential);
+    }
+
+    private AuthResponse handleCustomerLogin(UserCredential userCredential) {
+        Customer customer = customerService.getCustomerByUserId(userCredential.getId());
+        if (customer.getStatus() == CustomerStatus.DISABLED) {
+            return AuthResponse.builder().message("Login failed because user is disabled").build();
+        }
+        return generateSuccessResponse(userCredential);
+    }
+
+    private AuthResponse generateSuccessResponse(UserCredential userCredential) {
+        String token = jwtUtils.generateToken(userCredential);
+        return AuthResponse.builder().token(token).build();
+    }
+
     private ProfileResponse<?> mapToResponseCustomer(Customer customer, UserCredential user) {
         CustomerResponse customerResponse = CustomerResponse.builder()
                 .userId(user.getId())
@@ -233,6 +256,7 @@ public class AuthServiceImpl implements AuthService {
                 .city(customer.getCity())
                 .district(customer.getDistrict())
                 .address(customer.getAddress())
+                .status(customer.getStatus().name())
                 .createdDate(customer.getCreatedDate())
                 .modifiedDate(customer.getModifiedDate())
                 .build();

@@ -19,6 +19,7 @@ public class CustomerResponse {
     private String city;
     private String district;
     private String address;
+    private String status;
     private LocalDateTime modifiedDate;
     private LocalDateTime createdDate;
 }
