@@ -37,7 +37,6 @@ public class EventServiceImpl implements EventService {
     private final EventDetailService eventDetailService;
     private final InvoiceService invoiceService;
     private final ProductService productService;
-//    private final PaymentServiceImpl paymentService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -157,10 +156,17 @@ public class EventServiceImpl implements EventService {
             List<EventDetailRequest> eventDetailRequests = new ArrayList<>();
             List<String> skippedEventDetails = new ArrayList<>();
             List<String> proceededEventDetails = new ArrayList<>();
+            List<String> previousProduct = new ArrayList<>();
 
             for (EventDetail eventDetail : eventDetails) {
-                if (eventDetail.getApprovalStatus() == ApprovalStatus.PENDING)
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Regenerate will active when all requests are rejected");
+                if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                    previousProduct.add(eventDetail.getProduct().getId());
+                } else if (eventDetail.getApprovalStatus() == ApprovalStatus.PENDING) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Regenerate will activate when all requests are rejected");
+                }
+            }
+
+            for (EventDetail eventDetail : eventDetails) {
                 Long qty = 0L;
                 String unit = "";
                 if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED) {
@@ -179,7 +185,7 @@ public class EventServiceImpl implements EventService {
                             .maxCost(eventDetail.getCost())
                             .participant(event.getParticipant())
                             .duration(calculatedDate)
-                            .previousList(List.of(eventDetail.getProduct().getId()))
+                            .previousList(previousProduct)
                             .build();
                     ProductRecommendedResponse result = productService.generateRecommendation(request);
                     if (result == null) {
