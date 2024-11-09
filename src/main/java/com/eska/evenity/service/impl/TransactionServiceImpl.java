@@ -118,6 +118,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public WithdrawRequestResponse withDrawRequest(String userId, MoneyOnlyRequest request) {
         Balance balance = findBalanceByUserIdOrThrowException(userId);
+        if (balance.getAmount() < request.getAmount()) {
+            throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money on balance");
+        }
         WithdrawRequest withdrawRequest = WithdrawRequest.builder()
                 .amount(request.getAmount())
                 .approvalStatus(ApprovalStatus.PENDING)

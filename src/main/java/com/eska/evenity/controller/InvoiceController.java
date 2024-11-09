@@ -132,19 +132,10 @@ public class InvoiceController {
         }
     }
 
-//    @PostMapping("/{id}")
-//    public ResponseEntity<?> userPaid(@PathVariable String id) {
-//        Invoice invoice = invoiceService.userPaidEvent(id);
-//        return null;
-//    }
-
     @PutMapping("/{id}")
     public ResponseEntity<?> userPaidForEvent(@PathVariable String id) {
         try {
             PaymentResponse invoice = invoiceService.paidForEvent(id);
-//            Pattern pattern = Pattern.compile("paid");
-//            Matcher matcher = pattern.matcher(invoice);
-//            if (matcher.find()) {
         if (invoice == null) {
                 return ResponseEntity.badRequest().build();
             }
@@ -166,7 +157,9 @@ public class InvoiceController {
             Pattern pattern = Pattern.compile("not|included|paid");
             Matcher matcher = pattern.matcher(invoice);
             if (matcher.find()) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(invoice);
             }
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.CREATED.getReasonPhrase())
