@@ -159,6 +159,8 @@ public class EventServiceImpl implements EventService {
             List<String> proceededEventDetails = new ArrayList<>();
 
             for (EventDetail eventDetail : eventDetails) {
+                if (eventDetail.getApprovalStatus() == ApprovalStatus.PENDING)
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Regenerate will active when all requests are rejected");
                 Long qty = 0L;
                 String unit = "";
                 if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED) {

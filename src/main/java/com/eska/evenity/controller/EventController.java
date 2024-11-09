@@ -419,7 +419,7 @@ public class EventController {
             }
             WebResponse<?> response = WebResponse.builder()
                     .status(HttpStatus.OK.getReasonPhrase())
-                    .message("Successfully make recommendation")
+                    .message("Successfully make recommendation<")
                     .data(result)
                     .build();
             return ResponseEntity.ok(response);
