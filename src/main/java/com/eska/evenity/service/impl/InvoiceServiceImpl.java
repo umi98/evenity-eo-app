@@ -212,14 +212,28 @@ public class InvoiceServiceImpl implements InvoiceService {
             Payment payment = paymentService.getPaymentByOrderId(orderId);
             Invoice result = getInvoiceById(payment.getInvoice().getId());
             AdminFee adminFee = adminFeeRepository.findByInvoice_Id(result.getId()).get();
+            List<InvoiceDetail> invoiceDetails = invoiceDetailRepository.findByInvoice_Id(result.getId());
+
             result.setStatus(PaymentStatus.COMPLETE);
             result.setPaymentDate(LocalDateTime.now());
             result.setModifiedDate(LocalDateTime.now());
             invoiceRepository.saveAndFlush(result);
+
             adminFee.setStatus(PaymentStatus.COMPLETE);
             adminFee.setModifiedDate(LocalDateTime.now());
             adminFeeRepository.saveAndFlush(adminFee);
-            Long totalCost = (long) Double.parseDouble(grossAmount);
+
+            Long accPartialInvoiceDetail = 0L;
+            for (InvoiceDetail invoiceDetail : invoiceDetails) {
+                Long cost = (long) (invoiceDetail.getEventDetail().getCost() * 0.5);
+                accPartialInvoiceDetail += cost;
+                invoiceDetail.setStatus(PaymentStatus.PARTIAL);
+                invoiceDetail.setModifiedDate(LocalDateTime.now());
+                invoiceDetailRepository.save(invoiceDetail);
+                transactionService.changeBalanceWhenTransfer(cost, invoiceDetail.getEventDetail());
+            }
+
+            Long totalCost = (long) Double.parseDouble(grossAmount) - accPartialInvoiceDetail;
             transactionService.changeBalanceWhenCustomerPay(totalCost, result.getEvent());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -259,7 +273,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             result.setStatus(PaymentStatus.COMPLETE);
             result.setModifiedDate(LocalDateTime.now());
             invoiceDetailRepository.saveAndFlush(result);
-            Long cost = invoiceDetailRepository.findCostFromInvoiceDetail(id);
+            Long cost = (long) (invoiceDetailRepository.findCostFromInvoiceDetail(id) * 0.5);
             transactionService.changeBalanceWhenTransfer(cost, result.getEventDetail());
             return result.getId();
         } catch (Exception e) {
