@@ -1,14 +1,11 @@
 package com.eska.evenity.service;
 
-import com.eska.evenity.dto.response.DiagramData;
+import com.eska.evenity.dto.response.*;
 import org.springframework.data.domain.Page;
 
 import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
 import com.eska.evenity.dto.request.EventRequest;
 import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.dto.response.EventRecommendationResponse;
-import com.eska.evenity.dto.response.EventResponse;
-import com.eska.evenity.dto.response.TransactionDetail;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +14,7 @@ public interface EventService {
     EventResponse addNewEvent(EventRequest request);
     EventRecommendationResponse eventAndGenerateProduct(EventAndGenerateProductRequest request);
     EventRecommendationResponse regenerateProductOnSavedEvent(String id, EventAndGenerateProductRequest request);
+    RegenerateResponse regenerateWhenRejected(String eventId);
     TransactionDetail getTransactionByInvoiceId(String invoiceId);
     Page<EventResponse> getAllEvents(PagingRequest pagingRequest);
     Page<EventResponse> getAllEventsWithApprovedDetails(PagingRequest pagingRequest);

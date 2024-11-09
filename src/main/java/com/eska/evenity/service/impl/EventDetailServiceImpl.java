@@ -46,20 +46,22 @@ public class EventDetailServiceImpl implements EventDetailService {
         try {
             List<EventDetail> newDetails = new ArrayList<>();
             for (EventDetailRequest request : eventDetails) {
-                Product product = productService.getProductUsingId(request.getProductId());
-                EventDetail newDetail = EventDetail.builder()
-                        .event(event)
-                        .product(product)
-                        .approvalStatus(ApprovalStatus.PENDING)
-                        .cost(request.getCost())
-                        .eventProgress(EventProgress.NOT_STARTED)
-                        .notes(request.getNotes())
-                        .quantity(request.getQty())
-                        .unit(ProductUnit.valueOf(request.getUnit()))
-                        .createdDate(LocalDateTime.now())
-                        .modifiedDate(LocalDateTime.now())
-                        .build();
-                newDetails.add(newDetail);
+                if (request != null) {
+                    Product product = productService.getProductUsingId(request.getProductId());
+                    EventDetail newDetail = EventDetail.builder()
+                            .event(event)
+                            .product(product)
+                            .approvalStatus(ApprovalStatus.PENDING)
+                            .cost(request.getCost())
+                            .eventProgress(EventProgress.NOT_STARTED)
+                            .notes(request.getNotes())
+                            .quantity(request.getQty())
+                            .unit(ProductUnit.valueOf(request.getUnit()))
+                            .createdDate(LocalDateTime.now())
+                            .modifiedDate(LocalDateTime.now())
+                            .build();
+                    newDetails.add(newDetail);
+                }
             }
             repository.saveAllAndFlush(newDetails);
         } catch (Exception e) {
@@ -95,6 +97,11 @@ public class EventDetailServiceImpl implements EventDetailService {
     @Override
     public List<EventDetail> getEventDetailByEventIdAndApprovedRegForm(String eventId) {
         return repository.findByEventIdAndApprovalStatus(eventId, ApprovalStatus.APPROVED);
+    }
+
+    @Override
+    public List<EventDetail> getEventDetailRegForm(String event) {
+        return repository.findByEventId(event);
     }
 
     @Override

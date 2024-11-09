@@ -16,6 +16,7 @@ public interface EventDetailService {
     Page<EventDetailResponse> getEventDetailByVendorId(String vendorId, PagingRequest pagingRequest);
     List<EventDetailResponse> getEventDetailByEventIdAndApproved(String eventId);
     List<EventDetail> getEventDetailByEventIdAndApprovedRegForm(String eventId);
+    List<EventDetail> getEventDetailRegForm(String event);
     List<EventDetailResponse> getEventDetailByEventIdAndAllApprovalStatus(String eventId);
     EventDetailResponse getEvenDetailById(String id);
     void deleteDetail(EventDetail eventDetail);

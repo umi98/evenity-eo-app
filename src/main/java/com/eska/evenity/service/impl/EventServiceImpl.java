@@ -8,8 +8,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.eska.evenity.constant.CustomerStatus;
+import com.eska.evenity.constant.*;
+import com.eska.evenity.dto.request.*;
 import com.eska.evenity.dto.response.*;
+import com.eska.evenity.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,16 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.eska.evenity.constant.EventProgress;
-import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
-import com.eska.evenity.dto.request.EventDetailCustomizedRequest;
-import com.eska.evenity.dto.request.EventInfoMinimalistRequest;
-import com.eska.evenity.dto.request.EventRequest;
-import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.entity.Customer;
-import com.eska.evenity.entity.Event;
-import com.eska.evenity.entity.EventDetail;
-import com.eska.evenity.entity.Invoice;
 import com.eska.evenity.repository.EventRepository;
 import com.eska.evenity.service.CustomerService;
 import com.eska.evenity.service.EventDetailService;
@@ -151,6 +143,66 @@ public class EventServiceImpl implements EventService {
             findByIdOrThrowNotFound(id);
             return eventAndGenerateProduct(request);
         } catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public RegenerateResponse regenerateWhenRejected(String eventId) {
+        try {
+            Event event = findByIdOrThrowNotFound(eventId);
+            List<EventDetail> eventDetails = eventDetailService.getEventDetailRegForm(eventId);
+            Long calculatedDate = ChronoUnit.DAYS.between(event.getStartDate(), event.getEndDate()) + 1;
+
+            List<EventDetailRequest> eventDetailRequests = new ArrayList<>();
+            List<String> skippedEventDetails = new ArrayList<>();
+            List<String> proceededEventDetails = new ArrayList<>();
+
+            for (EventDetail eventDetail : eventDetails) {
+                Long qty = 0L;
+                String unit = "";
+                if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                    if (eventDetail.getProduct().getCategory().getMainCategory() == CategoryType.CATERING) {
+                        qty = event.getParticipant();
+                        unit = ProductUnit.PCS.name();
+                    } else {
+                        qty = calculatedDate;
+                        unit = ProductUnit.DAY.name();
+                    }
+                    EventDetailCustomizedRequest request = EventDetailCustomizedRequest.builder()
+                            .categoryId(eventDetail.getProduct().getCategory().getId())
+                            .province(event.getProvince())
+                            .city(event.getCity())
+                            .minCost(0L)
+                            .maxCost(eventDetail.getCost())
+                            .participant(event.getParticipant())
+                            .duration(calculatedDate)
+                            .previousList(List.of(eventDetail.getProduct().getId()))
+                            .build();
+                    ProductRecommendedResponse result = productService.generateRecommendation(request);
+                    if (result == null) {
+                        eventDetailRequests.add(null);
+                        skippedEventDetails.add("Category: " + eventDetail.getProduct().getCategory().getName());
+                    } else {
+                        proceededEventDetails.add("Category: " + eventDetail.getProduct().getCategory().getName());
+                        EventDetailRequest eventDetailRequest = EventDetailRequest.builder()
+                                .qty(qty)
+                                .unit(unit)
+                                .notes(eventDetail.getNotes())
+                                .cost(result.getCost())
+                                .productId(result.getProductId())
+                                .build();
+                        eventDetailRequests.add(eventDetailRequest);
+                    }
+                }
+            }
+            eventDetailService.addBulk(eventDetailRequests, event);
+            return RegenerateResponse.builder()
+                    .message("Summary of changes")
+                    .proceededEventDetails(proceededEventDetails)
+                    .skippedEventDetails(skippedEventDetails)
+                    .build();
+        } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }

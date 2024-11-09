@@ -1,5 +1,6 @@
 package com.eska.evenity.controller;
 
+import com.eska.evenity.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.eska.evenity.dto.request.EventAndGenerateProductRequest;
 import com.eska.evenity.dto.request.EventRequest;
 import com.eska.evenity.dto.request.PagingRequest;
-import com.eska.evenity.dto.response.EventDetailResponse;
-import com.eska.evenity.dto.response.EventRecommendationResponse;
-import com.eska.evenity.dto.response.EventResponse;
-import com.eska.evenity.dto.response.PagingResponse;
-import com.eska.evenity.dto.response.WebResponse;
 import com.eska.evenity.service.EventDetailService;
 import com.eska.evenity.service.EventService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/v1/event")
@@ -408,6 +407,26 @@ public class EventController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/regenerate")
+    public ResponseEntity<?> regenerateWhenRejected(@PathVariable String id) {
+        try {
+            RegenerateResponse result = eventService.regenerateWhenRejected(id);
+            if (result.getProceededEventDetails().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            }
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully make recommendation")
+                    .data(result)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
         }
     }
 
