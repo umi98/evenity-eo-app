@@ -13,6 +13,8 @@ public class ProductRecommendedResponse {
     private String vendorAddress;
     private String productId;
     private String productName;
+    private String categoryId;
+    private String categoryName;
     private String productDescription;
     private Long cost;
 }

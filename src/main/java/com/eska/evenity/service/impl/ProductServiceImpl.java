@@ -209,6 +209,8 @@ public class ProductServiceImpl implements ProductService {
                     .vendorAddress(chosenProduct.getVendor().getAddress())
                     .productId(chosenProduct.getId())
                     .productName(chosenProduct.getName())
+                    .categoryId(chosenProduct.getCategory().getId())
+                    .productName(chosenProduct.getCategory().getName())
                     .productDescription(chosenProduct.getDescription())
                     .cost(cost)
                     .build();
@@ -266,6 +268,8 @@ public class ProductServiceImpl implements ProductService {
                     .vendorAddress(chosenProduct.getVendor().getAddress())
                     .productId(chosenProduct.getId())
                     .productName(chosenProduct.getName())
+                    .categoryId(chosenProduct.getCategory().getId())
+                    .categoryName(chosenProduct.getCategory().getName())
                     .productDescription(chosenProduct.getDescription())
                     .cost(cost)
                     .build();

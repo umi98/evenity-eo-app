@@ -21,6 +21,8 @@ public class EventDetailResponse {
     private String eventName;
     private String productId;
     private String productName;
+    private String categoryId;
+    private String categoryName;
     private String vendorId;
     private String vendorName;
     private LocalDateTime createdDate;

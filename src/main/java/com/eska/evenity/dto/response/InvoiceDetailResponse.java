@@ -12,6 +12,8 @@ public class InvoiceDetailResponse {
     private String forwardPaymentStatus;
     private String productId;
     private String productName;
+    private String categoryId;
+    private String categoryName;
     private String vendorId;
     private String vendorName;
     private Long qty;

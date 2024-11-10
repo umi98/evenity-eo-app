@@ -164,6 +164,8 @@ public class EventDetailServiceImpl implements EventDetailService {
                 .eventName(eventDetail.getEvent().getName())
                 .productId(eventDetail.getProduct().getId())
                 .productName(eventDetail.getProduct().getName())
+                .categoryId(eventDetail.getProduct().getCategory().getId())
+                .categoryName(eventDetail.getProduct().getCategory().getName())
                 .vendorId(eventDetail.getProduct().getVendor().getId())
                 .vendorName(eventDetail.getProduct().getVendor().getName())
                 .createdDate(eventDetail.getCreatedDate())
