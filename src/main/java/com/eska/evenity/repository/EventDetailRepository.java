@@ -2,6 +2,7 @@ package com.eska.evenity.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,4 +53,12 @@ public interface EventDetailRepository extends JpaRepository<EventDetail, String
   @Modifying
   @Query("UPDATE EventDetail e SET e.eventProgress = :eventProgress WHERE e.event.id = :eventId")
   void updateEventProgress(@Param("eventId") String eventId, @Param("eventProgress") EventProgress eventProgress);
+
+  @Query("SELECT ed FROM EventDetail ed WHERE ed.event.id = :eventId " +
+          "AND ed.product.category.id = :categoryId " +
+          "AND ed.approvalStatus = :status")
+  Optional<EventDetail> findByEventIdAndCategoryIdAndApprovalStatus(
+          @Param("eventId") String eventId,
+          @Param("categoryId") String categoryId,
+          @Param("status") ApprovalStatus status);
 }

@@ -207,6 +207,7 @@ public class EventServiceImpl implements EventService {
                                 .productId(result.getProductId())
                                 .build();
                         eventDetailRequests.add(eventDetailRequest);
+                        eventDetailService.deleteRejectedEventDetailByEventAndCategory(eventId, categoryId);
                     }
                 }
             }

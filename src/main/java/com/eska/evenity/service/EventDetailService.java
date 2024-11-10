@@ -19,6 +19,7 @@ public interface EventDetailService {
     List<EventDetail> getEventDetailRegForm(String event);
     List<EventDetailResponse> getEventDetailByEventIdAndAllApprovalStatus(String eventId);
     EventDetailResponse getEvenDetailById(String id);
+    void deleteRejectedEventDetailByEventAndCategory(String eventId, String categoryId);
     void deleteDetail(EventDetail eventDetail);
     EventDetailResponse approveProductReqOnEventDetail(String detailId);
     EventDetailResponse rejectProductReqOnEventDetail(String detailId);

@@ -117,8 +117,15 @@ public class EventDetailServiceImpl implements EventDetailService {
     }
 
     @Override
-    public void deleteDetail(EventDetail eventDetail) {
+    public void deleteRejectedEventDetailByEventAndCategory(String eventId, String categoryId) {
+        Optional<EventDetail> rejectedDetail = repository
+                .findByEventIdAndCategoryIdAndApprovalStatus(eventId, categoryId, ApprovalStatus.REJECTED);
+        rejectedDetail.ifPresent(this::deleteDetail);
+    }
 
+    @Override
+    public void deleteDetail(EventDetail eventDetail) {
+        repository.delete(eventDetail);
     }
 
     @Override
