@@ -33,5 +33,11 @@ public interface WithdrawRequestRepository extends JpaRepository<WithdrawRequest
           @Param("year") int year,
           @Param("month") int month);
 
+  @Query("SELECT COUNT(wr) > 0 FROM WithdrawRequest wr " +
+          "WHERE wr.balance.userCredential.id = :userId " +
+          "AND wr.approvalStatus = :status")
+  boolean existsPendingRequestByUserId(
+          @Param("userId") String userId,
+          @Param("status") ApprovalStatus status);
   // Vendor getVendorByBalance_UserCredential_Id(String id);
 }

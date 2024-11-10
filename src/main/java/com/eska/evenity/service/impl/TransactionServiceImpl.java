@@ -121,6 +121,9 @@ public class TransactionServiceImpl implements TransactionService {
         if (balance.getAmount() < request.getAmount()) {
             throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money on balance");
         }
+        if (withdrawRequestRepository.existsPendingRequestByUserId(userId, ApprovalStatus.PENDING)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't make new request while having pending request");
+        }
         WithdrawRequest withdrawRequest = WithdrawRequest.builder()
                 .amount(request.getAmount())
                 .approvalStatus(ApprovalStatus.PENDING)
