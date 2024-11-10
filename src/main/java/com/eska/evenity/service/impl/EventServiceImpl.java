@@ -158,18 +158,24 @@ public class EventServiceImpl implements EventService {
             List<String> proceededEventDetails = new ArrayList<>();
             List<String> previousProduct = new ArrayList<>();
 
+            Set<String> categoriesWithPendingStatus = eventDetails.stream()
+                    .filter(eventDetail -> eventDetail.getApprovalStatus() == ApprovalStatus.PENDING)
+                    .map(eventDetail -> eventDetail.getProduct().getCategory().getId())
+                    .collect(Collectors.toSet());
+
             for (EventDetail eventDetail : eventDetails) {
-                if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED &&
+                !categoriesWithPendingStatus.contains(eventDetail.getProduct().getCategory().getId())) {
                     previousProduct.add(eventDetail.getProduct().getId());
-                } else if (eventDetail.getApprovalStatus() == ApprovalStatus.PENDING) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Regenerate will activate when all requests are rejected");
                 }
             }
 
             for (EventDetail eventDetail : eventDetails) {
-                Long qty = 0L;
-                String unit = "";
-                if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                String categoryId = eventDetail.getProduct().getCategory().getId();
+                if (eventDetail.getApprovalStatus() == ApprovalStatus.REJECTED &&
+                !categoriesWithPendingStatus.contains(categoryId)) {
+                    Long qty = 0L;
+                    String unit = "";
                     if (eventDetail.getProduct().getCategory().getMainCategory() == CategoryType.CATERING) {
                         qty = event.getParticipant();
                         unit = ProductUnit.PCS.name();
