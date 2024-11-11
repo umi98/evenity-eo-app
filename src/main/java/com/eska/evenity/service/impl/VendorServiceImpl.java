@@ -200,6 +200,11 @@ public class VendorServiceImpl implements VendorService {
         return vendorRepository.countVendorsRegisteredThisMonth();
     }
 
+    @Override
+    public boolean isExistInCityAndProvince(String city, String province) {
+        return vendorRepository.existsByCityAndProvince(city, province);
+    }
+
     private Vendor findByIdOrThrowNotFound(String id) {
         Optional<Vendor> vendor = vendorRepository.findById(id);
         return vendor.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "vendor not found"));

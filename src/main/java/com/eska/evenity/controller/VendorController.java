@@ -136,6 +136,20 @@ public class VendorController {
         }
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<?> isVendorExistInCity(
+            @RequestParam String city,
+            @RequestParam String province
+    ) {
+        try {
+            boolean vendorResponses = vendorService.isExistInCityAndProvince(city, province);
+            if (vendorResponses) return ResponseEntity.ok("Vendor exist");
+            else return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}/products")
     public ResponseEntity<?> getVendorAndProducts(@PathVariable String id) {
         try {

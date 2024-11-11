@@ -30,4 +30,5 @@ public interface VendorService {
     List<Vendor> getVendors(VendorStatus status);
     List<Vendor> getAllVendors();
     Integer countVendorRegisterThisMonth();
+    boolean isExistInCityAndProvince(String city, String province);
 }

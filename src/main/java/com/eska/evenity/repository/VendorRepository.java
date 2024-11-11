@@ -31,4 +31,6 @@ public interface VendorRepository extends JpaRepository<Vendor, String> {
     @Query("SELECT COUNT(v) FROM Vendor v WHERE MONTH(v.createdDate) = MONTH(CURRENT_DATE) " +
             "AND YEAR(v.createdDate) = YEAR(CURRENT_DATE)")
     Integer countVendorsRegisteredThisMonth();
+
+    boolean existsByCityAndProvince(String city, String province);
 }
