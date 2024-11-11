@@ -48,7 +48,8 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
                 "http://localhost:8081",
-                "https://evenity-phi.vercel.app/"
+                "https://evenity-phi.vercel.app/",
+                "https://evenity-git-development-facronactzs-projects.vercel.app/"
         ));
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
