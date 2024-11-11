@@ -76,4 +76,5 @@ public class EventSchedulerServiceImpl {
             System.err.println("Error in scheduled task: " + e.getMessage());
         }
     }
+
 }
