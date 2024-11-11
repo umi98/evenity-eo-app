@@ -11,6 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/v1/**")
                 .allowedOrigins(
+                        "http://localhost:5173",
                         "http://localhost:8081",  // Local development
                         "https://evenity-phi.vercel.app/" // Vercel frontend
                 )
