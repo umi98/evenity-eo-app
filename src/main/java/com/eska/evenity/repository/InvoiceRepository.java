@@ -39,4 +39,11 @@ public interface InvoiceRepository extends JpaRepository<Invoice, String> {
           "WHERE i.status = :status")
   Long calculateAllTimeGrossIncome(@Param("status") PaymentStatus status);
 
+  @Query("SELECT i FROM Invoice i " +
+          "JOIN i.event e " +
+          "JOIN e.customer c " +
+          "WHERE (:name IS NULL OR LOWER(c.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+          "OR (:name IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')))")
+  Page<Invoice> findByCustomerNameOrEventName(@Param("name") String name, Pageable pageable);
+
 }

@@ -18,6 +18,8 @@ public interface EventRepository extends JpaRepository<Event, String> {
   Page<Event> getEventByIsDeleted(Boolean status, Pageable pageable);
   List<Event> findByIsDeleted(Boolean isDeleted);
 
+  Page<Event> findByNameLikeIgnoreCase(String name, Pageable pageable);
+
   @Query("SELECT COUNT(e) FROM Event e WHERE " +
           "MONTH(e.startDate) = MONTH(CURRENT_DATE) AND " +
           "YEAR(e.startDate) = YEAR(CURRENT_DATE) AND " +

@@ -27,4 +27,5 @@ public interface InvoiceService {
     void createAdminFeeInvoice(Invoice invoice, Long nominal);
     Long grossIncomeInMonth();
     Long grossIncomeAllTime();
+    Page<InvoiceResponse> searchInvoice(String name, PagingRequest pagingRequest);
 }

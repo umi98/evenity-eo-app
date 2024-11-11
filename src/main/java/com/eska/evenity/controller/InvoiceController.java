@@ -57,6 +57,36 @@ public class InvoiceController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchInvoices(
+            @RequestParam (required = false) String name,
+            @RequestParam (required = false, defaultValue = "1") Integer page,
+            @RequestParam (required = false, defaultValue = "100") Integer size
+    ) {
+        try {
+            PagingRequest pagingRequest = PagingRequest.builder()
+                    .page(page)
+                    .size(size)
+                    .build();
+            Page<InvoiceResponse> invoiceResponses = invoiceService.searchInvoice(name, pagingRequest);
+            PagingResponse pagingResponse = PagingResponse.builder()
+                    .page(page)
+                    .size(size)
+                    .count(invoiceResponses.getTotalElements())
+                    .totalPage(invoiceResponses.getTotalPages())
+                    .build();
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully fetch data")
+                    .data(invoiceResponses.getContent())
+                    .pagingResponse(pagingResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getInvoiceById(@PathVariable String id) {
         try {

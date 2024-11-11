@@ -43,7 +43,7 @@ public class Customer {
     @Column(columnDefinition = "TEXT")
     private String address;
     @Enumerated(EnumType.STRING)
-    private CustomerStatus status = CustomerStatus.ACTIVE;
+    private CustomerStatus status;
 
     @OneToOne
     @JoinColumn(name = "user_credential_id", referencedColumnName = "id", unique = true)

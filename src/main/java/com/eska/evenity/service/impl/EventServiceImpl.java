@@ -356,15 +356,6 @@ public class EventServiceImpl implements EventService {
         }
         eventDetailService.editBulk(editBulk);
     }
-//
-//    @Override
-//    public PaymentResponse paidForEventProceeding(String eventId) {
-//        Event event = findByIdOrThrowNotFound(eventId);
-//        if (event.getIsProceeded()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This event has pre-service paid");
-//        }
-//        return paymentService.paidPreService(event);
-//    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -404,6 +395,13 @@ public class EventServiceImpl implements EventService {
         }
 
         return result;
+    }
+
+    @Override
+    public Page<EventResponse> searchEvent(String name, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Event> result = eventRepository.findByNameLikeIgnoreCase('%' + name + '%', pageable);
+        return result.map(r -> mapToResponse(r, "0"));
     }
 
     private Event findByIdOrThrowNotFound(String id) {

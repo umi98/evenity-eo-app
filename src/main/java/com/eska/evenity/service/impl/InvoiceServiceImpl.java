@@ -273,7 +273,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             if (result.getStatus() == PaymentStatus.COMPLETE)
                 return "Vendor or Product has been paid";
             if (result.getInvoice().getStatus() == PaymentStatus.UNPAID)
-                return "Uses has not paid for event";
+                return "User has not paid for event";
             result.setStatus(PaymentStatus.COMPLETE);
             result.setModifiedDate(LocalDateTime.now());
             invoiceDetailRepository.saveAndFlush(result);
@@ -308,6 +308,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public Long grossIncomeAllTime() {
         return invoiceRepository.calculateAllTimeGrossIncome(PaymentStatus.COMPLETE);
+    }
+
+    @Override
+    public Page<InvoiceResponse> searchInvoice(String name, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Page<Invoice> result = invoiceRepository.findByCustomerNameOrEventName(name, pageable);
+        return result.map(this::mapToResponse);
     }
 
     private InvoiceResponse mapToResponse(Invoice invoice) {
