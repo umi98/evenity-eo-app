@@ -34,7 +34,7 @@ public interface EventDetailRepository extends JpaRepository<EventDetail, String
 
   Page<EventDetail> findByProduct_Vendor_Id(String id, Pageable pageable);
 
-  Page<EventDetail> findByApprovalStatusAndCreatedDateBefore(
+  Page<EventDetail> findByApprovalStatusAndCreatedDateAfter(
           ApprovalStatus approvalStatus,
           LocalDateTime createdDate,
           Pageable pageable

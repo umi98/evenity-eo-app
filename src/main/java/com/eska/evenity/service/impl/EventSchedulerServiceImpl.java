@@ -40,7 +40,7 @@ public class EventSchedulerServiceImpl {
         try {
             Pageable pageable = PageRequest.of(0, 1000);
             LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
-            Page<EventDetail> pendingEventDetails = eventDetailRepository.findByApprovalStatusAndCreatedDateBefore(
+            Page<EventDetail> pendingEventDetails = eventDetailRepository.findByApprovalStatusAndCreatedDateAfter(
                     ApprovalStatus.PENDING, twentyFourHoursAgo, pageable
             );
             for (EventDetail eventDetail : pendingEventDetails) {
