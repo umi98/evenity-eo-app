@@ -239,69 +239,68 @@ class EventSchedulerServiceImplTest {
     }
 
     @Test
-    public void testProcessBalanceTransfers_Success() {
-        // Set up test data
+    void processBalanceTransfers_SuccessfulTransfer() {
+        // Arrange
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        Vendor vendor = mock(Vendor.class);
-        Product product = mock(Product.class);
-        InvoiceDetail invoiceDetail = mock(InvoiceDetail.class);
-        Invoice invoice = mock(Invoice.class);
-        Event event = mock(Event.class);
-        EventDetail eventDetail = mock(EventDetail.class);
-        UserCredential userCredential = mock(UserCredential.class);
-        Balance senderBalance = mock(Balance.class);
-        Balance recipientBalance = mock(Balance.class);
+        InvoiceDetail eligibleInvoiceDetail = createEligibleInvoiceDetail(threeDaysAgo);
 
-        // Mocking the necessary behavior
-        when(invoiceDetail.getInvoice()).thenReturn(invoice);
-        when(invoice.getEvent()).thenReturn(event);
-        when(invoice.getStatus()).thenReturn(PaymentStatus.COMPLETE);
-        when(event.getEndDate()).thenReturn(threeDaysAgo.toLocalDate());
-        when(event.getEndTime()).thenReturn(LocalTime.now());
-        when(invoiceDetail.getStatus()).thenReturn(PaymentStatus.UNPAID);
-        when(invoiceDetail.getEventDetail()).thenReturn(eventDetail);
-        when(eventDetail.getApprovalStatus()).thenReturn(ApprovalStatus.APPROVED);
-        when(eventDetail.getCost()).thenReturn(100L); // Changed to double for cost
+        when(invoiceDetailRepository.findEligibleForTransfer(any(LocalDateTime.class)))
+                .thenReturn(List.of(eligibleInvoiceDetail));
 
-        when(eventDetail.getProduct()).thenReturn(product);
-        when(product.getVendor()).thenReturn(vendor);
-        when(vendor.getUserCredential()).thenReturn(userCredential);
+        // Act
+        eventSchedulerService.processBalanceTransfers();
 
-        // Mocking user and balance behavior
-        when(userService.findByUsername("admin@gmail.com")).thenReturn(userCredential);
-        when(userCredential.getId()).thenReturn("1");
-        when(balanceRepository.findBalanceByUserCredential_Id("1")).thenReturn(Optional.of(senderBalance));
-        when(eventDetail.getProduct().getVendor().getUserCredential().getId()).thenReturn("1");
-        when(balanceRepository.findBalanceByUserCredential_Id("2")).thenReturn(Optional.of(recipientBalance));
-        when(senderBalance.getAmount()).thenReturn(1000L);
-        when(recipientBalance.getAmount()).thenReturn(500L);
-
-        List<InvoiceDetail> eligibleInvoiceDetails = List.of(invoiceDetail);
-        when(invoiceDetailRepository.findEligibleForTransfer(threeDaysAgo)).thenReturn(eligibleInvoiceDetails);
-
-        // Call the changeBalanceWhenTransfer method directly
-        transactionService.changeBalanceWhenTransfer((long) (eventDetail.getCost() * 0.5), eventDetail);
-
-        // Verify interactions
-        verify(invoiceDetail).setStatus(PaymentStatus.COMPLETE);
-        verify(invoiceDetail).setModifiedDate(any(LocalDateTime.class)); // Verify modified date is set
-        verify(invoiceDetailRepository).saveAndFlush(invoiceDetail);
-        verify(senderBalance).setAmount(950L); // Verify sender balance deduction
-        verify(recipientBalance).setAmount(550L); // Verify recipient balance addition
-        verify(balanceRepository, times(2)).saveAndFlush(any(Balance.class)); // Verify balances are saved
+        // Assert
+        verify(invoiceDetailRepository).saveAndFlush(eligibleInvoiceDetail);
+        verify(transactionService).changeBalanceWhenTransfer(
+                eq((long) (eligibleInvoiceDetail.getEventDetail().getCost() * 0.5)),
+                eq(eligibleInvoiceDetail.getEventDetail())
+        );
     }
 
     @Test
-    public void testProcessBalanceTransfers_Exception() {
-        // Set up to throw an exception
-        when(invoiceDetailRepository.findEligibleForTransfer(any())).thenThrow(new RuntimeException("Database error"));
+    void processBalanceTransfers_NoEligibleTransfers() {
+        // Arrange
+        when(invoiceDetailRepository.findEligibleForTransfer(any(LocalDateTime.class)))
+                .thenReturn(List.of());
 
-        // Assert that the method throws the expected exception
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            transactionService.changeBalanceWhenTransfer(10L, new EventDetail()); // Call the method that should throw an exception
-        });
+        // Act
+        eventSchedulerService.processBalanceTransfers();
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Something went wrong", exception.getReason());
+        // Assert
+        verify(invoiceDetailRepository, never()).saveAndFlush(any(InvoiceDetail.class));
+        verify(transactionService, never()).changeBalanceWhenTransfer(anyLong(), any());
+    }
+
+    @Test
+    void processBalanceTransfers_ThrowsException() {
+        // Arrange
+        when(invoiceDetailRepository.findEligibleForTransfer(any(LocalDateTime.class)))
+                .thenThrow(new RuntimeException("Database error"));
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> eventSchedulerService.processBalanceTransfers());
+    }
+
+    private InvoiceDetail createEligibleInvoiceDetail(LocalDateTime endDateTime) {
+        // Helper method to set up a mock eligible InvoiceDetail
+        Event event = new Event();
+        event.setEndDate(endDateTime.toLocalDate());
+        event.setEndTime(endDateTime.toLocalTime());
+
+        EventDetail eventDetail = new EventDetail();
+        eventDetail.setApprovalStatus(ApprovalStatus.APPROVED);
+        eventDetail.setCost(1000L);
+
+        Invoice invoice = new Invoice();
+        invoice.setStatus(PaymentStatus.COMPLETE);
+        invoice.setEvent(event);
+
+        InvoiceDetail invoiceDetail = new InvoiceDetail();
+        invoiceDetail.setInvoice(invoice);
+        invoiceDetail.setStatus(PaymentStatus.UNPAID);
+        invoiceDetail.setEventDetail(eventDetail);
+
+        return invoiceDetail;
     }
 }

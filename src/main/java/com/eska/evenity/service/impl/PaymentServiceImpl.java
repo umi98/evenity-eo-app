@@ -53,25 +53,6 @@ public class PaymentServiceImpl {
                 .build();
     }
 
-//    public PaymentResponse paidPreService(Event event) {
-//        String orderId = "event-" + UUID.randomUUID();
-//        Map<String, String> body = paymentProceeding(orderId, 10000L);
-//        ProceedingEventFee eventFee = ProceedingEventFee.builder()
-//                .event(event)
-//                .token(body.get("token"))
-//                .redirectUrl(body.get("redirect_url"))
-//                .transactionStatus("ordered")
-//                .createdDate(LocalDateTime.now())
-//                .orderId(orderId)
-//                .build();
-//        proceedingEventFeeRepository.saveAndFlush(eventFee);
-//        return PaymentResponse.builder()
-//                .orderId(orderId)
-//                .token(eventFee.getToken())
-//                .url(eventFee.getRedirectUrl())
-//                .build();
-//    }
-
     public Payment getPaymentByOrderId(String id) {
         return paymentRepository.findByOrderId(id);
     }

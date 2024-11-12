@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -273,9 +274,13 @@ public class TransactionController {
     }
 
     @PutMapping("/withdraw/{id}/approve")
-    public ResponseEntity<?> approveWithdraw(@PathVariable String id) {
+    public ResponseEntity<?> approveWithdraw(
+            @PathVariable String id,
+            @RequestParam("image") MultipartFile image
+    ) {
         try {
-            WithdrawRequestResponse withdrawResponses = transactionService.approveWithdrawRequest(id);
+            if (image.isEmpty()) throw new IllegalArgumentException("image is empty");
+            WithdrawRequestResponse withdrawResponses = transactionService.approveWithdrawRequest(id, image);
             WebResponse<WithdrawRequestResponse> response = WebResponse.<WithdrawRequestResponse>builder()
                     .status(HttpStatus.OK.getReasonPhrase())
                     .message("Successfully retrieve data")

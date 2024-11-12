@@ -17,6 +17,7 @@ public class WithdrawRequestResponse {
     private String userName;
     private String vendorId;
     private String vendorName;
+    private String imageProofUrl;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 }

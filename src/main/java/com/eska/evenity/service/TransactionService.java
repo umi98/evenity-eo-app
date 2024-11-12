@@ -10,6 +10,7 @@ import com.eska.evenity.dto.response.WithdrawRequestResponse;
 import com.eska.evenity.entity.Balance;
 import com.eska.evenity.entity.Event;
 import com.eska.evenity.entity.EventDetail;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface TransactionService {
     Page<BalanceResponse> getAllBalanceAccount(PagingRequest pagingRequest);
@@ -21,7 +22,7 @@ public interface TransactionService {
     Page<WithdrawRequestResponse> getAllWithdrawRequest(PagingRequest pagingRequest);
     Page<WithdrawRequestResponse> getAllWithdrawRequestByUserId(String id, PagingRequest pagingRequest);
     WithdrawRequestResponse withDrawRequest(String userId, MoneyOnlyRequest request);
-    WithdrawRequestResponse approveWithdrawRequest(String requestId);
+    WithdrawRequestResponse approveWithdrawRequest(String requestId, MultipartFile image);
     WithdrawRequestResponse rejectWithdrawRequest(String requestId);
     Page<TransactionHistoryResponse> getAllTransactionHistory(PagingRequest pagingRequest);
     Page<TransactionHistoryResponse> getAllTransactionHistoryByUserId(String userId, PagingRequest pagingRequest);

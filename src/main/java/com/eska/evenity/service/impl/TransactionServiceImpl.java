@@ -2,13 +2,18 @@ package com.eska.evenity.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.eska.evenity.constant.ApprovalStatus;
@@ -41,6 +46,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionHistoryRepository transactionHistoryRepository;
     private final WithdrawRequestRepository withdrawRequestRepository;
     private final UserService userService;
+
+    @Value("${cloudinary.url}")
+    private String CLOUDINARY_URL;
 
     @Override
     public Page<BalanceResponse> getAllBalanceAccount(PagingRequest pagingRequest) {
@@ -147,27 +155,45 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public WithdrawRequestResponse approveWithdrawRequest(String requestId) {
-        WithdrawRequest request = findRequestByIdOrThrowException(requestId);
-        request.setApprovalStatus(ApprovalStatus.APPROVED);
-        request.setModifiedDate(LocalDateTime.now());
-        withdrawRequestRepository.saveAndFlush(request);
-        Balance balance = findBalanceByIdOrThrowException(request.getBalance().getId());
-        balance.setAmount(balance.getAmount() - request.getAmount());
-        balance.setModifiedDate(LocalDateTime.now());
-        balanceRepository.saveAndFlush(balance);
-        UserCredential user = userService.loadByUserId(balance.getUserCredential().getId());
-        TransactionHistory history = TransactionHistory.builder()
-                .amount(request.getAmount())
-                .activity(TransactionType.WITHDRAW)
-                .description("Admin approved User id " + user.getId() + " (" + user.getUsername() +
-                        ") to withdraw: IDR " + request.getAmount() +
-                        " with request code: " + request.getId())
-                .createdDate(LocalDateTime.now())
-                .createdBy(user)
-                .build();
-        transactionHistoryRepository.saveAndFlush(history);
-        return mapRequestToResponse(request);
+    public WithdrawRequestResponse approveWithdrawRequest(String requestId, MultipartFile image) {
+        try {
+            Cloudinary cloudinary = new Cloudinary(CLOUDINARY_URL);
+            System.out.println(image.getOriginalFilename() + '1');
+            Map param1 = ObjectUtils.asMap(
+                    "use_filename", true,
+                    "unique_filename", false,
+                    "overwrite", true
+            );
+            System.out.println(image.getOriginalFilename() + "11");
+            Map resultUpload = cloudinary.uploader().upload(image.getBytes(), param1);
+            System.out.println(image.getOriginalFilename() + '2');
+
+            WithdrawRequest request = findRequestByIdOrThrowException(requestId);
+            System.out.println(image.getOriginalFilename() + '3');
+            request.setApprovalStatus(ApprovalStatus.APPROVED);
+            request.setModifiedDate(LocalDateTime.now());
+            request.setImageProofUrl((String) resultUpload.get("url"));
+            withdrawRequestRepository.saveAndFlush(request);
+            Balance balance = findBalanceByIdOrThrowException(request.getBalance().getId());
+            balance.setAmount(balance.getAmount() - request.getAmount());
+            balance.setModifiedDate(LocalDateTime.now());
+            System.out.println(image.getOriginalFilename() + '4');
+            balanceRepository.saveAndFlush(balance);
+            UserCredential user = userService.loadByUserId(balance.getUserCredential().getId());
+            TransactionHistory history = TransactionHistory.builder()
+                    .amount(request.getAmount())
+                    .activity(TransactionType.WITHDRAW)
+                    .description("Admin approved User id " + user.getId() + " (" + user.getUsername() +
+                            ") to withdraw: IDR " + request.getAmount() +
+                            " with request code: " + request.getId())
+                    .createdDate(LocalDateTime.now())
+                    .createdBy(user)
+                    .build();
+            transactionHistoryRepository.saveAndFlush(history);
+            return mapRequestToResponse(request);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oops! Something went wrong");
+        }
     }
 
     @Override
@@ -322,6 +348,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .userName(withdrawRequest.getBalance().getUserCredential().getUsername())
                 .vendorId(vendor.getId())
                 .vendorName(vendor.getName())
+                .imageProofUrl(withdrawRequest.getImageProofUrl())
                 .createdDate(withdrawRequest.getCreatedDate())
                 .modifiedDate(withdrawRequest.getModifiedDate())
                 .build();

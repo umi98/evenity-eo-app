@@ -40,6 +40,8 @@ public class WithdrawRequest {
     @ManyToOne
     @JoinColumn(name = "balance_id", referencedColumnName = "id")
     private Balance balance;
+    @Column(nullable = true)
+    private String imageProofUrl;
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdDate;
