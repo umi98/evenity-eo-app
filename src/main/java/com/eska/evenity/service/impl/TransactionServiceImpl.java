@@ -157,19 +157,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public WithdrawRequestResponse approveWithdrawRequest(String requestId, MultipartFile image) {
         try {
+            validateImage(image);
             Cloudinary cloudinary = new Cloudinary(CLOUDINARY_URL);
-            System.out.println(image.getOriginalFilename() + '1');
             Map param1 = ObjectUtils.asMap(
                     "use_filename", true,
                     "unique_filename", false,
                     "overwrite", true
             );
-            System.out.println(image.getOriginalFilename() + "11");
             Map resultUpload = cloudinary.uploader().upload(image.getBytes(), param1);
-            System.out.println(image.getOriginalFilename() + '2');
 
             WithdrawRequest request = findRequestByIdOrThrowException(requestId);
-            System.out.println(image.getOriginalFilename() + '3');
             request.setApprovalStatus(ApprovalStatus.APPROVED);
             request.setModifiedDate(LocalDateTime.now());
             request.setImageProofUrl((String) resultUpload.get("url"));
@@ -177,7 +174,6 @@ public class TransactionServiceImpl implements TransactionService {
             Balance balance = findBalanceByIdOrThrowException(request.getBalance().getId());
             balance.setAmount(balance.getAmount() - request.getAmount());
             balance.setModifiedDate(LocalDateTime.now());
-            System.out.println(image.getOriginalFilename() + '4');
             balanceRepository.saveAndFlush(balance);
             UserCredential user = userService.loadByUserId(balance.getUserCredential().getId());
             TransactionHistory history = TransactionHistory.builder()
@@ -352,5 +348,28 @@ public class TransactionServiceImpl implements TransactionService {
                 .createdDate(withdrawRequest.getCreatedDate())
                 .modifiedDate(withdrawRequest.getModifiedDate())
                 .build();
+    }
+
+    private void validateImage(MultipartFile image) {
+        if (image.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No image file uploaded.");
+        }
+
+        String contentType = image.getContentType();
+        if (contentType == null || contentType.equals("image/jpeg")
+                || contentType.equals("image/jpg") || contentType.equals("image/png")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid file type. Only JPG, JPEG, and PNG images are allowed."
+            );
+        }
+
+        long maxSizeInBytes = 1024 * 1024;
+        if (image.getSize() > maxSizeInBytes) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "File size exceeds the 1MB limit."
+            );
+        }
     }
 }
