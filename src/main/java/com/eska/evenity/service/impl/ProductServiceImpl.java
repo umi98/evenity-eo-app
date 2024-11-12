@@ -46,12 +46,12 @@ public class ProductServiceImpl implements ProductService {
         try {
             Category category = categoryService.getCategoryUsingId(productRequest.getCategoryId());
             Vendor vendor = vendorService.getVendorUsingId(productRequest.getVendorId());
-            Long qty = 0L;
+            Long qty = 1L;
             ProductUnit unit = null;
             if (vendor.getStatus() != VendorStatus.ACTIVE) throw new BadRequestException("Vendor is yet to approved");
 
             if (category.getMainCategory() == CategoryType.CATERING) unit = ProductUnit.PCS;
-            else unit = ProductUnit.PCS;
+            else unit = ProductUnit.DAY;
 
             Product product = Product.builder()
                     .name(productRequest.getName())

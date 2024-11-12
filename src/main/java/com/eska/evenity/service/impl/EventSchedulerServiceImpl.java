@@ -36,6 +36,7 @@ public class EventSchedulerServiceImpl {
         try {
             autoRejectPendingEventDetails();
             changeProgressionStatus();
+            processBalanceTransfers();
         } catch (Exception e) {
             System.err.println("Error in async task: " + e.getMessage());
         }
