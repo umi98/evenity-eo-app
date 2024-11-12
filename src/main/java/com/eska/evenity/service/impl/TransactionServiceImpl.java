@@ -356,8 +356,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         String contentType = image.getContentType();
-        if (contentType == null || contentType.equals("image/jpeg")
-                || contentType.equals("image/jpg") || contentType.equals("image/png")) {
+        if (contentType == null || !isValidImageType(contentType)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Invalid file type. Only JPG, JPEG, and PNG images are allowed."
@@ -371,5 +370,9 @@ public class TransactionServiceImpl implements TransactionService {
                     "File size exceeds the 1MB limit."
             );
         }
+    }
+
+    private boolean isValidImageType(String contentType) {
+        return contentType.equals("image/jpeg") || contentType.equals("image/jpg") || contentType.equals("image/png");
     }
 }
