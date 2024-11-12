@@ -1,5 +1,6 @@
 package com.eska.evenity.dto.request;
 
+import com.eska.evenity.dto.response.ProductRecommendedResponse;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -41,5 +42,6 @@ public class EventAndGenerateProductRequest {
     @NotBlank(message = "Customer id should be filled")
     private String customerId;
     private List<EventInfoMinimalistRequest> categoryProduct;
+    private List<ProductRecommendedResponse> lockedProduct;
     private List<String> previousProduct;
 }

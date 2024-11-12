@@ -52,14 +52,6 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Value("${midtrans.snap.url}")
     private String snapUrl;
 
-//    @Override
-//    public void generateAdminFee() {
-//        List<Invoice> invoices = invoiceRepository.findAll();
-//        for (Invoice invoice : invoices) {
-//            createAdminFeeInvoice(invoice, 0L);
-//        }
-//    }
-
     @Override
     public Page<InvoiceResponse> getInvoices(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());

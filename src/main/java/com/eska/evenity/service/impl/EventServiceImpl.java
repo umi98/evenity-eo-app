@@ -102,6 +102,9 @@ public class EventServiceImpl implements EventService {
                     .build();
             Long calculatedDate = ChronoUnit.DAYS.between(event.getStartDate(), event.getEndDate()) + 1;
             List<ProductRecommendedResponse> recommendedList = new ArrayList<>();
+            request.getLockedProduct().forEach(productRecommendedResponse -> {
+                request.getPreviousProduct().add(productRecommendedResponse.getProductId());
+            });
             for (EventInfoMinimalistRequest request1 : request.getCategoryProduct()) {
                 EventDetailCustomizedRequest customizedRequest = EventDetailCustomizedRequest.builder()
                         .categoryId(request1.getCategoryId())
@@ -116,6 +119,7 @@ public class EventServiceImpl implements EventService {
                 ProductRecommendedResponse result = productService.generateRecommendation(customizedRequest);
                 recommendedList.add(result);
             }
+            if (!request.getLockedProduct().isEmpty()) recommendedList.addAll(request.getLockedProduct());
             return EventRecommendationResponse.builder()
                     .name(event.getName())
                     .description(event.getDescription())
