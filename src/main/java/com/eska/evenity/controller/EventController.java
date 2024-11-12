@@ -332,6 +332,24 @@ public class EventController {
         }
     }
 
+    @PostMapping("/locked/generate")
+//    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> regenerateWithLockedProduct(@Valid @RequestBody EventAndGenerateProductRequest request) {
+        try {
+            EventRecommendationResponse eventResponse = eventService.eventAndGenerateProduct(request);
+            WebResponse<?> response = WebResponse.builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Successfully retrieve data")
+                    .data(eventResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
     @PostMapping("/{id}/regenerate/recommendation")
 //    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> addOtherProduct(@PathVariable String id, @Valid @RequestBody EventAndGenerateProductRequest request) {
