@@ -29,7 +29,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         Integer approvedVendor = vendorService.getVendors(VendorStatus.ACTIVE).size();
         Integer pendingVendor = vendorService.getVendors(VendorStatus.PENDING).size();
         Integer inactiveVendor = vendorService.getVendors(VendorStatus.INACTIVE).size();
-        Integer customerRegisterThisMonth = customerService.countVendorRegisterThisMonth();
+        Integer customerRegisterThisMonth = customerService.countCustomerRegisterThisMonth();
         Integer vendorRegisterThisMonth = vendorService.countVendorRegisterThisMonth();
         Integer totalVendor = vendorService.getAllVendors().size();
         Integer totalCustomer = customerService.getAllCustomers().size();

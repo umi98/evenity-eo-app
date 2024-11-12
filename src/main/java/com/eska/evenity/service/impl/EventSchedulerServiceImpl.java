@@ -2,17 +2,22 @@ package com.eska.evenity.service.impl;
 
 import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.EventProgress;
-import com.eska.evenity.entity.Event;
-import com.eska.evenity.entity.EventDetail;
+import com.eska.evenity.constant.PaymentStatus;
+import com.eska.evenity.entity.*;
 import com.eska.evenity.repository.EventDetailRepository;
 import com.eska.evenity.repository.EventRepository;
+import com.eska.evenity.repository.InvoiceDetailRepository;
+import com.eska.evenity.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
 public class EventSchedulerServiceImpl {
     private final EventRepository eventRepository;
     private final EventDetailRepository eventDetailRepository;
+    private final InvoiceDetailRepository invoiceDetailRepository;
+    private final TransactionService transactionService;
 
     @Async
     public CompletableFuture<Void> runAsyncTask() {
@@ -74,6 +81,33 @@ public class EventSchedulerServiceImpl {
 
         } catch (Exception e) {
             System.err.println("Error in scheduled task: " + e.getMessage());
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void processBalanceTransfers() {
+        try {
+            LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+            // Find eligible unpaid invoice details with finished events older than 3 days and approved status
+            List<InvoiceDetail> eligibleInvoiceDetails = invoiceDetailRepository.findEligibleForTransfer(threeDaysAgo);
+            eligibleInvoiceDetails.forEach(invoiceDetail -> {
+                Invoice invoice = invoiceDetail.getInvoice();
+                Event event = invoice.getEvent();
+
+                if (invoice.getStatus() == PaymentStatus.COMPLETE &&
+                        event.getEndDate().atTime(event.getEndTime()).isBefore(threeDaysAgo) &&
+                        invoiceDetail.getStatus() == PaymentStatus.UNPAID &&
+                        invoiceDetail.getEventDetail().getApprovalStatus() == ApprovalStatus.APPROVED) {
+                    invoiceDetail.setStatus(PaymentStatus.COMPLETE);
+                    invoiceDetail.setModifiedDate(LocalDateTime.now());
+                    invoiceDetailRepository.saveAndFlush(invoiceDetail);
+                    Long transferAmount = (long) (invoiceDetail.getEventDetail().getCost() * 0.5);
+                    transactionService.changeBalanceWhenTransfer(transferAmount, invoiceDetail.getEventDetail());
+                }
+            });
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Something went wrong");
         }
     }
 

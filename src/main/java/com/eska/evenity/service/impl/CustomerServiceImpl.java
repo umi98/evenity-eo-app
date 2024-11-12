@@ -152,7 +152,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Integer countVendorRegisterThisMonth() {
+    public Integer countCustomerRegisterThisMonth() {
         return customerRepository.countCustomersRegisteredThisMonth();
     }
 

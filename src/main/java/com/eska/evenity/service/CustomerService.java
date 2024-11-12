@@ -23,5 +23,5 @@ public interface CustomerService {
     void deleteCustomer(String id);
     List<Customer> searchCustomer(String name);
     List<Customer> getAllCustomers();
-    Integer countVendorRegisterThisMonth();
+    Integer countCustomerRegisterThisMonth();
 }

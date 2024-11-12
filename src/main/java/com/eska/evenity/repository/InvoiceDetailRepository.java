@@ -1,5 +1,6 @@
 package com.eska.evenity.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -31,4 +32,14 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail, St
           "JOIN invoiceDetail.eventDetail eventDetail " +
           "WHERE invoiceDetail.id = :invoiceDetailId")
   Long findCostFromInvoiceDetail(@Param("invoiceDetailId") String invoiceDetailId);
+
+  @Query("SELECT id FROM InvoiceDetail id " +
+          "JOIN id.invoice i " +
+          "JOIN i.event e " +
+          "JOIN id.eventDetail ed " +
+          "WHERE i.status = 'COMPLETE' " +
+          "AND id.status = 'UNPAID' " +
+          "AND ed.approvalStatus = 'APPROVED' " +
+          "AND e.endDate >= :threeDaysAgo")
+  List<InvoiceDetail> findEligibleForTransfer(@Param("threeDaysAgo") LocalDateTime threeDaysAgo);
 }

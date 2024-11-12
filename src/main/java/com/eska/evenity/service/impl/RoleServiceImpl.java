@@ -5,7 +5,9 @@ import com.eska.evenity.entity.Role;
 import com.eska.evenity.repository.RoleRepository;
 import com.eska.evenity.service.RoleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -16,11 +18,15 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role getOrSave(ERole role) {
-        Optional<Role> existingRole = repository.findByRole(role);
-        if (existingRole.isPresent()) return existingRole.get();
-        Role newRole = Role.builder()
-                .role(role)
-                .build();
-        return repository.saveAndFlush(newRole);
+        try {
+            Optional<Role> existingRole = repository.findByRole(role);
+            if (existingRole.isPresent()) return existingRole.get();
+            Role newRole = Role.builder()
+                    .role(role)
+                    .build();
+            return repository.saveAndFlush(newRole);
+        } catch (Exception e) {
+            throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "Something went wrong");
+        }
     }
 }

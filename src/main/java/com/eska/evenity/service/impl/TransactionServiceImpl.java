@@ -226,26 +226,32 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void changeBalanceWhenTransfer(Long amount, EventDetail eventDetail) {
-        UserCredential userCredential = userService.findByUsername("admin@gmail.com");
-        Balance sender = findBalanceByUserIdOrThrowException(userCredential.getId());
-        Balance recipient = findBalanceByUserIdOrThrowException(eventDetail.getProduct().getVendor().getUserCredential().getId());
-        sender.setAmount(sender.getAmount() - amount);
-        sender.setModifiedDate(LocalDateTime.now());
-        balanceRepository.saveAndFlush(sender);
-        recipient.setAmount(recipient.getAmount() + amount);
-        recipient.setModifiedDate(LocalDateTime.now());
-        balanceRepository.saveAndFlush(recipient);
-        TransactionHistory history = TransactionHistory.builder()
-                .amount(amount)
-                .activity(TransactionType.TRANSFER)
-                .description("Admin transfer payment from user for event id " +
-                        eventDetail.getEvent().getId() + " (" + eventDetail.getEvent().getName() +
-                        ") : IDR " + amount + " to user id : " + recipient.getUserCredential().getId() +
-                        " (" + recipient.getUserCredential().getUsername() + ")")
-                .createdDate(LocalDateTime.now())
-                .createdBy(userCredential)
-                .build();
-        transactionHistoryRepository.saveAndFlush(history);
+        try {
+            UserCredential userCredential = userService.findByUsername("admin@gmail.com");
+            Balance sender = findBalanceByUserIdOrThrowException(userCredential.getId());
+            Balance recipient = findBalanceByUserIdOrThrowException(
+                    eventDetail.getProduct().getVendor().getUserCredential().getId()
+            );
+            sender.setAmount(sender.getAmount() - amount);
+            sender.setModifiedDate(LocalDateTime.now());
+            balanceRepository.saveAndFlush(sender);
+            recipient.setAmount(recipient.getAmount() + amount);
+            recipient.setModifiedDate(LocalDateTime.now());
+            balanceRepository.saveAndFlush(recipient);
+            TransactionHistory history = TransactionHistory.builder()
+                    .amount(amount)
+                    .activity(TransactionType.TRANSFER)
+                    .description("Admin transfer payment from user for event id " +
+                            eventDetail.getEvent().getId() + " (" + eventDetail.getEvent().getName() +
+                            ") : IDR " + amount + " to user id : " + recipient.getUserCredential().getId() +
+                            " (" + recipient.getUserCredential().getUsername() + ")")
+                    .createdDate(LocalDateTime.now())
+                    .createdBy(userCredential)
+                    .build();
+            transactionHistoryRepository.saveAndFlush(history);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Something went wrong");
+        }
     }
 
     @Override
