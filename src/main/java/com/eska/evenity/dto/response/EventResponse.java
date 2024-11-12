@@ -30,6 +30,7 @@ public class EventResponse {
     private String customerName;
     private String phoneNumber;
     private Boolean isDeleted;
+    private Boolean isCancelled;
     private LocalDateTime modifiedDate;
     private LocalDateTime createdDate;
     private List<EventDetailResponse> eventDetailResponseList;

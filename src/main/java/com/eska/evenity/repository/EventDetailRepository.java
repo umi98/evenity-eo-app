@@ -61,4 +61,16 @@ public interface EventDetailRepository extends JpaRepository<EventDetail, String
           @Param("eventId") String eventId,
           @Param("categoryId") String categoryId,
           @Param("status") ApprovalStatus status);
+
+  @Query("SELECT ed FROM EventDetail ed " +
+          "JOIN ed.product p " +
+          "JOIN p.category c " +
+          "WHERE c.id IN :categoryIds " +
+          "AND ed.approvalStatus = :approvalStatus " +
+          "AND ed.event.id = :eventId " +
+          "ORDER BY ed.createdDate DESC")
+  List<EventDetail> findApprovedEventDetailsByCategoryIdsAndEvent(
+          @Param("categoryIds") List<String> categoryIds,
+          @Param("approvalStatus") ApprovalStatus approvalStatus,
+          @Param("eventId") String eventId);
 }

@@ -17,6 +17,8 @@ import com.eska.evenity.entity.InvoiceDetail;
 public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetail, String> {
   List<InvoiceDetail> findByInvoice_Id(String id);
 
+  List<InvoiceDetail> findByInvoice_IdOrderByCreatedDateDesc(String invoiceId);
+
   List<InvoiceDetail> findByInvoice_IdAndEventDetail_ApprovalStatus(String id, ApprovalStatus approval);
 
   InvoiceDetail findByEventDetail_Id(String id);

@@ -160,6 +160,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 ));
         if (result.getStatus() == PaymentStatus.COMPLETE)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This invoice has been paid");
+        if (result.getEvent().getIsCancelled())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event was cancelled");
         List<Long> costs = invoiceDetailRepository.findAllCostsByInvoiceId(id);
         Long totalCost = costs.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
         AdminFee adminFee = adminFeeRepository.findByInvoice_Id(id)
@@ -274,6 +276,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 return "Vendor or Product has been paid";
             if (result.getInvoice().getStatus() == PaymentStatus.UNPAID)
                 return "User has not paid for event";
+            if (result.getInvoice().getEvent().getIsCancelled())
+                return "Event is cancelled, unable to pay";
             result.setStatus(PaymentStatus.COMPLETE);
             result.setModifiedDate(LocalDateTime.now());
             invoiceDetailRepository.saveAndFlush(result);

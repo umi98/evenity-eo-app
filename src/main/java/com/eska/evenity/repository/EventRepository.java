@@ -34,4 +34,6 @@ public interface EventRepository extends JpaRepository<Event, String> {
           "(e.isDeleted = false OR e.isDeleted IS NULL)")
   long countFutureEvents(@Param("currentDate") LocalDate currentDate);
 
+  List<Event> findByIsCancelledFalseAndIsDeletedFalse();
+
 }

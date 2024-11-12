@@ -49,8 +49,8 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
-//    @Column(columnDefinition = "boolean default false")
-//    private Boolean isProceeded;
+    @Column(columnDefinition = "boolean default false")
+    private Boolean isCancelled;
     @CreatedDate
     @Column(name = "created_date", updatable = false)
     private LocalDateTime createdDate;

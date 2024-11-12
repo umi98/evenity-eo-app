@@ -60,6 +60,7 @@ public class EventServiceImpl implements EventService {
                     .theme(request.getTheme())
                     .participant(request.getParticipant())
                     .customer(customer)
+                    .isCancelled(false)
                     .createdDate(LocalDateTime.now())
                     .modifiedDate(LocalDateTime.now())
                     .isDeleted(false)
@@ -94,6 +95,7 @@ public class EventServiceImpl implements EventService {
                     .theme(request.getTheme())
                     .participant(request.getParticipant())
                     .customer(customer)
+                    .isCancelled(false)
                     .createdDate(LocalDateTime.now())
                     .modifiedDate(LocalDateTime.now())
                     .isDeleted(false)
@@ -435,6 +437,7 @@ public class EventServiceImpl implements EventService {
                 .customerName(event.getCustomer().getFullName())
                 .eventDetailResponseList(eventDetailResponseList)
                 .isDeleted(event.getIsDeleted())
+                .isCancelled(event.getIsCancelled())
                 .createdDate(event.getCreatedDate())
                 .modifiedDate(event.getModifiedDate())
                 .build();

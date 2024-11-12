@@ -7,6 +7,7 @@ import com.eska.evenity.entity.*;
 import com.eska.evenity.repository.EventDetailRepository;
 import com.eska.evenity.repository.EventRepository;
 import com.eska.evenity.repository.InvoiceDetailRepository;
+import com.eska.evenity.repository.InvoiceRepository;
 import com.eska.evenity.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,6 +31,7 @@ public class EventSchedulerServiceImpl {
     private final EventRepository eventRepository;
     private final EventDetailRepository eventDetailRepository;
     private final InvoiceDetailRepository invoiceDetailRepository;
+    private final InvoiceRepository invoiceRepository;
     private final TransactionService transactionService;
 
     @Async
@@ -37,6 +40,7 @@ public class EventSchedulerServiceImpl {
             autoRejectPendingEventDetails();
             changeProgressionStatus();
             processBalanceTransfers();
+            checkAndCancelUnpaidEvents();
         } catch (Exception e) {
             System.err.println("Error in async task: " + e.getMessage());
         }
@@ -105,6 +109,42 @@ public class EventSchedulerServiceImpl {
                     invoiceDetailRepository.saveAndFlush(invoiceDetail);
                     Long transferAmount = (long) (invoiceDetail.getEventDetail().getCost() * 0.5);
                     transactionService.changeBalanceWhenTransfer(transferAmount, invoiceDetail.getEventDetail());
+                }
+            });
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Something went wrong");
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkAndCancelUnpaidEvents() {
+        try {
+            List<Event> eventList = eventRepository.findByIsCancelledFalseAndIsDeletedFalse();
+
+            eventList.forEach(event -> {
+                HashSet<String> categoryList = new HashSet<>();
+                List<EventDetail> eventDetails = eventDetailRepository.findByEventId(event.getId());
+                Invoice invoice = invoiceRepository.findByEventId(event.getId());
+                if (invoice == null || invoice.getStatus() == PaymentStatus.COMPLETE) {
+                    return;
+                }
+                eventDetails.forEach(eventDetail -> {
+                    categoryList.add(eventDetail.getProduct().getCategory().getId());
+                });
+                List<InvoiceDetail> invoiceDetailList = invoiceDetailRepository
+                        .findByInvoice_IdOrderByCreatedDateDesc(invoice.getId());
+
+                if (invoiceDetailList.size() == categoryList.size()) {
+                    InvoiceDetail firstInvoiceDetail = invoiceDetailList.get(0);
+
+                    LocalDateTime createdDate = firstInvoiceDetail.getCreatedDate();
+                    LocalDateTime now = LocalDateTime.now();
+                    long daysBetween = java.time.Duration.between(createdDate, now).toDays();
+
+                    if (daysBetween > 3) {
+                        event.setIsCancelled(true);
+                        eventRepository.saveAndFlush(event);
+                    }
                 }
             });
         } catch (Exception e) {
