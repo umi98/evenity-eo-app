@@ -416,6 +416,21 @@ public class EventController {
         }
     }
 
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelEvent(@PathVariable String id) {
+        try {
+            EventResponse eventResponse = eventService.cancelEvent(id);
+            WebResponse<EventResponse> response = WebResponse.<EventResponse>builder()
+                    .status(HttpStatus.OK.getReasonPhrase())
+                    .message("Event cancelled")
+                    .data(eventResponse)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}/start")
     public ResponseEntity<?> changeEventToStarted(@PathVariable String id) {
         try {

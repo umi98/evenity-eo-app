@@ -410,6 +410,15 @@ public class EventServiceImpl implements EventService {
         return result.map(r -> mapToResponse(r, "0"));
     }
 
+    @Override
+    public EventResponse cancelEvent(String id) {
+        Event result = findByIdOrThrowNotFound(id);
+        result.setIsCancelled(true);
+        result.setModifiedDate(LocalDateTime.now());
+        eventRepository.saveAndFlush(result);
+        return mapToResponse(result,"0");
+    }
+
     private Event findByIdOrThrowNotFound(String id) {
         Optional<Event> event = eventRepository.findById(id);
         return event.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "event not found"));

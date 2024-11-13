@@ -31,4 +31,5 @@ public interface EventService {
     void deleteEvent(String id);
     List<DiagramData> getEventCountByMonth();
     Page<EventResponse> searchEvent(String name, PagingRequest pagingRequest);
+    EventResponse cancelEvent(String id);
 }
