@@ -363,7 +363,7 @@ public class TransactionServiceImpl implements TransactionService {
             );
         }
 
-        long maxSizeInBytes = 1024 * 1024;
+        long maxSizeInBytes = 2 * 1024 * 1024;
         if (image.getSize() > maxSizeInBytes) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
