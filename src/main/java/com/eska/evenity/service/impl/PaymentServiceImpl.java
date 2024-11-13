@@ -66,12 +66,6 @@ public class PaymentServiceImpl {
         PaymentRequest paymentRequest = PaymentRequest.builder()
                 .paymentDetailRequest(paymentDetailRequest)
                 .paymentMethod(List.of(
-                        "shopeepay",
-                        "gopay",
-                        "dana",
-                        "linkaja",
-                        "indomaret",
-                        "alfamart",
                         "bca_va",
                         "bni_va",
                         "mandiri_va",
