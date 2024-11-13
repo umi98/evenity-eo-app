@@ -136,8 +136,6 @@ public class ProductServiceImpl implements ProductService {
             product.setName(productRequest.getName());
             product.setDescription(productRequest.getDescription());
             product.setPrice(productRequest.getPrice());
-            product.setQty(productRequest.getQty());
-            product.setProductUnit(ProductUnit.valueOf(productRequest.getProductUnit()));
             product.setCategory(category);
             product.setModifiedDate(LocalDateTime.now());
             productRepository.saveAndFlush(product);

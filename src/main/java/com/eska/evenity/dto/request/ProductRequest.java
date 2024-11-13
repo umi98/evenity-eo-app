@@ -25,10 +25,10 @@ public class ProductRequest {
     private String description;
     @Positive(message = "Price should have positive value")
     private Long price;
-    @Positive(message = "Quantity should have positive value")
-    private Long qty;
-    @EnumValue(enumClass = ProductUnit.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
-    private String productUnit;
+//    @Positive(message = "Quantity should have positive value")
+//    private Long qty;
+//    @EnumValue(enumClass = ProductUnit.class, message = "Status must be one of: DAY, PCS, HOUR, GUEST_CAPACITY")
+//    private String productUnit;
     @NotBlank(message = "Category id should be filled")
     private String categoryId;
     @NotBlank(message = "Vendor id should be filled")
