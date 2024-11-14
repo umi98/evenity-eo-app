@@ -78,7 +78,15 @@ public class EventSchedulerServiceImpl {
                 List<EventDetail> eventDetails = eventDetailRepository.findByEventId(event.getId());
                 List<EventDetail> editedDetails = new ArrayList<>();
 
-                if (now.isAfter(eventStart) && now.isBefore(eventEnd)) {
+                if (event.getIsCancelled()) {
+                    eventDetails.forEach(eventDetail -> {
+                        eventDetail.setEventProgress(EventProgress.CANCELLED);
+                        eventDetail.setModifiedDate(LocalDateTime.now());
+                        editedDetails.add(eventDetail);
+                    });
+                    eventDetailRepository.saveAllAndFlush(editedDetails);
+                }
+                else if (now.isAfter(eventStart) && now.isBefore(eventEnd)) {
                     // Set EventDetails to ON_PROGRESS if within event time range
                     eventDetails.forEach(eventDetail -> {
                         eventDetail.setEventProgress(EventProgress.ON_PROGRESS);
