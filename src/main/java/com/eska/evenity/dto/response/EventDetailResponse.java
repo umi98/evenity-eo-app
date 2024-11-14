@@ -19,6 +19,8 @@ public class EventDetailResponse {
     private Long cost;
     private String eventId;
     private String eventName;
+    private Boolean isEventDeleted;
+    private Boolean isEventCancelled;
     private String productId;
     private String productName;
     private String categoryId;

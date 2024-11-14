@@ -169,6 +169,8 @@ public class EventDetailServiceImpl implements EventDetailService {
                 .cost(eventDetail.getCost())
                 .eventId(eventDetail.getEvent().getId())
                 .eventName(eventDetail.getEvent().getName())
+                .isEventDeleted(eventDetail.getEvent().getIsDeleted())
+                .isEventCancelled(eventDetail.getEvent().getIsCancelled())
                 .productId(eventDetail.getProduct().getId())
                 .productName(eventDetail.getProduct().getName())
                 .categoryId(eventDetail.getProduct().getCategory().getId())

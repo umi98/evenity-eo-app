@@ -20,6 +20,8 @@ public class InvoiceResponse {
     private LocalTime endTime;
     private String eventId;
     private String eventName;
+    private Boolean isEventDeleted;
+    private Boolean isEventCancelled;
     private String customerId;
     private String customerName;
     private String customerProvince;
