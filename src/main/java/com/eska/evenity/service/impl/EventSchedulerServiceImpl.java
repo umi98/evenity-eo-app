@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -74,13 +75,25 @@ public class EventSchedulerServiceImpl {
             for (Event event : events) {
                 LocalDateTime eventStart = LocalDateTime.of(event.getStartDate(), event.getStartTime());
                 LocalDateTime eventEnd = LocalDateTime.of(event.getEndDate(), event.getEndTime());
+                List<EventDetail> eventDetails = eventDetailRepository.findByEventId(event.getId());
+                List<EventDetail> editedDetails = new ArrayList<>();
 
                 if (now.isAfter(eventStart) && now.isBefore(eventEnd)) {
                     // Set EventDetails to ON_PROGRESS if within event time range
-                    eventDetailRepository.updateEventProgress(event.getId(), EventProgress.ON_PROGRESS);
+                    eventDetails.forEach(eventDetail -> {
+                        eventDetail.setEventProgress(EventProgress.ON_PROGRESS);
+                        eventDetail.setModifiedDate(LocalDateTime.now());
+                        editedDetails.add(eventDetail);
+                    });
+                    eventDetailRepository.saveAllAndFlush(editedDetails);
                 } else if (now.isAfter(eventEnd)) {
                     // Set EventDetails to FINISHED if event has ended
-                    eventDetailRepository.updateEventProgress(event.getId(), EventProgress.FINISHED);
+                    eventDetails.forEach(eventDetail -> {
+                        eventDetail.setEventProgress(EventProgress.FINISHED);
+                        eventDetail.setModifiedDate(LocalDateTime.now());
+                        editedDetails.add(eventDetail);
+                    });
+                    eventDetailRepository.saveAllAndFlush(editedDetails);
                 }
             }
 

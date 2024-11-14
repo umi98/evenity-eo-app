@@ -32,7 +32,6 @@ import lombok.RequiredArgsConstructor;
 public class VendorServiceImpl implements VendorService {
     private final VendorRepository vendorRepository;
     private final UserService userService;
-//    private final ProductService productService;
     private final TransactionService transactionService;
 
     @Transactional(rollbackFor = Exception.class)
