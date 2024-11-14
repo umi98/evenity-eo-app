@@ -190,12 +190,6 @@ public class ProductServiceImpl implements ProductService {
                     maxCost,
                     request.getPreviousProduct()
             );
-            System.out.println(minCost);
-            System.out.println(maxCost);
-            System.out.println(request.getProvince());
-            System.out.println(request.getCity());
-            System.out.println(request.getCategoryId());
-            System.out.println(request.getPreviousProduct());
             if (products.isEmpty()) {
                 return null;
             }
@@ -239,12 +233,6 @@ public class ProductServiceImpl implements ProductService {
                 minCost = minCost / request.getDuration();
                 maxCost = maxCost / request.getDuration();
             }
-            System.out.println(minCost);
-            System.out.println(maxCost);
-            System.out.println(request.getProvince());
-            System.out.println(request.getCity());
-            System.out.println(request.getCategoryId());
-            System.out.println(request.getPreviousList());
             List<Product> products = productRepository.findRecommendation(
                     request.getProvince(),
                     request.getCity(),

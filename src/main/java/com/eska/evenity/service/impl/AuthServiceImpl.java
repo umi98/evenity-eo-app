@@ -202,15 +202,19 @@ public class AuthServiceImpl implements AuthService {
         List<Customer> customerList = customerService.searchCustomer(name);
         for (Customer customer : customerList) {
             Optional<UserCredential> user = userCredentialRepository.findById(customer.getUserCredential().getId());
-            ProfileResponse<?> cust = mapToResponseCustomer(customer, user.get());
-            responses.add(cust);
+            user.ifPresent(u -> {
+                ProfileResponse<?> cust = mapToResponseCustomer(customer, u);
+                responses.add(cust);
+            });
         }
 
         List<Vendor> vendorList = vendorService.searchVendor(name);
         for (Vendor vendor : vendorList) {
             Optional<UserCredential> user = userCredentialRepository.findById(vendor.getUserCredential().getId());
-            ProfileResponse<?> ven = mapToResponseVendor(vendor, user.get());
-            responses.add(ven);
+            user.ifPresent(u -> {
+                ProfileResponse<?> ven = mapToResponseVendor(vendor, u);
+                responses.add(ven);
+            });
         }
 
         int start = (int) pageable.getOffset();

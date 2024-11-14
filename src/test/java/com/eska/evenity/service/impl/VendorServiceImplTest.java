@@ -3,6 +3,7 @@ package com.eska.evenity.service.impl;
 import com.eska.evenity.constant.CategoryType;
 import com.eska.evenity.constant.UserStatus;
 import com.eska.evenity.constant.VendorStatus;
+import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.request.VendorRequest;
 import com.eska.evenity.dto.response.VendorResponse;
 import com.eska.evenity.entity.UserCredential;
@@ -15,8 +16,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -144,5 +154,366 @@ class VendorServiceImplTest {
 
         assertEquals(48, vendor.getScoring());
         verify(vendorRepository, times(1)).saveAndFlush(vendor);
+    }
+
+    @Test
+    public void testGetAllVendor() {
+        // Arrange
+        PagingRequest pagingRequest = new PagingRequest(1, 10);
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setId("1");
+        vendor.setUserCredential(new UserCredential());
+        vendor.setMainCategory(CategoryType.CATERING);
+        vendor.setStatus(VendorStatus.ACTIVE);
+        vendor.setName("Test Vendor");
+
+        List<Vendor> vendors = Collections.singletonList(vendor);
+        Page<Vendor> vendorPage = new PageImpl<>(vendors, pageable, vendors.size());
+
+        when(vendorRepository.findAll(pageable)).thenReturn(vendorPage);
+
+        // Act
+        Page<VendorResponse> result = vendorService.getAllVendor(pagingRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(10, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals("Test Vendor", result.getContent().get(0).getName()); // Assuming VendorResponse has a getName() method
+
+        verify(vendorRepository, times(1)).findAll(pageable);
+    }
+
+    @Test
+    public void testGetAllActiveVendor() {
+        // Arrange
+        PagingRequest pagingRequest = new PagingRequest(1, 10);
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setId("1");
+        vendor.setUserCredential(new UserCredential());
+        vendor.setMainCategory(CategoryType.CATERING);
+        vendor.setStatus(VendorStatus.ACTIVE);
+        vendor.setName("Active Vendor");
+
+        List<Vendor> vendors = Collections.singletonList(vendor);
+        Page<Vendor> vendorPage = new PageImpl<>(vendors, pageable, vendors.size());
+
+        when(vendorRepository.getVendorByStatus(UserStatus.ACTIVE, pageable)).thenReturn(vendorPage);
+
+        // Act
+        Page<VendorResponse> result = vendorService.getAllActiveVendor(pagingRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(10, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals("Active Vendor", result.getContent().get(0).getName()); // Assuming VendorResponse has a getName() method
+
+        verify(vendorRepository, times(1)).getVendorByStatus(UserStatus.ACTIVE, pageable);
+    }
+
+    @Test
+    public void testGetApprovedVendor() {
+        // Arrange
+        PagingRequest pagingRequest = new PagingRequest(1, 10);
+        Pageable pageable = PageRequest.of(pagingRequest.getPage() - 1, pagingRequest.getSize());
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setId("1");
+        vendor.setUserCredential(new UserCredential());
+        vendor.setMainCategory(CategoryType.CATERING);
+        vendor.setStatus(VendorStatus.ACTIVE);
+        vendor.setName("Approved Vendor");
+
+        List<Vendor> vendors = Collections.singletonList(vendor);
+        Page<Vendor> vendorPage = new PageImpl<>(vendors, pageable, vendors.size());
+
+        when(vendorRepository.findByStatus(VendorStatus.ACTIVE, pageable)).thenReturn(vendorPage);
+
+        // Act
+        Page<VendorResponse> result = vendorService.getApprovedVendor(pagingRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(10, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals("Approved Vendor", result.getContent().get(0).getName()); // Assuming VendorResponse has a getName() method
+
+        verify(vendorRepository, times(1)).findByStatus(VendorStatus.ACTIVE, pageable);
+    }
+
+    @Test
+    public void testGetVendorByUserId() {
+        // Arrange
+        String userId = "user123";
+        UserCredential userCredential = new UserCredential(); // Assuming you have a UserCredential class
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setId("vendor123");
+
+        when(userService.loadByUserId(userId)).thenReturn(userCredential);
+        when(vendorRepository.findVendorByUserCredential(userCredential)).thenReturn(vendor);
+
+        // Act
+        Vendor result = vendorService.getVendorByUserId(userId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("vendor123", result.getId());
+        verify(userService, times(1)).loadByUserId(userId);
+        verify(vendorRepository, times(1)).findVendorByUserCredential(userCredential);
+    }
+
+    @Test
+    public void testGetVendorUsingId() {
+        // Arrange
+        String vendorId = "vendor123";
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setId(vendorId);
+
+        when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(vendor)); // Assuming findById returns Optional
+
+        // Act
+        Vendor result = vendorService.getVendorUsingId(vendorId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(vendorId, result.getId());
+        verify(vendorRepository, times(1)).findById(vendorId);
+    }
+
+    @Test
+    public void testGetVendorUsingId_NotFound() {
+        // Arrange
+        String vendorId = "vendor123";
+
+        when(vendorRepository.findById(vendorId)).thenReturn(Optional.empty()); // Assuming findById returns Optional
+
+        // Act & Assert
+        assertThrows(ResponseStatusException.class, () -> {
+            vendorService.getVendorUsingId(vendorId);
+        });
+
+        verify(vendorRepository, times(1)).findById(vendorId);
+    }
+
+    @Test
+    public void testRejectStatusVendor() {
+        // Arrange
+        String vendorId = "vendor123";
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setId(vendorId);
+        vendor.setStatus(VendorStatus.ACTIVE);
+        vendor.setUserCredential(new UserCredential());
+        vendor.setMainCategory(CategoryType.CATERING);
+
+        when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(vendor)); // Assuming findById returns Optional
+
+        // Act
+        VendorResponse result = vendorService.rejectStatusVendor(vendorId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(VendorStatus.INACTIVE, vendor.getStatus());
+        assertNotNull(vendor.getModifiedDate());
+        verify(vendorRepository, times(1)).saveAndFlush(vendor);
+        verify(vendorRepository, times(1)).findById(vendorId);
+    }
+
+    @Test
+    public void testSoftDeleteById() {
+        // Arrange
+        String vendorId = "vendor123";
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setId(vendorId);
+        vendor.setStatus(VendorStatus.ACTIVE); // Assuming ACTIVE is a valid status
+        UserCredential userCredential = new UserCredential(); // Assuming you have a UserCredential class
+        userCredential.setId("user123");
+        vendor.setUserCredential(userCredential);
+
+        when(vendorRepository.findById(vendorId)).thenReturn(Optional.of(vendor)); // Assuming findById returns Optional
+
+        // Act
+        vendorService.softDeleteById(vendorId);
+
+        // Assert
+        assertEquals(VendorStatus.INACTIVE, vendor.getStatus());
+        assertNotNull(vendor.getModifiedDate());
+        verify(vendorRepository, times(1)).saveAndFlush(vendor);
+        verify(userService, times(1)).softDeleteById(userCredential.getId());
+        verify(vendorRepository, times(1)).findById(vendorId);
+    }
+
+    @Test
+    public void testSoftDeleteById_NotFound() {
+        // Arrange
+        String vendorId = "vendor123";
+
+        when(vendorRepository.findById(vendorId)).thenReturn(Optional.empty()); // Assuming findById returns Optional
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            vendorService.softDeleteById(vendorId);
+        });
+
+        verify(vendorRepository, times(1)).findById(vendorId);
+        verify(userService, never()).softDeleteById(anyString()); // Ensure userService.softDeleteById is not called
+    }
+
+    @Test
+    public void testSearchVendor() {
+        // Arrange
+        String vendorName = "Test Vendor";
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setName(vendorName);
+        List<Vendor> vendors = Collections.singletonList(vendor);
+
+        when(vendorRepository.findAllByNameLikeIgnoreCase('%' + vendorName + '%')).thenReturn(vendors);
+
+        // Act
+        List<Vendor> result = vendorService.searchVendor(vendorName);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(vendorName, result.get(0).getName());
+        verify(vendorRepository, times(1)).findAllByNameLikeIgnoreCase('%' + vendorName + '%');
+    }
+
+    @Test
+    public void testGetVendors_ActiveStatus() {
+        // Arrange
+        Vendor vendor1 = new Vendor(); // Assuming you have a Vendor class
+        vendor1.setStatus(VendorStatus.ACTIVE);
+        Vendor vendor2 = new Vendor();
+        vendor2.setStatus(VendorStatus.ACTIVE);
+        List<Vendor> vendors = Arrays.asList(vendor1, vendor2);
+
+        when(vendorRepository.findByStatus(VendorStatus.ACTIVE)).thenReturn(vendors);
+
+        // Act
+        List<Vendor> result = vendorService.getVendors(VendorStatus.ACTIVE);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(vendorRepository, times(1)).findByStatus(VendorStatus.ACTIVE);
+    }
+
+    @Test
+    public void testGetVendors_PendingStatus() {
+        // Arrange
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setStatus(VendorStatus.PENDING);
+        List<Vendor> vendors = Collections.singletonList(vendor);
+
+        when(vendorRepository.findByStatus(VendorStatus.PENDING)).thenReturn(vendors);
+
+        // Act
+        List<Vendor> result = vendorService.getVendors(VendorStatus.PENDING);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(vendorRepository, times(1)).findByStatus(VendorStatus.PENDING);
+    }
+
+    @Test
+    public void testGetVendors_InactiveStatus() {
+        // Arrange
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setStatus(VendorStatus.INACTIVE);
+        List<Vendor> vendors = Collections.singletonList(vendor);
+
+        when(vendorRepository.findByStatus(VendorStatus.INACTIVE)).thenReturn(vendors);
+
+        // Act
+        List<Vendor> result = vendorService.getVendors(VendorStatus.INACTIVE);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(vendorRepository, times(1)).findByStatus(VendorStatus.INACTIVE);
+    }
+
+    @Test
+    public void testGetVendors_DisabledStatus() {
+        // Arrange
+        Vendor vendor = new Vendor(); // Assuming you have a Vendor class
+        vendor.setStatus(VendorStatus.DISABLED);
+        List<Vendor> vendors = Collections.singletonList(vendor);
+
+        when(vendorRepository.findByStatus(VendorStatus.DISABLED)).thenReturn(vendors);
+
+        // Act
+        List<Vendor> result = vendorService.getVendors(VendorStatus.DISABLED);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(vendorRepository, times(1)).findByStatus(VendorStatus.DISABLED);
+    }
+
+    @Test
+    public void testGetAllVendors() {
+        // Arrange
+        Vendor vendor1 = new Vendor(); // Assuming you have a Vendor class
+        Vendor vendor2 = new Vendor();
+        List<Vendor> vendors = Arrays.asList(vendor1, vendor2);
+
+        when(vendorRepository.findAll()).thenReturn(vendors);
+
+        // Act
+        List <Vendor> result = vendorService.getAllVendors();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(vendorRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testCountVendorRegisterThisMonth() {
+        // Arrange
+        int expectedCount = 5;
+        when(vendorRepository.countVendorsRegisteredThisMonth()).thenReturn(expectedCount);
+
+        // Act
+        Integer result = vendorService.countVendorRegisterThisMonth();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedCount, result);
+        verify(vendorRepository, times(1)).countVendorsRegisteredThisMonth();
+    }
+
+    @Test
+    public void testIsExistInCityAndProvince_Exists() {
+        // Arrange
+        String city = "Test City";
+        String province = "Test Province";
+        when(vendorRepository.existsByCityAndProvince(city, province)).thenReturn(true);
+
+        // Act
+        boolean result = vendorService.isExistInCityAndProvince(city, province);
+
+        // Assert
+        assertTrue(result);
+        verify(vendorRepository, times(1)).existsByCityAndProvince(city, province);
+    }
+
+    @Test
+    public void testIsExistInCityAndProvince_NotExists() {
+        // Arrange
+        String city = "Test City";
+        String province = "Test Province";
+        when(vendorRepository.existsByCityAndProvince(city, province)).thenReturn(false);
+
+        // Act
+        boolean result = vendorService.isExistInCityAndProvince(city, province);
+
+        // Assert
+        assertFalse(result);
+        verify(vendorRepository, times(1)).existsByCityAndProvince(city, province);
     }
 }

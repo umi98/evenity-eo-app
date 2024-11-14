@@ -3,12 +3,8 @@ package com.eska.evenity.service.impl;
 import com.eska.evenity.constant.ApprovalStatus;
 import com.eska.evenity.constant.EventProgress;
 import com.eska.evenity.constant.PaymentStatus;
-import com.eska.evenity.constant.ProductUnit;
 import com.eska.evenity.entity.*;
-import com.eska.evenity.repository.BalanceRepository;
-import com.eska.evenity.repository.EventDetailRepository;
-import com.eska.evenity.repository.EventRepository;
-import com.eska.evenity.repository.InvoiceDetailRepository;
+import com.eska.evenity.repository.*;
 import com.eska.evenity.service.TransactionService;
 import com.eska.evenity.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,16 +17,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,6 +44,9 @@ class EventSchedulerServiceImplTest {
     private InvoiceDetailRepository invoiceDetailRepository;
 
     @Mock
+    private InvoiceRepository invoiceRepository;
+
+    @Mock
     private TransactionService transactionService;
 
     @Mock
@@ -72,6 +66,7 @@ class EventSchedulerServiceImplTest {
         doNothing().when(eventSchedulerService).autoRejectPendingEventDetails();
         doNothing().when(eventSchedulerService).changeProgressionStatus();
         doNothing().when(eventSchedulerService).processBalanceTransfers();
+        doNothing().when(eventSchedulerService).checkAndCancelUnpaidEvents();
 
         // Act
         CompletableFuture<Void> future = eventSchedulerService.runAsyncTask();
@@ -81,6 +76,7 @@ class EventSchedulerServiceImplTest {
         verify(eventSchedulerService, times(1)).autoRejectPendingEventDetails();
         verify(eventSchedulerService, times(1)).changeProgressionStatus();
         verify(eventSchedulerService, times(1)).processBalanceTransfers();
+        verify(eventSchedulerService, times(1)).checkAndCancelUnpaidEvents();
     }
 
     @Test
@@ -163,45 +159,84 @@ class EventSchedulerServiceImplTest {
     }
 
     @Test
-    void testChangeProgressionStatus_OngoingEvent() {
+    public void testChangeProgressionStatus_CancelledEvent() {
         // Arrange
         LocalDateTime now = LocalDateTime.now();
-        Event ongoingEvent = new Event();
-        ongoingEvent.setId("1");
-        ongoingEvent.setStartDate(LocalDate.now());
-        ongoingEvent.setStartTime(now.minusHours(1).toLocalTime());
-        ongoingEvent.setEndDate(LocalDate.now());
-        ongoingEvent.setEndTime(now.plusHours(1).toLocalTime());
+        Event event = new Event();
+        event.setId("1");
+        event.setIsCancelled(true);
+        event.setStartDate(LocalDate.now());
+        event.setStartTime(LocalDateTime.now().toLocalTime());
+        event.setEndDate(LocalDate.now());
+        event.setEndTime(LocalDateTime.now().plusHours(1).toLocalTime());
 
-        when(eventRepository.findByIsDeleted(false)).thenReturn(Arrays.asList(ongoingEvent));
+        EventDetail eventDetail = new EventDetail();
+        eventDetail.setEventProgress(EventProgress.NOT_STARTED); // Assuming a NOT_STARTED state
+        eventDetail.setId(event.getId());
+
+        when(eventRepository.findByIsDeleted(false)).thenReturn(Collections.singletonList(event));
+        when(eventDetailRepository.findByEventId(event.getId())).thenReturn(Collections.singletonList(eventDetail));
 
         // Act
         eventSchedulerService.changeProgressionStatus();
 
         // Assert
-        verify(eventDetailRepository, times(1)).updateEventProgress("1", EventProgress.ON_PROGRESS);
-        verify(eventDetailRepository, never()).updateEventProgress("1", EventProgress.FINISHED);
+        assertEquals(EventProgress.CANCELLED, eventDetail.getEventProgress());
+        verify(eventDetailRepository, times(1)).saveAllAndFlush(anyList());
+    }
+
+    @Test
+    void testChangeProgressionStatus_OngoingEvent() {
+        // Arrange
+        LocalDateTime now = LocalDateTime.now();
+        Event event = new Event();
+        event.setId("2");
+        event.setIsCancelled(false);
+        event.setStartDate(LocalDate.now());
+        event.setStartTime(now.minusMinutes(30).toLocalTime()); // Start time in the past
+        event.setEndDate(LocalDate.now());
+        event.setEndTime(now.plusMinutes(30).toLocalTime()); // End time in the future
+
+        EventDetail eventDetail = new EventDetail();
+        eventDetail.setEventProgress(EventProgress.NOT_STARTED);
+        eventDetail.setId(event.getId());
+
+        when(eventRepository.findByIsDeleted(false)).thenReturn(Collections.singletonList(event));
+        when(eventDetailRepository.findByEventId(event.getId())).thenReturn(Collections.singletonList(eventDetail));
+
+        // Act
+        eventSchedulerService.changeProgressionStatus();
+
+        // Assert
+        assertEquals(EventProgress.ON_PROGRESS, eventDetail.getEventProgress());
+        verify(eventDetailRepository, times(1)).saveAllAndFlush(anyList());
     }
 
     @Test
     void testChangeProgressionStatus_FinishedEvent() {
         // Arrange
         LocalDateTime now = LocalDateTime.now();
-        Event finishedEvent = new Event();
-        finishedEvent.setId("2");
-        finishedEvent.setStartDate(LocalDate.now());
-        finishedEvent.setStartTime(now.minusHours(2).toLocalTime());
-        finishedEvent.setEndDate(LocalDate.now());
-        finishedEvent.setEndTime(now.minusHours(1).toLocalTime());
+        Event event = new Event();
+        event.setId("3");
+        event.setIsCancelled(false);
+        event.setStartDate(LocalDate.now());
+        event.setStartTime(now.minusHours(2).toLocalTime()); // Start time in the past
+        event.setEndDate(LocalDate.now());
+        event.setEndTime(now.minusMinutes(30).toLocalTime()); // End time in the past
 
-        when(eventRepository.findByIsDeleted(false)).thenReturn(Arrays.asList(finishedEvent));
+        EventDetail eventDetail = new EventDetail();
+        eventDetail.setEventProgress(EventProgress.NOT_STARTED);
+        eventDetail.setId(event.getId());
+
+        when(eventRepository.findByIsDeleted(false)).thenReturn(Collections.singletonList(event));
+        when(eventDetailRepository.findByEventId(event.getId())).thenReturn(Collections.singletonList(eventDetail));
 
         // Act
         eventSchedulerService.changeProgressionStatus();
 
         // Assert
-        verify(eventDetailRepository, times(1)).updateEventProgress("2", EventProgress.FINISHED);
-        verify(eventDetailRepository, never()).updateEventProgress("2", EventProgress.ON_PROGRESS);
+        assertEquals(EventProgress.FINISHED, eventDetail.getEventProgress());
+        verify(eventDetailRepository, times(1)).saveAllAndFlush(anyList());
     }
 
     @Test
@@ -302,5 +337,93 @@ class EventSchedulerServiceImplTest {
         invoiceDetail.setEventDetail(eventDetail);
 
         return invoiceDetail;
+    }
+
+    @Test
+    public void testCheckAndCancelUnpaidEvents_NoInvoice() {
+        // Arrange
+        Event event = new Event();
+        event.setId("1");
+        event.setIsCancelled(false);
+        event.setIsDeleted(false);
+
+        List<Event> eventList = new ArrayList<>();
+        eventList.add(event);
+
+        when(eventRepository.findByIsCancelledFalseAndIsDeletedFalse()).thenReturn(eventList);
+        when(invoiceRepository.findByEventId(event.getId())).thenReturn(null); // No invoice
+
+        // Act
+        eventSchedulerService.checkAndCancelUnpaidEvents();
+
+        // Assert
+        assertFalse(event.getIsCancelled());
+        verify(eventRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    public void testCheckAndCancelUnpaidEvents_InvoiceComplete() {
+        // Arrange
+        Event event = new Event();
+        event.setId("1");
+        event.setIsCancelled(false);
+        event.setIsDeleted(false);
+
+        Invoice invoice = new Invoice();
+        invoice.setStatus(PaymentStatus.COMPLETE); // Invoice is complete
+
+        List<Event> eventList = new ArrayList<>();
+        eventList.add(event);
+
+        when(eventRepository.findByIsCancelledFalseAndIsDeletedFalse()).thenReturn(eventList);
+        when(invoiceRepository.findByEventId(event.getId())).thenReturn(invoice); // Invoice found
+
+        // Act
+        eventSchedulerService.checkAndCancelUnpaidEvents();
+
+        // Assert
+        assertFalse(event.getIsCancelled());
+        verify(eventRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    public void testCheckAndCancelUnpaidEvents_CancelEvent() {
+        // Arrange
+        Event event = new Event();
+        event.setId("1");
+        event.setIsCancelled(false);
+        event.setIsDeleted(false);
+
+        Invoice invoice = new Invoice();
+        invoice.setStatus(PaymentStatus.UNPAID); // Invoice is unpaid
+
+        EventDetail eventDetail = new EventDetail();
+        eventDetail.setProduct(new Product()); // Assuming Product has a default constructor
+        eventDetail.getProduct().setCategory(new Category()); // Assuming Category has a default constructor
+        eventDetail.getProduct().getCategory().setId("category1");
+
+        List<EventDetail> eventDetails = new ArrayList<>();
+        eventDetails.add(eventDetail);
+
+        InvoiceDetail invoiceDetail = new InvoiceDetail();
+        invoiceDetail.setCreatedDate(LocalDateTime.now().minusDays(4)); // Created 4 days ago
+
+        List<InvoiceDetail> invoiceDetailList = new ArrayList<>();
+        invoiceDetailList.add(invoiceDetail);
+
+        List<Event> eventList = new ArrayList<>();
+        eventList.add(event);
+
+        when(eventRepository.findByIsCancelledFalseAndIsDeletedFalse()).thenReturn(eventList);
+        when(invoiceRepository.findByEventId(event.getId())).thenReturn(invoice); // Invoice found
+        when(eventDetailRepository.findByEventId(event.getId())).thenReturn(eventDetails);
+        when(invoiceDetailRepository.findByInvoice_IdOrderByCreatedDateDesc(invoice.getId())).thenReturn(invoiceDetailList);
+
+        // Act
+        eventSchedulerService.checkAndCancelUnpaidEvents();
+
+        // Assert
+        assertTrue(event.getIsCancelled());
+        verify(eventRepository, times(1)).saveAndFlush(event);
     }
 }
