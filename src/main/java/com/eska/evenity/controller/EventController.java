@@ -1,5 +1,6 @@
 package com.eska.evenity.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/event")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class EventController {
     private final EventService eventService;
     private final EventDetailService eventDetailService;

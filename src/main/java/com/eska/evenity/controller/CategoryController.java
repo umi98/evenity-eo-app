@@ -4,6 +4,7 @@ import com.eska.evenity.dto.request.CategoryRequest;
 import com.eska.evenity.dto.response.CategoryResponse;
 import com.eska.evenity.dto.response.WebResponse;
 import com.eska.evenity.service.CategoryService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/category")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class CategoryController {
     private final CategoryService categoryService;
 

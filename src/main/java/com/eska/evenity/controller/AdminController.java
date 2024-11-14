@@ -2,6 +2,7 @@ package com.eska.evenity.controller;
 
 import com.eska.evenity.dto.response.*;
 import com.eska.evenity.service.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@SecurityRequirement(name = "Bearer Authentication")
 public class AdminController {
     private final CustomerService customerService;
     private final AdminDashboardService adminDashboardService;

@@ -5,6 +5,7 @@ import com.eska.evenity.dto.request.PagingRequest;
 import com.eska.evenity.dto.response.*;
 import com.eska.evenity.service.EventService;
 import com.eska.evenity.service.TransactionService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/transaction")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class TransactionController {
     private final TransactionService transactionService;
     private final EventService eventService;

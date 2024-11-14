@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                 .sessionManagement(cfg ->cfg.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request ->
                         request.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                                .requestMatchers("/api/midtrans/notification", "api/v1/auth/login", "api/v1/auth/register/**").permitAll()
+                                .requestMatchers("/api-docs/**", "/swagger-ui/**","/api/midtrans/notification", "api/v1/auth/login", "api/v1/auth/register/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
