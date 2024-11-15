@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +32,7 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllCustomer(
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam (required = false, defaultValue = "100") Integer size
@@ -61,7 +62,7 @@ public class CustomerController {
     }
 
     @GetMapping("/active")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllActiveCustomer(
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam (required = false, defaultValue = "100") Integer size

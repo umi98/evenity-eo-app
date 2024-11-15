@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -343,8 +344,10 @@ public class EventServiceImpl implements EventService {
     public HashMap<String, Long> numOfFuturePastEvents() {
         HashMap<String, Long> result = new HashMap<>();
         LocalDate current = LocalDate.now();
+        LocalDate startOfNextMonth = LocalDate.now()
+                .with(TemporalAdjusters.firstDayOfNextMonth());
         Long pastEventsCount = eventRepository.countPastEvents(current);
-        Long futureEventsCount = eventRepository.countFutureEvents(current);
+        Long futureEventsCount = eventRepository.countFutureEvents(startOfNextMonth);
         result.put("pastEvents", pastEventsCount);
         result.put("futureEvents", futureEventsCount);
         return result;

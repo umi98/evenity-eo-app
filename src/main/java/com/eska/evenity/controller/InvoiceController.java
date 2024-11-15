@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.eska.evenity.dto.request.PagingRequest;
@@ -31,6 +32,7 @@ public class InvoiceController {
 //    }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllInvoices(
             @RequestParam (required = false, defaultValue = "1") Integer page,
             @RequestParam (required = false, defaultValue = "100") Integer size

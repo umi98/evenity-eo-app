@@ -30,7 +30,7 @@ public interface EventRepository extends JpaRepository<Event, String> {
           "(e.isDeleted = false OR e.isDeleted IS NULL)")
   long countPastEvents(@Param("currentDate") LocalDate currentDate);
 
-  @Query("SELECT COUNT(e) FROM Event e WHERE e.startDate > :currentDate AND " +
+  @Query("SELECT COUNT(e) FROM Event e WHERE e.startDate >= :currentDate AND " +
           "(e.isDeleted = false OR e.isDeleted IS NULL)")
   long countFutureEvents(@Param("currentDate") LocalDate currentDate);
 
