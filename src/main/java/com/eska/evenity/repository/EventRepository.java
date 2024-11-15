@@ -26,7 +26,7 @@ public interface EventRepository extends JpaRepository<Event, String> {
           "(e.isDeleted = false OR e.isDeleted IS NULL)")
   long countEventsThisMonth();
 
-  @Query("SELECT COUNT(e) FROM Event e WHERE e.endDate < :currentDate AND " +
+  @Query("SELECT COUNT(e) FROM Event e WHERE e.endDate >= :currentDate AND " +
           "(e.isDeleted = false OR e.isDeleted IS NULL)")
   long countPastEvents(@Param("currentDate") LocalDate currentDate);
 

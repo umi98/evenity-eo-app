@@ -343,10 +343,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public HashMap<String, Long> numOfFuturePastEvents() {
         HashMap<String, Long> result = new HashMap<>();
-        LocalDate current = LocalDate.now();
+        LocalDate startOfPreviousMonth = LocalDate.now()
+                .minusMonths(1)
+                .with(TemporalAdjusters.firstDayOfMonth());
         LocalDate startOfNextMonth = LocalDate.now()
                 .with(TemporalAdjusters.firstDayOfNextMonth());
-        Long pastEventsCount = eventRepository.countPastEvents(current);
+        Long pastEventsCount = eventRepository.countPastEvents(startOfPreviousMonth);
         Long futureEventsCount = eventRepository.countFutureEvents(startOfNextMonth);
         result.put("pastEvents", pastEventsCount);
         result.put("futureEvents", futureEventsCount);
