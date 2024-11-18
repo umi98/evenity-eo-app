@@ -209,6 +209,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         try {
             Payment payment = paymentService.getPaymentByOrderId(orderId);
             Invoice result = getInvoiceById(payment.getInvoice().getId());
+            if (result.getStatus() == PaymentStatus.COMPLETE)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This event has been paid");
             AdminFee adminFee = adminFeeRepository.findByInvoice_Id(result.getId()).get();
             List<InvoiceDetail> invoiceDetails = invoiceDetailRepository.findByInvoice_Id(result.getId());
 
