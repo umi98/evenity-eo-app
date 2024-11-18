@@ -1,0 +1,10 @@
+INSERT INTO public.category (id,created_date,main_category,modified_date,"name") VALUES
+	 ('5384c23b-9e4b-4d01-8ee9-86bf7e114e69','2024-11-04 02:50:33.255652','VENUE','2024-11-04 02:50:33.25567','Seaside Garden Venue'),
+	 ('f5576263-ce77-4720-ba5a-879538f16778','2024-11-04 02:50:53.497487','PARKING','2024-11-04 02:50:53.497501','Valet Parking Service'),
+	 ('91944cc3-aad9-4b9c-a7a9-3a5b10cd97c7','2024-11-04 02:51:08.299447','SECURITY','2024-11-04 02:51:08.299473','Event Security Personnel'),
+	 ('0e739ec0-8609-4038-98b0-3c9c8f26b30b','2024-11-04 02:51:45.720754','FLOWER_AND_DECORATION','2024-11-04 02:51:45.720768','Exquisite Floral Arrangements'),
+	 ('39a744c3-7c33-4508-add0-eea2d9858519','2024-11-04 02:52:04.210474','PHOTOGRAPHY_AND_VIDEOGRAPHY','2024-11-04 02:52:04.210489','High-Definition Photography and Videography'),
+	 ('6815c9a6-c2da-4849-9e8f-055257256768','2024-11-04 02:52:19.323511','TECHNOLOGY_AND_MULTIMEDIA','2024-11-04 02:52:19.323533','LED Screen and Projector Setup'),
+	 ('f666d1e6-6f36-4ea4-8533-84a2a79a7d7b','2024-11-04 11:24:56.812018','CATERING','2024-11-04 11:24:56.812036','Gourmet Catering Services'),
+	 ('62620fcc-6c23-4f5b-a320-76abe103aaed','2024-11-04 12:33:52.335448','VENUE','2024-11-04 12:33:52.335453','Elegant Garden Venue'),
+	 ('85830f97-f4e5-493f-80ad-301dcb9b5742','2024-11-04 02:52:35.606579','ENTERTAINER','2024-11-04 02:52:35.606595','Live Entertainment');
